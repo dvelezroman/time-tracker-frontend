@@ -15,16 +15,17 @@ export interface RegisterRequest {
   email: string;
   password: string;
   phone?: string;
+  role: 'ADMIN' | 'OPERATOR';
 }
 
 export const authService = {
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
-    const response = await apiClient.post<LoginResponse>('/auth/login', credentials);
+    const response = await apiClient.post<LoginResponse>('/users/login', credentials);
     return response.data;
   },
 
   register: async (data: RegisterRequest): Promise<LoginResponse> => {
-    const response = await apiClient.post<LoginResponse>('/auth/register', data);
+    const response = await apiClient.post<LoginResponse>('/users/register', data);
     return response.data;
   },
 

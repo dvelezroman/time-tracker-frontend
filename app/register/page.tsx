@@ -13,34 +13,81 @@ import {
   InputAdornment,
   IconButton,
   Link,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material';
-import { useAuth } from '@/hooks/useAuth';
+import {
+  Visibility,
+  VisibilityOff,
+  Email,
+  Lock,
+  Phone,
+  Person,
+} from '@mui/icons-material';
+import { authService } from '@/lib/api/services/auth.service';
+import { useAuthStore } from '@/store/useAuthStore';
 import { ROUTES } from '@/lib/constants';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { setAuth } = useAuthStore();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: '',
+    role: 'OPERATOR' as 'ADMIN' | 'OPERATOR',
+  });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [field]: e.target.value });
+    setError('');
+  };
+
+  const handleRoleChange = (e: any) => {
+    setFormData({ ...formData, role: e.target.value });
+  };
+
+  const validateForm = () => {
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return false;
+    }
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await login({ email, password });
+      const { confirmPassword, ...registerData } = formData;
+      const response = await authService.register(registerData);
+      setAuth(response.user, response.token);
+      router.push(ROUTES.DASHBOARD);
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Login failed. Please try again.';
+        err.response?.data?.message || err.message || 'Registration failed. Please try again.';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -63,7 +110,7 @@ export default function LoginPage() {
       <Card
         sx={{
           width: '100%',
-          maxWidth: isMobile ? '100%' : 440,
+          maxWidth: isMobile ? '100%' : 500,
           borderRadius: 3,
           boxShadow: theme.palette.mode === 'dark'
             ? '0 8px 32px rgba(0, 0, 0, 0.4)'
@@ -90,7 +137,7 @@ export default function LoginPage() {
               fontSize: isMobile ? '1.75rem' : '2rem',
             }}
           >
-            Welcome Back
+            Create Account
           </Typography>
           <Typography
             variant="body2"
@@ -99,7 +146,7 @@ export default function LoginPage() {
               fontSize: isMobile ? '0.875rem' : '1rem',
             }}
           >
-            Sign in to your account to continue
+            Sign up to get started with Time Tracker
           </Typography>
         </Box>
 
@@ -124,8 +171,8 @@ export default function LoginPage() {
               fullWidth
               label="Email Address"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleChange('email')}
               required
               margin="normal"
               autoComplete="email"
@@ -154,15 +201,82 @@ export default function LoginPage() {
               }}
             />
 
+            <FormControl
+              fullWidth
+              margin="normal"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  fontSize: isMobile ? '0.875rem' : '0.9375rem',
+                },
+              }}
+            >
+              <InputLabel>Role</InputLabel>
+              <Select
+                value={formData.role}
+                onChange={handleRoleChange}
+                label="Role"
+                startAdornment={
+                  <InputAdornment position="start" sx={{ ml: 1 }}>
+                    <Person
+                      sx={{
+                        color: theme.palette.mode === 'dark' ? '#8b949e' : '#4a4a4a',
+                      }}
+                    />
+                  </InputAdornment>
+                }
+              >
+                <MenuItem value="OPERATOR">Operator</MenuItem>
+                <MenuItem value="ADMIN">Admin</MenuItem>
+              </Select>
+            </FormControl>
+
+            <TextField
+              fullWidth
+              label="Phone Number (Optional)"
+              type="tel"
+              value={formData.phone}
+              onChange={handleChange('phone')}
+              margin="normal"
+              autoComplete="tel"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Phone
+                      sx={{
+                        color: theme.palette.mode === 'dark' ? '#8b949e' : '#4a4a4a',
+                      }}
+                    />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  fontSize: isMobile ? '0.875rem' : '0.9375rem',
+                },
+              }}
+            />
+
             <TextField
               fullWidth
               label="Password"
               type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={handleChange('password')}
               required
               margin="normal"
-              autoComplete="current-password"
+              autoComplete="new-password"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -184,6 +298,53 @@ export default function LoginPage() {
                       }}
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  fontSize: isMobile ? '0.875rem' : '0.9375rem',
+                },
+              }}
+            />
+
+            <TextField
+              fullWidth
+              label="Confirm Password"
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={formData.confirmPassword}
+              onChange={handleChange('confirmPassword')}
+              required
+              margin="normal"
+              autoComplete="new-password"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock
+                      sx={{
+                        color: theme.palette.mode === 'dark' ? '#8b949e' : '#4a4a4a',
+                      }}
+                    />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle confirm password visibility"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      edge="end"
+                      sx={{
+                        color: theme.palette.mode === 'dark' ? '#8b949e' : '#4a4a4a',
+                      }}
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -227,7 +388,7 @@ export default function LoginPage() {
                 },
               }}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Creating Account...' : 'Create Account'}
             </Button>
 
             <Box sx={{ textAlign: 'center', mt: 2 }}>
@@ -238,9 +399,9 @@ export default function LoginPage() {
                   fontSize: isMobile ? '0.8125rem' : '0.875rem',
                 }}
               >
-                Don't have an account?{' '}
+                Already have an account?{' '}
                 <Link
-                  href={ROUTES.REGISTER}
+                  href={ROUTES.LOGIN}
                   sx={{
                     color: theme.palette.primary.main,
                     fontWeight: 600,
@@ -250,7 +411,7 @@ export default function LoginPage() {
                     },
                   }}
                 >
-                  Sign up
+                  Sign in
                 </Link>
               </Typography>
             </Box>
@@ -260,3 +421,4 @@ export default function LoginPage() {
     </Box>
   );
 }
+
