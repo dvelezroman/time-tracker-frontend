@@ -14,6 +14,7 @@ export interface LoginResponse {
 export interface RegisterRequest {
   email: string;
   password: string;
+  confirmPassword?: string;
   phone?: string;
   role: 'ADMIN' | 'OPERATOR';
 }
@@ -25,7 +26,8 @@ export const authService = {
   },
 
   register: async (data: RegisterRequest): Promise<LoginResponse> => {
-    const response = await apiClient.post<LoginResponse>('/users/register', data);
+    const { confirmPassword, ...registerData } = data;
+    const response = await apiClient.post<LoginResponse>('/users/register', registerData);
     return response.data;
   },
 

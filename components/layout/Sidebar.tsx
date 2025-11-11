@@ -16,6 +16,7 @@ import {
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
+import EventIcon from '@mui/icons-material/Event';
 import { useRouter, usePathname } from 'next/navigation';
 import { ROUTES } from '@/lib/constants';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -41,9 +42,15 @@ const navItems: NavItem[] = [
     path: ROUTES.DASHBOARD,
   },
   {
+    label: 'Events',
+    icon: <EventIcon />,
+    path: ROUTES.EVENTS,
+    roles: ['ADMIN', 'OPERATOR'],
+  },
+  {
     label: 'Users',
     icon: <PeopleIcon />,
-    path: '/users',
+    path: ROUTES.USERS,
     roles: ['ADMIN'],
   },
   {

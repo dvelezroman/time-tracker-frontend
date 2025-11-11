@@ -10,6 +10,12 @@ export const API_ENDPOINTS = {
     BASE: '/users',
     BY_ID: (id: number) => `/users/${id}`,
   },
+  EVENTS: {
+    BASE: '/events',
+    BY_ID: (id: number) => `/events/${id}`,
+    START: (id: number) => `/events/${id}/start`,
+    STOP: (id: number) => `/events/${id}/stop`,
+  },
 } as const;
 
 export const ROUTES = {
@@ -18,6 +24,10 @@ export const ROUTES = {
   REGISTER: '/register',
   DASHBOARD: '/dashboard',
   PROFILE: '/profile',
+  EVENTS: '/events',
+  EVENTS_CREATE: '/events/create',
+  USERS: '/users',
+  USERS_CREATE: '/users/create',
 } as const;
 
 export const STORAGE_KEYS = {
