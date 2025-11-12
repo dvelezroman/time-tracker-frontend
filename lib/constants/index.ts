@@ -28,6 +28,8 @@ export const ROUTES = {
   PROFILE: '/profile',
   EVENTS: '/events',
   EVENTS_CREATE: '/events/create',
+  EVENTS_DETAIL: (id: number) => `/events/${id}`,
+  EVENTS_TIMER: (id: number) => `/events/${id}/timer`,
   USERS: '/users',
   USERS_CREATE: '/users/create',
 } as const;
