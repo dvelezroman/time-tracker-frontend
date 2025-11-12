@@ -236,6 +236,7 @@ export default function LoginPage() {
                 sx={{
                   color: theme.palette.mode === 'dark' ? '#8b949e' : '#4a4a4a',
                   fontSize: isMobile ? '0.8125rem' : '0.875rem',
+                  mb: 1,
                 }}
               >
                 Don't have an account?{' '}
@@ -251,6 +252,27 @@ export default function LoginPage() {
                   }}
                 >
                   Sign up
+                </Link>
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.mode === 'dark' ? '#8b949e' : '#4a4a4a',
+                  fontSize: isMobile ? '0.8125rem' : '0.875rem',
+                }}
+              >
+                <Link
+                  href={ROUTES.FORGOT_PASSWORD}
+                  sx={{
+                    color: theme.palette.primary.main,
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  Forgot your password?
                 </Link>
               </Typography>
             </Box>
