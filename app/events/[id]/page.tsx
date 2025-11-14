@@ -203,15 +203,25 @@ export default function EventDetailPage() {
 
               <Box display="flex" gap={2} flexWrap="wrap" mt={4}>
                 {(event.status === 'DRAFT' || event.status === 'PUBLISHED') && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleStartEvent}
-                    disabled={starting}
-                    size={isMobile ? 'medium' : 'large'}
-                  >
-                    {starting ? <CircularProgress size={24} /> : 'Start Event'}
-                  </Button>
+                  <>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => router.push(ROUTES.EVENTS_EDIT(event.id))}
+                      size={isMobile ? 'medium' : 'large'}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleStartEvent}
+                      disabled={starting}
+                      size={isMobile ? 'medium' : 'large'}
+                    >
+                      {starting ? <CircularProgress size={24} /> : 'Start Event'}
+                    </Button>
+                  </>
                 )}
 
                 {event.status === 'ONGOING' && (

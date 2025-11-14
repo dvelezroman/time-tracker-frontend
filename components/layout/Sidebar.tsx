@@ -17,6 +17,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
 import EventIcon from '@mui/icons-material/Event';
+import CategoryIcon from '@mui/icons-material/Category';
 import { useRouter, usePathname } from 'next/navigation';
 import { ROUTES } from '@/lib/constants';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -45,6 +46,12 @@ const navItems: NavItem[] = [
     label: 'Events',
     icon: <EventIcon />,
     path: ROUTES.EVENTS,
+    roles: ['ADMIN', 'OPERATOR'],
+  },
+  {
+    label: 'Categories',
+    icon: <CategoryIcon />,
+    path: ROUTES.CATEGORIES,
     roles: ['ADMIN', 'OPERATOR'],
   },
   {
@@ -91,7 +98,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         {filteredNavItems.map((item) => (
           <ListItem key={item.path} disablePadding>
             <ListItemButton
-              selected={pathname === item.path}
+              selected={pathname === item.path || pathname?.startsWith(item.path + '/')}
               onClick={() => handleNavigation(item.path)}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>

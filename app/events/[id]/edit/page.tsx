@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import {
   Box,
   Card,
@@ -17,18 +17,33 @@ import {
   useTheme,
   useMediaQuery,
   Container,
+  CircularProgress,
 } from '@mui/material';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
-import { eventService, CreateEventRequest } from '@/lib/api/services/event.service';
+import {
+  eventService,
+  UpdateEventRequest,
+  Event,
+} from '@/lib/api/services/event.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 
-export default function CreateEventPage() {
+export default function EditEventPage() {
   const router = useRouter();
+  const params = useParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [formData, setFormData] = useState<CreateEventRequest>({
+  const eventId = Number(params.id);
+
+  const [event, setEvent] = useState<Event | null>(null);
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    startDate: string;
+    endDate: string;
+    location: string;
+  }>({
     name: '',
     description: '',
     startDate: '',
@@ -41,27 +56,62 @@ export default function CreateEventPage() {
     }
     return 'UTC';
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  const handleChange = (field: keyof CreateEventRequest) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  useEffect(() => {
+    if (eventId) {
+      loadEvent();
+    }
+  }, [eventId]);
+
+  const loadEvent = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const timezoneValue = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const eventData = await eventService.getById(eventId, timezoneValue);
+      setEvent(eventData);
+      setTimezone(eventData.timezone || timezoneValue);
+
+      // Convert dates to local datetime-local format
+      const formatDateTimeLocal = (dateString: string, localDateString?: string): string => {
+        const date = localDateString ? new Date(localDateString) : new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      };
+
+      setFormData({
+        name: eventData.name,
+        description: eventData.description || '',
+        startDate: formatDateTimeLocal(eventData.startDate, eventData.startDateLocal),
+        endDate: formatDateTimeLocal(eventData.endDate, eventData.endDateLocal),
+        location: eventData.location || '',
+      });
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Failed to load event. Please try again.';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (
+    field: 'name' | 'description' | 'startDate' | 'endDate' | 'location'
+  ) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [field]: e.target.value });
     setError('');
   };
 
   const handleTimezoneChange = (e: any) => {
     setTimezone(e.target.value);
-  };
-
-  const formatDateTimeLocal = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
   const convertLocalToUTC = (localDateTime: string): string => {
@@ -87,27 +137,85 @@ export default function CreateEventPage() {
       return;
     }
 
-    setLoading(true);
+    setSaving(true);
 
     try {
-      await eventService.create(
+      await eventService.update(
+        eventId,
         {
           ...formData,
           startDate: startDateUTC,
           endDate: endDateUTC,
         },
-        timezone
+        timezone,
       );
-      showToast('Event created successfully!', 'success');
+      showToast('Event updated successfully!', 'success');
       router.push(ROUTES.EVENTS);
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to create event. Please try again.';
+        err.response?.data?.message || err.message || 'Failed to update event. Please try again.';
       setError(errorMessage);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
+        <MainLayout>
+          <Container maxWidth="md">
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+              <CircularProgress />
+            </Box>
+          </Container>
+        </MainLayout>
+      </ProtectedRoute>
+    );
+  }
+
+  if (error && !event) {
+    return (
+      <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
+        <MainLayout>
+          <Container maxWidth="md">
+            <Alert severity="error">{error}</Alert>
+          </Container>
+        </MainLayout>
+      </ProtectedRoute>
+    );
+  }
+
+  if (!event) {
+    return (
+      <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
+        <MainLayout>
+          <Container maxWidth="md">
+            <Alert severity="info">Event not found</Alert>
+          </Container>
+        </MainLayout>
+      </ProtectedRoute>
+    );
+  }
+
+  // Prevent editing ONGOING or COMPLETED events
+  if (event.status === 'ONGOING' || event.status === 'COMPLETED') {
+    return (
+      <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
+        <MainLayout>
+          <Container maxWidth="md">
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              Cannot edit event with status: {event.status}. Only DRAFT and PUBLISHED events can be
+              edited.
+            </Alert>
+            <Button variant="contained" onClick={() => router.push(ROUTES.EVENTS_DETAIL(eventId))}>
+              View Event Details
+            </Button>
+          </Container>
+        </MainLayout>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
@@ -115,7 +223,7 @@ export default function CreateEventPage() {
         <Container maxWidth="md">
           <Box sx={{ py: 4 }}>
             <Typography
-              variant="h4"
+              variant={isMobile ? 'h5' : 'h4'}
               component="h1"
               gutterBottom
               sx={{
@@ -125,7 +233,7 @@ export default function CreateEventPage() {
                 fontSize: isMobile ? '1.75rem' : '2rem',
               }}
             >
-              Create New Event
+              Edit Event
             </Typography>
 
             <Card
@@ -256,8 +364,8 @@ export default function CreateEventPage() {
                       type="button"
                       variant="outlined"
                       fullWidth
-                      onClick={() => router.back()}
-                      disabled={loading}
+                      onClick={() => router.push(ROUTES.EVENTS_DETAIL(eventId))}
+                      disabled={saving}
                       sx={{
                         py: 1.5,
                         borderRadius: 2,
@@ -271,7 +379,7 @@ export default function CreateEventPage() {
                       type="submit"
                       variant="contained"
                       fullWidth
-                      disabled={loading}
+                      disabled={saving}
                       sx={{
                         py: 1.5,
                         borderRadius: 2,
@@ -289,7 +397,7 @@ export default function CreateEventPage() {
                         },
                       }}
                     >
-                      {loading ? 'Creating...' : 'Create Event'}
+                      {saving ? 'Updating...' : 'Update Event'}
                     </Button>
                   </Box>
                 </Box>

@@ -16,6 +16,10 @@ export const API_ENDPOINTS = {
     START: (id: number) => `/events/${id}/start`,
     STOP: (id: number) => `/events/${id}/stop`,
   },
+  CATEGORIES: {
+    BASE: '/categories',
+    BY_ID: (id: number) => `/categories/${id}`,
+  },
 } as const;
 
 export const ROUTES = {
@@ -29,7 +33,10 @@ export const ROUTES = {
   EVENTS: '/events',
   EVENTS_CREATE: '/events/create',
   EVENTS_DETAIL: (id: number) => `/events/${id}`,
+  EVENTS_EDIT: (id: number) => `/events/${id}/edit`,
   EVENTS_TIMER: (id: number) => `/events/${id}/timer`,
+  CATEGORIES: '/categories',
+  CATEGORIES_CREATE: '/categories/create',
   USERS: '/users',
   USERS_CREATE: '/users/create',
 } as const;
