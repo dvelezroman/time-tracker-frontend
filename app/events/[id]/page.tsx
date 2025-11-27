@@ -225,14 +225,52 @@ export default function EventDetailPage() {
                 )}
 
                 {event.status === 'ONGOING' && (
-                  <Button
-                    variant="contained"
-                    color="success"
-                    onClick={handleViewTimer}
-                    size={isMobile ? 'medium' : 'large'}
-                  >
-                    View Timer
-                  </Button>
+                  <>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={handleViewTimer}
+                      size={isMobile ? 'medium' : 'large'}
+                    >
+                      View Timer
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => router.push(ROUTES.EVENTS_SCAN(event.id))}
+                      size={isMobile ? 'medium' : 'large'}
+                    >
+                      Scan QR Code
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => router.push(ROUTES.EVENTS_LEADERBOARD(event.id))}
+                      size={isMobile ? 'medium' : 'large'}
+                    >
+                      Leaderboard
+                    </Button>
+                  </>
+                )}
+
+                {(event.status === 'ONGOING' || event.status === 'COMPLETED') && (
+                  <>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => router.push(ROUTES.EVENTS_LEADERBOARD(event.id))}
+                      size={isMobile ? 'medium' : 'large'}
+                    >
+                      Leaderboard
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={() => router.push(ROUTES.EVENTS_QR_CODES(event.id))}
+                      size={isMobile ? 'medium' : 'large'}
+                    >
+                      QR Codes
+                    </Button>
+                  </>
                 )}
               </Box>
             </CardContent>
