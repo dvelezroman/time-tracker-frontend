@@ -84,6 +84,24 @@ export const timeEntryService = {
     return response.data;
   },
 
+  recordFinishById: async (
+    eventId: number,
+    ticketId: number,
+    registrationId: number,
+    timezone?: string,
+  ): Promise<RecordFinishResponse> => {
+    const params: any = {};
+    if (timezone) {
+      params.timezone = timezone;
+    }
+    const response = await apiClient.post<RecordFinishResponse>(
+      '/time-entries/record-finish-by-id',
+      { eventId, ticketId, registrationId },
+      { params },
+    );
+    return response.data;
+  },
+
   validateQR: async (
     qrCode: string,
     eventId: number,

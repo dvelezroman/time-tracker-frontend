@@ -100,12 +100,15 @@ export default function QRScannerPage() {
         {
           fps: 10,
           qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
         },
         (decodedText) => {
+          // Handle QR code scan - scanner continues running
           handleQRCodeScanned(decodedText);
         },
         (errorMessage) => {
           // Ignore scanning errors (they're frequent while scanning)
+          // Scanner continues running in idle mode
         },
       );
 
@@ -136,10 +139,35 @@ export default function QRScannerPage() {
 
     try {
       setRecording(true);
-      await stopScanning();
+      // Don't stop scanning - keep it running for continuous scanning
+      
+      // Parse QR code JSON
+      let qrData: { eventId: number; ticketId: number; registrationId: number };
+      try {
+        qrData = JSON.parse(qrCode);
+        if (!qrData.eventId || !qrData.ticketId || !qrData.registrationId) {
+          throw new Error('Invalid QR code format');
+        }
+      } catch (parseError) {
+        setRecording(false);
+        showToast('Invalid QR code format. Expected JSON with eventId, ticketId, and registrationId.', 'error');
+        return;
+      }
+
+      // Verify eventId matches
+      if (qrData.eventId !== eventId) {
+        setRecording(false);
+        showToast(`QR code is for a different event (Event ID: ${qrData.eventId})`, 'error');
+        return;
+      }
 
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const result = await timeEntryService.recordFinish(qrCode, eventId, timezone);
+      const result = await timeEntryService.recordFinishById(
+        qrData.eventId,
+        qrData.ticketId,
+        qrData.registrationId,
+        timezone,
+      );
 
       setLastRecorded(result);
       showToast(
@@ -147,22 +175,17 @@ export default function QRScannerPage() {
         'success',
       );
 
-      // Resume scanning after a short delay
+      // Resume recording after a short delay (scanner keeps running)
       setTimeout(() => {
         setRecording(false);
-        startScanning();
-      }, 2000);
+      }, 1500);
     } catch (err: any) {
       setRecording(false);
       const errorMessage =
         err.response?.data?.message || err.message || 'Failed to record finish time.';
       setError(errorMessage);
       showToast(errorMessage, 'error');
-
-      // Resume scanning after error
-      setTimeout(() => {
-        startScanning();
-      }, 2000);
+      // Scanner continues running - no need to restart
     }
   };
 
