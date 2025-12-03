@@ -236,6 +236,14 @@ export default function EventDetailPage() {
                     </Button>
                     <Button
                       variant="contained"
+                      color="info"
+                      onClick={() => router.push(ROUTES.EVENTS_TIMER_FULLSCREEN(event.id))}
+                      size={isMobile ? 'medium' : 'large'}
+                    >
+                      Full Screen Timer
+                    </Button>
+                    <Button
+                      variant="contained"
                       color="primary"
                       onClick={() => router.push(ROUTES.EVENTS_SCAN(event.id))}
                       size={isMobile ? 'medium' : 'large'}

@@ -182,7 +182,16 @@ export default function EventTimerPage() {
                   Elapsed Time
                 </Typography>
                 <Timer startDate={event.startDate} />
-                <Box sx={{ mt: 4, width: '100%', maxWidth: 300 }}>
+                <Box sx={{ mt: 4, width: '100%', maxWidth: 300, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    fullWidth
+                    onClick={() => router.push(ROUTES.EVENTS_TIMER_FULLSCREEN(eventId))}
+                    size={isMobile ? 'medium' : 'large'}
+                  >
+                    Full Screen View
+                  </Button>
                   <Button
                     variant="contained"
                     color="error"
