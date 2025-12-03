@@ -50,15 +50,17 @@ export default function EditEventPage() {
     endDate: '',
     location: '',
   });
-  const [timezone, setTimezone] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      return Intl.DateTimeFormat().resolvedOptions().timeZone;
-    }
-    return 'UTC';
-  });
+  const [timezone, setTimezone] = useState<string>('UTC');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    // Set timezone on client side only to avoid hydration mismatch
+    if (typeof window !== 'undefined') {
+      setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    }
+  }, []);
 
   useEffect(() => {
     if (eventId) {

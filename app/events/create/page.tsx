@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Box,
@@ -35,14 +35,16 @@ export default function CreateEventPage() {
     endDate: '',
     location: '',
   });
-  const [timezone, setTimezone] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      return Intl.DateTimeFormat().resolvedOptions().timeZone;
-    }
-    return 'UTC';
-  });
+  const [timezone, setTimezone] = useState<string>('UTC');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Set timezone on client side only to avoid hydration mismatch
+    if (typeof window !== 'undefined') {
+      setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    }
+  }, []);
 
   const handleChange = (field: keyof CreateEventRequest) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

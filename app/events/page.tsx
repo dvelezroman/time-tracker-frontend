@@ -75,12 +75,18 @@ export default function EventsPage() {
   const [deleting, setDeleting] = useState(false);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [error, setError] = useState('');
+  const [timezone, setTimezone] = useState<string>('UTC');
 
-  const timezone = typeof window !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'UTC';
+  useEffect(() => {
+    // Set timezone on client side only to avoid hydration mismatch
+    if (typeof window !== 'undefined') {
+      setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    }
+  }, []);
 
   useEffect(() => {
     loadEvents();
-  }, [page, limit, search, statusFilter, startDateFrom, startDateTo]);
+  }, [page, limit, search, statusFilter, startDateFrom, startDateTo, timezone]);
 
   const loadEvents = async () => {
     try {

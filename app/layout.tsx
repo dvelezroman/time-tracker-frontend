@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { ThemeProvider } from '@/lib/theme/ThemeProvider';
+import { AuthProvider } from '@/components/common/AuthProvider';
 import { Toast } from '@/components/common/Toast';
 import './globals.css';
 
@@ -17,8 +18,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ThemeProvider>
-          {children}
-          <Toast />
+          <AuthProvider>
+            {children}
+            <Toast />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

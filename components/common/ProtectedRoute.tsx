@@ -13,9 +13,14 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, _hasHydrated } = useAuthStore();
 
   useEffect(() => {
+    // Only check auth after store has hydrated to prevent hydration mismatch
+    if (!_hasHydrated) {
+      return;
+    }
+
     if (!isAuthenticated) {
       router.push(ROUTES.LOGIN);
       return;
@@ -24,7 +29,12 @@ export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
     if (roles && user && !roles.includes(user.role)) {
       router.push(ROUTES.DASHBOARD);
     }
-  }, [isAuthenticated, user, roles, router]);
+  }, [_hasHydrated, isAuthenticated, user, roles, router]);
+
+  // Show loading while store is hydrating (prevents hydration mismatch)
+  if (!_hasHydrated) {
+    return <Loading fullScreen message="Loading..." />;
+  }
 
   if (!isAuthenticated) {
     return <Loading fullScreen message="Redirecting to login..." />;
