@@ -18,6 +18,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
 import EventIcon from '@mui/icons-material/Event';
 import CategoryIcon from '@mui/icons-material/Category';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { useRouter, usePathname } from 'next/navigation';
 import { ROUTES } from '@/lib/constants';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -52,6 +53,12 @@ const navItems: NavItem[] = [
     label: 'Categories',
     icon: <CategoryIcon />,
     path: ROUTES.CATEGORIES,
+    roles: ['ADMIN', 'OPERATOR'],
+  },
+  {
+    label: 'Competitors',
+    icon: <EmojiEventsIcon />,
+    path: ROUTES.COMPETITORS,
     roles: ['ADMIN', 'OPERATOR'],
   },
   {

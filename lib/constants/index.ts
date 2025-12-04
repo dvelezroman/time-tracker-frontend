@@ -43,6 +43,7 @@ export const ROUTES = {
   CATEGORIES_CREATE: '/categories/create',
   USERS: '/users',
   USERS_CREATE: '/users/create',
+  COMPETITORS: '/competitors',
 } as const;
 
 export const STORAGE_KEYS = {

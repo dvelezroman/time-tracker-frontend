@@ -16,6 +16,7 @@ import {
   Grid,
   Paper,
 } from '@mui/material';
+import { Download as DownloadIcon } from '@mui/icons-material';
 import { QRCodeSVG } from 'qrcode.react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
@@ -35,6 +36,7 @@ export default function QRCodesPage() {
   const [competitors, setCompetitors] = useState<EventCompetitor[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -83,6 +85,22 @@ export default function QRCodesPage() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      setDownloading(true);
+      setError('');
+      await eventCompetitorService.downloadQRCodesPDF(eventId);
+      showToast('PDF downloaded successfully!', 'success');
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Failed to download PDF.';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const competitorsWithQR = competitors.filter((c) => c.qrCode);
@@ -165,6 +183,17 @@ export default function QRCodesPage() {
                     {generating ? <CircularProgress size={24} /> : 'Generate All QR Codes'}
                   </Button>
                 )}
+                {competitorsWithQR.length > 0 && (
+                  <Button
+                    variant="contained"
+                    startIcon={downloading ? <CircularProgress size={20} /> : <DownloadIcon />}
+                    onClick={handleDownloadPDF}
+                    disabled={downloading}
+                    size={isMobile ? 'medium' : 'large'}
+                  >
+                    {downloading ? 'Downloading...' : 'Download PDF'}
+                  </Button>
+                )}
                 <Button
                   variant="outlined"
                   onClick={handlePrint}
@@ -234,6 +263,11 @@ export default function QRCodesPage() {
                       <Typography variant="h6" align="center" gutterBottom>
                         {competitor.competitor.firstName} {competitor.competitor.lastName}
                       </Typography>
+                      {competitor.sequentialNumber && (
+                        <Typography variant="body1" color="primary" align="center" fontWeight="bold">
+                          #{competitor.sequentialNumber}
+                        </Typography>
+                      )}
                       {competitor.category && (
                         <Typography variant="body2" color="text.secondary" align="center">
                           {competitor.category.name}

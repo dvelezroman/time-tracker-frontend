@@ -5,8 +5,14 @@ export interface EventCompetitor {
   eventId: number;
   competitorId: number;
   categoryId: number | null;
+  sequentialNumber?: number | null;
   qrCode: string | null;
   registeredAt: string;
+  event?: {
+    id: number;
+    name: string;
+    description?: string;
+  };
   competitor: {
     id: number;
     firstName: string;
@@ -21,7 +27,30 @@ export interface EventCompetitor {
   } | null;
 }
 
+export interface FilterEventCompetitorParams {
+  page?: number;
+  limit?: number;
+  eventId?: number;
+  competitorId?: number;
+  categoryId?: number;
+}
+
+export interface EventCompetitorListResponse {
+  data: EventCompetitor[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export const eventCompetitorService = {
+  getAll: async (params?: FilterEventCompetitorParams): Promise<EventCompetitorListResponse> => {
+    const response = await apiClient.get<EventCompetitorListResponse>('/event-competitors', {
+      params,
+    });
+    return response.data;
+  },
+
   getByEvent: async (eventId: number): Promise<EventCompetitor[]> => {
     const response = await apiClient.get<EventCompetitor[]>(
       `/event-competitors/event/${eventId}`,
@@ -44,6 +73,23 @@ export const eventCompetitorService = {
       `/event-competitors/event/${eventId}/generate-qr-codes`,
     );
     return response.data;
+  },
+
+  downloadQRCodesPDF: async (eventId: number): Promise<void> => {
+    const response = await apiClient.get(`/event-competitors/event/${eventId}/download-qr-codes-pdf`, {
+      responseType: 'blob',
+    });
+
+    // Create blob and download
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `QR_Codes_Event_${eventId}_${new Date().getTime()}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   },
 };
 
