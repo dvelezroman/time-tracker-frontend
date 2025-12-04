@@ -5,6 +5,8 @@ export interface UpdateUserRequest {
   email?: string;
   phone?: string;
   password?: string;
+  role?: 'ADMIN' | 'OPERATOR';
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface PaginatedResponse<T> {

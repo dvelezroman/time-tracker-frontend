@@ -16,6 +16,7 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { eventService, Event, EventStatus } from '@/lib/api/services/event.service';
@@ -136,6 +137,16 @@ export default function EventDetailPage() {
       <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
         <MainLayout>
           <Container maxWidth="md">
+            <Box sx={{ mb: 3 }}>
+              <Button
+                startIcon={<ArrowBackIcon />}
+                onClick={() => router.push(ROUTES.EVENTS)}
+                sx={{ mb: 2 }}
+                size={isMobile ? 'medium' : 'large'}
+              >
+                Back to Events
+              </Button>
+            </Box>
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
               <CircularProgress />
             </Box>
@@ -150,6 +161,16 @@ export default function EventDetailPage() {
       <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
         <MainLayout>
           <Container maxWidth="md">
+            <Box sx={{ mb: 3 }}>
+              <Button
+                startIcon={<ArrowBackIcon />}
+                onClick={() => router.push(ROUTES.EVENTS)}
+                sx={{ mb: 2 }}
+                size={isMobile ? 'medium' : 'large'}
+              >
+                Back to Events
+              </Button>
+            </Box>
             <Alert severity="error">{error}</Alert>
           </Container>
         </MainLayout>
@@ -162,6 +183,16 @@ export default function EventDetailPage() {
       <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
         <MainLayout>
           <Container maxWidth="md">
+            <Box sx={{ mb: 3 }}>
+              <Button
+                startIcon={<ArrowBackIcon />}
+                onClick={() => router.push(ROUTES.EVENTS)}
+                sx={{ mb: 2 }}
+                size={isMobile ? 'medium' : 'large'}
+              >
+                Back to Events
+              </Button>
+            </Box>
             <Alert severity="info">Event not found</Alert>
           </Container>
         </MainLayout>
@@ -174,6 +205,14 @@ export default function EventDetailPage() {
       <MainLayout>
         <Container maxWidth="md">
           <Box sx={{ mb: 3 }}>
+            <Button
+              startIcon={<ArrowBackIcon />}
+              onClick={() => router.push(ROUTES.EVENTS)}
+              sx={{ mb: 2 }}
+              size={isMobile ? 'medium' : 'large'}
+            >
+              Back to Events
+            </Button>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography variant={isMobile ? 'h5' : 'h4'} component="h1">
                 {event.name}

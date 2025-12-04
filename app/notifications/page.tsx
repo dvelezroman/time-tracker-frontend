@@ -99,17 +99,25 @@ function NotificationsPageContent() {
   const loadEvents = async () => {
     try {
       setLoading(true);
+      setError('');
       const response = await eventService.getAll({ limit: 1000 });
+      console.log('Events API response:', response);
+      console.log('Events data:', response.data);
       // Filter to only show COMPLETED or ONGOING events
       const filteredEvents = response.data.filter(
         (e) => e.status === 'COMPLETED' || e.status === 'ONGOING',
       );
+      console.log('Filtered events:', filteredEvents);
       setEvents(filteredEvents);
+      if (filteredEvents.length === 0) {
+        setError('No COMPLETED or ONGOING events found. Please create or start an event first.');
+      }
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.message || err.message || 'Failed to load events. Please try again.';
       setError(errorMessage);
       showToast(errorMessage, 'error');
+      console.error('Error loading events:', err);
     } finally {
       setLoading(false);
     }
@@ -282,13 +290,28 @@ function NotificationsPageContent() {
                       onChange={(e) => setSelectedEventId(e.target.value as number | '')}
                       label="Select Event"
                       disabled={loading}
+                      displayEmpty
                     >
-                      {events.map((event) => (
-                        <MenuItem key={event.id} value={event.id}>
-                          {event.name} ({event.status})
+                      {loading ? (
+                        <MenuItem disabled>
+                          <CircularProgress size={16} sx={{ mr: 1 }} />
+                          Loading events...
                         </MenuItem>
-                      ))}
+                      ) : events.length === 0 ? (
+                        <MenuItem disabled>No events available</MenuItem>
+                      ) : (
+                        events.map((event) => (
+                          <MenuItem key={event.id} value={event.id}>
+                            {event.name} ({event.status})
+                          </MenuItem>
+                        ))
+                      )}
                     </Select>
+                    {!loading && events.length === 0 && (
+                      <FormHelperText>
+                        No COMPLETED or ONGOING events found. Please create or start an event first.
+                      </FormHelperText>
+                    )}
                   </FormControl>
 
                   {/* Notification Type */}

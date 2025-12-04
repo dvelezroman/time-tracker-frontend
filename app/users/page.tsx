@@ -62,6 +62,16 @@ export default function UsersPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<UserWithDates | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [userToEdit, setUserToEdit] = useState<UserWithDates | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [editFormData, setEditFormData] = useState<UpdateUserRequest>({
+    email: '',
+    phone: '',
+    password: '',
+    role: 'OPERATOR',
+    status: 'ACTIVE',
+  });
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -139,8 +149,65 @@ export default function UsersPage() {
   };
 
   const handleEdit = (user: UserWithDates) => {
-    // TODO: Implement edit user page
-    showToast('Edit user functionality coming soon', 'info');
+    setUserToEdit(user);
+    setEditFormData({
+      email: user.email,
+      phone: user.phone || '',
+      password: '',
+      role: user.role,
+      status: user.status,
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditDialogOpen(false);
+    setUserToEdit(null);
+    setEditFormData({
+      email: '',
+      phone: '',
+      password: '',
+      role: 'OPERATOR',
+      status: 'ACTIVE',
+    });
+    setError('');
+  };
+
+  const handleEditSubmit = async () => {
+    if (!userToEdit) return;
+
+    // Build update data, excluding empty password
+    const updateData: UpdateUserRequest = {
+      email: editFormData.email,
+      phone: editFormData.phone || undefined,
+      role: editFormData.role,
+      status: editFormData.status,
+    };
+
+    // Only include password if it's provided
+    if (editFormData.password && editFormData.password.length > 0) {
+      if (editFormData.password.length < 6) {
+        setError('Password must be at least 6 characters long');
+        return;
+      }
+      updateData.password = editFormData.password;
+    }
+
+    try {
+      setEditing(true);
+      setError('');
+      await userService.updateUser(userToEdit.id, updateData);
+      showToast('User updated successfully!', 'success');
+      handleEditClose();
+      loadUsers();
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Failed to update user. Please try again.';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
+    } finally {
+      setEditing(false);
+    }
   };
 
   const handleDeleteClick = (user: UserWithDates) => {
@@ -390,6 +457,83 @@ export default function UsersPage() {
           </Box>
         </Container>
 
+        {/* Edit User Dialog */}
+        <Dialog open={editDialogOpen} onClose={handleEditClose} maxWidth="sm" fullWidth>
+          <DialogTitle>Edit User</DialogTitle>
+          <DialogContent>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+                {error}
+              </Alert>
+            )}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+              <TextField
+                fullWidth
+                label="Email"
+                type="email"
+                value={editFormData.email}
+                onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                required
+                disabled={editing}
+              />
+              <FormControl fullWidth>
+                <InputLabel>Role</InputLabel>
+                <Select
+                  value={editFormData.role}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, role: e.target.value as 'ADMIN' | 'OPERATOR' })
+                  }
+                  label="Role"
+                  disabled={editing}
+                >
+                  <MenuItem value="OPERATOR">Operator</MenuItem>
+                  <MenuItem value="ADMIN">Admin</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={editFormData.status}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, status: e.target.value as 'ACTIVE' | 'INACTIVE' })
+                  }
+                  label="Status"
+                  disabled={editing}
+                >
+                  <MenuItem value="ACTIVE">Active</MenuItem>
+                  <MenuItem value="INACTIVE">Inactive</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                fullWidth
+                label="Phone Number"
+                type="tel"
+                value={editFormData.phone}
+                onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                disabled={editing}
+              />
+              <TextField
+                fullWidth
+                label="New Password (leave empty to keep current)"
+                type="password"
+                value={editFormData.password}
+                onChange={(e) => setEditFormData({ ...editFormData, password: e.target.value })}
+                disabled={editing}
+                helperText="Leave empty to keep the current password"
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleEditClose} disabled={editing}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditSubmit} variant="contained" disabled={editing}>
+              {editing ? <CircularProgress size={24} /> : 'Save'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Delete User Dialog */}
         <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
           <DialogTitle>Delete User</DialogTitle>
           <DialogContent>
