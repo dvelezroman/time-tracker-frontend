@@ -28,12 +28,16 @@ export function MainLayout({ children }: MainLayoutProps) {
           component="main"
           sx={{
             flexGrow: 1,
-            p: 3,
-            width: { sm: `calc(100% - ${sidebarOpen ? 240 : 0}px)` },
-            transition: theme.transitions.create('margin', {
+            p: { xs: 1, sm: 2, md: 3 },
+            width: { 
+              xs: '100%',
+              sm: `calc(100% - ${sidebarOpen ? 240 : 0}px)` 
+            },
+            transition: theme.transitions.create(['width', 'margin'], {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.leavingScreen,
             }),
+            overflowX: 'hidden',
           }}
         >
           {children}

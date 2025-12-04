@@ -250,8 +250,8 @@ export default function EventsPage() {
   return (
     <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
       <MainLayout>
-        <Container maxWidth="xl">
-          <Box sx={{ py: 4 }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2, md: 3 } }}>
+          <Box sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
             <Box
               display="flex"
               justifyContent="space-between"
@@ -286,8 +286,8 @@ export default function EventsPage() {
               </Alert>
             )}
 
-            <Card>
-              <CardContent>
+            <Card sx={{ overflow: 'hidden' }}>
+              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                 <Box
                   display="flex"
                   gap={2}
@@ -353,17 +353,36 @@ export default function EventsPage() {
                   </Box>
                 ) : (
                   <>
-                    <TableContainer>
-                      <Table>
+                    <TableContainer
+                      sx={{
+                        overflowX: 'auto',
+                        '& .MuiTableCell-root': {
+                          whiteSpace: isMobile ? 'nowrap' : 'normal',
+                          padding: isMobile ? '8px 4px' : '16px',
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
+                        },
+                      }}
+                    >
+                      <Table size={isMobile ? 'small' : 'medium'}>
                         <TableHead>
                           <TableRow>
                             <TableCell>Name</TableCell>
-                            <TableCell>Description</TableCell>
-                            <TableCell>Location</TableCell>
-                            <TableCell>Start Date</TableCell>
-                            <TableCell>End Date</TableCell>
+                            <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
+                              Description
+                            </TableCell>
+                            <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                              Location
+                            </TableCell>
+                            <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                              Start Date
+                            </TableCell>
+                            <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                              End Date
+                            </TableCell>
                             <TableCell>Status</TableCell>
-                            <TableCell>Created At</TableCell>
+                            <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
+                              Created At
+                            </TableCell>
                             <TableCell align="right">Actions</TableCell>
                           </TableRow>
                         </TableHead>
@@ -374,8 +393,31 @@ export default function EventsPage() {
                                 <Typography variant="body2" fontWeight="medium">
                                   {event.name}
                                 </Typography>
+                                {isMobile && (
+                                  <>
+                                    {event.description && (
+                                      <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                        display="block"
+                                        sx={{
+                                          maxWidth: 200,
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          whiteSpace: 'nowrap',
+                                          mt: 0.5,
+                                        }}
+                                      >
+                                        {event.description}
+                                      </Typography>
+                                    )}
+                                    <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
+                                      {formatDate(event.startDate, event.startDateLocal)}
+                                    </Typography>
+                                  </>
+                                )}
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
                                 <Typography
                                   variant="body2"
                                   color="text.secondary"
@@ -389,17 +431,17 @@ export default function EventsPage() {
                                   {event.description || '-'}
                                 </Typography>
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                                 <Typography variant="body2" color="text.secondary">
                                   {event.location || '-'}
                                 </Typography>
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                                 <Typography variant="body2" color="text.secondary">
                                   {formatDate(event.startDate, event.startDateLocal)}
                                 </Typography>
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                                 <Typography variant="body2" color="text.secondary">
                                   {formatDate(event.endDate, event.endDateLocal)}
                                 </Typography>
@@ -411,7 +453,7 @@ export default function EventsPage() {
                                   color={getStatusColor(event.status)}
                                 />
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
                                 <Typography variant="body2" color="text.secondary">
                                   {format(new Date(event.createdAt), 'PPp')}
                                 </Typography>
@@ -490,6 +532,19 @@ export default function EventsPage() {
                       rowsPerPage={limit}
                       onRowsPerPageChange={handleChangeRowsPerPage}
                       rowsPerPageOptions={[5, 10, 25, 50]}
+                      labelRowsPerPage={isMobile ? 'Rows:' : 'Rows per page:'}
+                      labelDisplayedRows={({ from, to, count }) =>
+                        isMobile ? `${from}-${to} of ${count}` : `${from}-${to} of ${count !== -1 ? count : `more than ${to}`}`
+                      }
+                      sx={{
+                        '& .MuiTablePagination-toolbar': {
+                          flexWrap: 'wrap',
+                          gap: 1,
+                        },
+                        '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
+                        },
+                      }}
                     />
                   </>
                 )}

@@ -69,7 +69,14 @@ export function Header({ onMenuClick }: HeaderProps) {
           </IconButton>
         )}
 
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <Typography 
+          variant="h6" 
+          component="div" 
+          sx={{ 
+            flexGrow: 1,
+            fontSize: { xs: '1rem', sm: '1.25rem' },
+          }}
+        >
           Time Tracker
         </Typography>
 

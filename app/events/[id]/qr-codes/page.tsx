@@ -147,8 +147,8 @@ export default function QRCodesPage() {
   return (
     <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
       <MainLayout>
-        <Container maxWidth="xl">
-          <Box sx={{ py: 4 }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2, md: 3 } }}>
+          <Box sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
             <Box
               display="flex"
               justifyContent="space-between"
@@ -235,41 +235,60 @@ export default function QRCodesPage() {
                 </CardContent>
               </Card>
             ) : (
-              <Grid container spacing={3}>
+              <Grid container spacing={{ xs: 2, sm: 3 }}>
                 {competitorsWithQR.map((competitor) => (
                   <Grid item xs={12} sm={6} md={4} lg={3} key={competitor.id}>
                     <Paper
                       elevation={2}
                       sx={{
-                        p: 2,
+                        p: { xs: 1.5, sm: 2 },
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        minHeight: 280,
+                        minHeight: { xs: 250, sm: 280 },
                       }}
                     >
                       <Box
                         sx={{
-                          mb: 2,
-                          p: 2,
+                          mb: { xs: 1, sm: 2 },
+                          p: { xs: 1, sm: 2 },
                           bgcolor: 'background.paper',
                           borderRadius: 1,
                           border: '1px solid',
                           borderColor: 'divider',
                         }}
                       >
-                        <QRCodeSVG value={competitor.qrCode!} size={150} />
+                        <QRCodeSVG 
+                          value={competitor.qrCode!} 
+                          size={isMobile ? 120 : 150} 
+                        />
                       </Box>
-                      <Typography variant="h6" align="center" gutterBottom>
+                      <Typography 
+                        variant="h6" 
+                        align="center" 
+                        gutterBottom
+                        sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}
+                      >
                         {competitor.competitor.firstName} {competitor.competitor.lastName}
                       </Typography>
                       {competitor.sequentialNumber && (
-                        <Typography variant="body1" color="primary" align="center" fontWeight="bold">
+                        <Typography 
+                          variant="body1" 
+                          color="primary" 
+                          align="center" 
+                          fontWeight="bold"
+                          sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+                        >
                           #{competitor.sequentialNumber}
                         </Typography>
                       )}
                       {competitor.category && (
-                        <Typography variant="body2" color="text.secondary" align="center">
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary" 
+                          align="center"
+                          sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                        >
                           {competitor.category.name}
                         </Typography>
                       )}
@@ -277,7 +296,12 @@ export default function QRCodesPage() {
                         variant="caption"
                         color="text.secondary"
                         align="center"
-                        sx={{ mt: 1, wordBreak: 'break-all' }}
+                        sx={{ 
+                          mt: 1, 
+                          wordBreak: 'break-all',
+                          fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                          px: 1,
+                        }}
                       >
                         {competitor.qrCode}
                       </Typography>

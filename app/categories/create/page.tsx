@@ -104,8 +104,8 @@ export default function CreateCategoryPage() {
   return (
     <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
       <MainLayout>
-        <Container maxWidth="md">
-          <Box sx={{ py: 4 }}>
+        <Container maxWidth="md" sx={{ px: { xs: 1, sm: 2, md: 3 } }}>
+          <Box sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
             <Typography
               variant={isMobile ? 'h5' : 'h4'}
               component="h1"

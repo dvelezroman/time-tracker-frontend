@@ -14,8 +14,13 @@ export function Footer() {
           theme.palette.mode === 'light' ? theme.palette.grey[200] : theme.palette.grey[800],
       }}
     >
-      <Container maxWidth="lg">
-        <Typography variant="body2" color="text.secondary" align="center">
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+        <Typography 
+          variant="body2" 
+          color="text.secondary" 
+          align="center"
+          sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+        >
           {'© '}
           <Link color="inherit" href="/">
             Time Tracker

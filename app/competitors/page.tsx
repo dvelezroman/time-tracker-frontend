@@ -24,8 +24,9 @@ import {
   Chip,
   CircularProgress,
   Alert,
+  Button,
 } from '@mui/material';
-import { Search as SearchIcon } from '@mui/icons-material';
+import { Search as SearchIcon, Download as DownloadIcon } from '@mui/icons-material';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import {
@@ -54,6 +55,7 @@ export default function CompetitorsPage() {
   const [eventFilter, setEventFilter] = useState<number | ''>('');
   const [categoryFilter, setCategoryFilter] = useState<number | ''>('');
   const [error, setError] = useState('');
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     loadEvents();
@@ -162,11 +164,31 @@ export default function CompetitorsPage() {
     setPage(0);
   };
 
+  const handleDownloadPDF = async () => {
+    if (!eventFilter) {
+      showToast('Please select an event first', 'warning');
+      return;
+    }
+
+    try {
+      setDownloading(true);
+      await eventCompetitorService.downloadQRCodesPDF(Number(eventFilter));
+      showToast('PDF downloaded successfully', 'success');
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Failed to download PDF. Please try again.';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
       <MainLayout>
-        <Container maxWidth="xl">
-          <Box sx={{ py: 4 }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2, md: 3 } }}>
+          <Box sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
             <Typography
               variant={isMobile ? 'h5' : 'h4'}
               component="h1"
@@ -185,8 +207,22 @@ export default function CompetitorsPage() {
               </Alert>
             )}
 
-            <Card>
-              <CardContent>
+            {eventFilter && (
+              <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                <Button
+                  variant="contained"
+                  startIcon={downloading ? <CircularProgress size={20} color="inherit" /> : <DownloadIcon />}
+                  onClick={handleDownloadPDF}
+                  disabled={downloading}
+                  size={isMobile ? 'medium' : 'large'}
+                >
+                  {downloading ? 'Downloading...' : 'Download QR Codes PDF'}
+                </Button>
+              </Box>
+            )}
+
+            <Card sx={{ overflow: 'hidden' }}>
+              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                 <Box
                   display="flex"
                   gap={2}
@@ -253,16 +289,34 @@ export default function CompetitorsPage() {
                   </Box>
                 ) : (
                   <>
-                    <TableContainer>
-                      <Table>
+                    <TableContainer
+                      sx={{
+                        overflowX: 'auto',
+                        '& .MuiTableCell-root': {
+                          whiteSpace: isMobile ? 'nowrap' : 'normal',
+                          padding: isMobile ? '8px 4px' : '16px',
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
+                        },
+                      }}
+                    >
+                      <Table size={isMobile ? 'small' : 'medium'}>
                         <TableHead>
                           <TableRow>
                             <TableCell>Competitor Name</TableCell>
-                            <TableCell>Email</TableCell>
-                            <TableCell>Phone</TableCell>
+                            <TableCell>Sequential #</TableCell>
+                            <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                              Email
+                            </TableCell>
+                            <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                              Phone
+                            </TableCell>
                             <TableCell>Event</TableCell>
-                            <TableCell>Category</TableCell>
-                            <TableCell>Registered At</TableCell>
+                            <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
+                              Category
+                            </TableCell>
+                            <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                              Registered At
+                            </TableCell>
                             <TableCell>QR Code</TableCell>
                           </TableRow>
                         </TableHead>
@@ -273,13 +327,45 @@ export default function CompetitorsPage() {
                                 <Typography variant="body2" fontWeight="medium">
                                   {ec.competitor.firstName} {ec.competitor.lastName}
                                 </Typography>
+                                {isMobile && (
+                                  <>
+                                    {ec.competitor.email && (
+                                      <Typography variant="caption" color="text.secondary" display="block">
+                                        {ec.competitor.email}
+                                      </Typography>
+                                    )}
+                                    {ec.category && (
+                                      <Chip
+                                        label={ec.category.name}
+                                        size="small"
+                                        color="secondary"
+                                        variant="outlined"
+                                        sx={{ mt: 0.5 }}
+                                      />
+                                    )}
+                                  </>
+                                )}
                               </TableCell>
                               <TableCell>
+                                {ec.sequentialNumber ? (
+                                  <Chip
+                                    label={`#${ec.sequentialNumber}`}
+                                    size="small"
+                                    color="primary"
+                                    variant="filled"
+                                  />
+                                ) : (
+                                  <Typography variant="body2" color="text.secondary">
+                                    -
+                                  </Typography>
+                                )}
+                              </TableCell>
+                              <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                                 <Typography variant="body2" color="text.secondary">
                                   {ec.competitor.email || '-'}
                                 </Typography>
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                                 <Typography variant="body2" color="text.secondary">
                                   {ec.competitor.phone || '-'}
                                 </Typography>
@@ -292,7 +378,7 @@ export default function CompetitorsPage() {
                                   variant="outlined"
                                 />
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
                                 {ec.category ? (
                                   <Chip
                                     label={ec.category.name}
@@ -306,9 +392,9 @@ export default function CompetitorsPage() {
                                   </Typography>
                                 )}
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                                 <Typography variant="body2" color="text.secondary">
-                                  {format(new Date(ec.registeredAt), 'PPp')}
+                                  {format(new Date(ec.registeredAt), isMobile ? 'PP' : 'PPp')}
                                 </Typography>
                               </TableCell>
                               <TableCell>
@@ -333,6 +419,19 @@ export default function CompetitorsPage() {
                       rowsPerPage={limit}
                       onRowsPerPageChange={handleChangeRowsPerPage}
                       rowsPerPageOptions={[5, 10, 25, 50]}
+                      labelRowsPerPage={isMobile ? 'Rows:' : 'Rows per page:'}
+                      labelDisplayedRows={({ from, to, count }) =>
+                        isMobile ? `${from}-${to} of ${count}` : `${from}-${to} of ${count !== -1 ? count : `more than ${to}`}`
+                      }
+                      sx={{
+                        '& .MuiTablePagination-toolbar': {
+                          flexWrap: 'wrap',
+                          gap: 1,
+                        },
+                        '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
+                        },
+                      }}
                     />
                   </>
                 )}

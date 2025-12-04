@@ -171,8 +171,8 @@ export default function CategoriesPage() {
   return (
     <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
       <MainLayout>
-        <Container maxWidth="xl">
-          <Box sx={{ py: 4 }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2, md: 3 } }}>
+          <Box sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
             <Box
               display="flex"
               justifyContent="space-between"
@@ -207,8 +207,8 @@ export default function CategoriesPage() {
               </Alert>
             )}
 
-            <Card>
-              <CardContent>
+            <Card sx={{ overflow: 'hidden' }}>
+              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                 <Box
                   display="flex"
                   gap={2}
@@ -260,14 +260,27 @@ export default function CategoriesPage() {
                   </Box>
                 ) : (
                   <>
-                    <TableContainer>
-                      <Table>
+                    <TableContainer
+                      sx={{
+                        overflowX: 'auto',
+                        '& .MuiTableCell-root': {
+                          whiteSpace: isMobile ? 'nowrap' : 'normal',
+                          padding: isMobile ? '8px 4px' : '16px',
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
+                        },
+                      }}
+                    >
+                      <Table size={isMobile ? 'small' : 'medium'}>
                         <TableHead>
                           <TableRow>
                             <TableCell>Name</TableCell>
-                            <TableCell>Description</TableCell>
+                            <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                              Description
+                            </TableCell>
                             <TableCell>Event</TableCell>
-                            <TableCell>Created At</TableCell>
+                            <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
+                              Created At
+                            </TableCell>
                             <TableCell align="right">Actions</TableCell>
                           </TableRow>
                         </TableHead>
@@ -278,8 +291,24 @@ export default function CategoriesPage() {
                                 <Typography variant="body2" fontWeight="medium">
                                   {category.name}
                                 </Typography>
+                                {isMobile && category.description && (
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    display="block"
+                                    sx={{
+                                      maxWidth: 200,
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap',
+                                      mt: 0.5,
+                                    }}
+                                  >
+                                    {category.description}
+                                  </Typography>
+                                )}
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                                 <Typography variant="body2" color="text.secondary">
                                   {category.description || '-'}
                                 </Typography>
@@ -298,7 +327,7 @@ export default function CategoriesPage() {
                                   </Typography>
                                 )}
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
                                 <Typography variant="body2" color="text.secondary">
                                   {format(new Date(category.createdAt), 'PPp')}
                                 </Typography>
@@ -332,6 +361,19 @@ export default function CategoriesPage() {
                       rowsPerPage={limit}
                       onRowsPerPageChange={handleChangeRowsPerPage}
                       rowsPerPageOptions={[5, 10, 25, 50]}
+                      labelRowsPerPage={isMobile ? 'Rows:' : 'Rows per page:'}
+                      labelDisplayedRows={({ from, to, count }) =>
+                        isMobile ? `${from}-${to} of ${count}` : `${from}-${to} of ${count !== -1 ? count : `more than ${to}`}`
+                      }
+                      sx={{
+                        '& .MuiTablePagination-toolbar': {
+                          flexWrap: 'wrap',
+                          gap: 1,
+                        },
+                        '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
+                        },
+                      }}
                     />
                   </>
                 )}

@@ -182,8 +182,8 @@ export default function UsersPage() {
   return (
     <ProtectedRoute roles={['ADMIN']}>
       <MainLayout>
-        <Container maxWidth="xl">
-          <Box sx={{ py: 4 }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2, md: 3 } }}>
+          <Box sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
             <Box
               display="flex"
               justifyContent="space-between"
@@ -218,8 +218,8 @@ export default function UsersPage() {
               </Alert>
             )}
 
-            <Card>
-              <CardContent>
+            <Card sx={{ overflow: 'hidden' }}>
+              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                 <Box
                   display="flex"
                   gap={2}
@@ -275,15 +275,28 @@ export default function UsersPage() {
                   </Box>
                 ) : (
                   <>
-                    <TableContainer>
-                      <Table>
+                    <TableContainer
+                      sx={{
+                        overflowX: 'auto',
+                        '& .MuiTableCell-root': {
+                          whiteSpace: isMobile ? 'nowrap' : 'normal',
+                          padding: isMobile ? '8px 4px' : '16px',
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
+                        },
+                      }}
+                    >
+                      <Table size={isMobile ? 'small' : 'medium'}>
                         <TableHead>
                           <TableRow>
                             <TableCell>Email</TableCell>
-                            <TableCell>Phone</TableCell>
+                            <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                              Phone
+                            </TableCell>
                             <TableCell>Role</TableCell>
                             <TableCell>Status</TableCell>
-                            <TableCell>Created At</TableCell>
+                            <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                              Created At
+                            </TableCell>
                             <TableCell align="right">Actions</TableCell>
                           </TableRow>
                         </TableHead>
@@ -294,8 +307,13 @@ export default function UsersPage() {
                                 <Typography variant="body2" fontWeight="medium">
                                   {user.email}
                                 </Typography>
+                                {isMobile && user.phone && (
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    {user.phone}
+                                  </Typography>
+                                )}
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                                 <Typography variant="body2" color="text.secondary">
                                   {user.phone || '-'}
                                 </Typography>
@@ -315,7 +333,7 @@ export default function UsersPage() {
                                   color={getStatusColor(user.status)}
                                 />
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                                 <Typography variant="body2" color="text.secondary">
                                   {user.createdAt
                                     ? format(new Date(user.createdAt), 'PPp')
@@ -351,6 +369,19 @@ export default function UsersPage() {
                       rowsPerPage={limit}
                       onRowsPerPageChange={handleChangeRowsPerPage}
                       rowsPerPageOptions={[5, 10, 25, 50]}
+                      labelRowsPerPage={isMobile ? 'Rows:' : 'Rows per page:'}
+                      labelDisplayedRows={({ from, to, count }) =>
+                        isMobile ? `${from}-${to} of ${count}` : `${from}-${to} of ${count !== -1 ? count : `more than ${to}`}`
+                      }
+                      sx={{
+                        '& .MuiTablePagination-toolbar': {
+                          flexWrap: 'wrap',
+                          gap: 1,
+                        },
+                        '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
+                        },
+                      }}
                     />
                   </>
                 )}
