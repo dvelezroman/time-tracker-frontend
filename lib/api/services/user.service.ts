@@ -7,10 +7,19 @@ export interface UpdateUserRequest {
   password?: string;
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export const userService = {
   getUsers: async (): Promise<User[]> => {
-    const response = await apiClient.get<User[]>('/users');
-    return response.data;
+    const response = await apiClient.get<PaginatedResponse<User>>('/users');
+    // API returns paginated response, extract the data array
+    return response.data.data || response.data;
   },
 
   getUserById: async (id: number): Promise<User> => {

@@ -29,8 +29,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (user) {
             setAuth(user, token);
           }
-        } catch (error) {
+        } catch (error: any) {
           // Token is invalid or expired, clear auth
+          console.error('Session validation failed:', error?.response?.data || error?.message);
           clearAuth();
         } finally {
           setIsValidating(false);
@@ -38,7 +39,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     };
 
-    validateSession();
+    // Add a small delay to ensure token is persisted after login
+    const timeoutId = setTimeout(validateSession, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [_hasHydrated, token, setAuth, clearAuth]);
 
   return <>{children}</>;

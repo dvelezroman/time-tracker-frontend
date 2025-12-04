@@ -28,7 +28,14 @@ class ApiClient {
             try {
               const auth = JSON.parse(authStorage);
               if (auth?.state?.token) {
-                config.headers.Authorization = `Bearer ${auth.state.token}`;
+                const token = auth.state.token.trim();
+                if (token) {
+                  config.headers.Authorization = `Bearer ${token}`;
+                } else {
+                  console.warn('Token is empty in auth storage');
+                }
+              } else {
+                console.warn('No token found in auth storage structure:', Object.keys(auth || {}));
               }
             } catch (error) {
               console.error('Error parsing auth storage:', error);
