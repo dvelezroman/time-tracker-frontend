@@ -15,6 +15,7 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { eventService, Event, EventStatus } from '@/lib/api/services/event.service';
@@ -32,6 +33,7 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
+  const [sendingWhatsApp, setSendingWhatsApp] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -80,6 +82,29 @@ export default function EventDetailPage() {
 
   const handleViewTimer = () => {
     router.push(ROUTES.EVENTS_TIMER(eventId));
+  };
+
+  const handleSendWhatsAppTimes = async () => {
+    if (!event) return;
+
+    try {
+      setSendingWhatsApp(true);
+      setError('');
+      const result = await eventService.sendWhatsAppTimes(eventId);
+      showToast(
+        `WhatsApp notifications queued successfully! ${result.queued} sent, ${result.skipped} skipped.`,
+        'success',
+      );
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        'Failed to send WhatsApp notifications. Please try again.';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
+    } finally {
+      setSendingWhatsApp(false);
+    }
   };
 
   const getStatusColor = (status: EventStatus): 'default' | 'primary' | 'success' | 'warning' | 'error' => {
@@ -277,6 +302,29 @@ export default function EventDetailPage() {
                       size={isMobile ? 'medium' : 'large'}
                     >
                       QR Codes
+                    </Button>
+                  </>
+                )}
+
+                {event.status === 'COMPLETED' && (
+                  <>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      startIcon={sendingWhatsApp ? <CircularProgress size={20} /> : <WhatsAppIcon />}
+                      onClick={handleSendWhatsAppTimes}
+                      disabled={sendingWhatsApp}
+                      size={isMobile ? 'medium' : 'large'}
+                    >
+                      {sendingWhatsApp ? 'Sending...' : 'Send Times via WhatsApp'}
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => router.push(`${ROUTES.NOTIFICATIONS}?eventId=${event.id}`)}
+                      size={isMobile ? 'medium' : 'large'}
+                    >
+                      Send Notifications
                     </Button>
                   </>
                 )}

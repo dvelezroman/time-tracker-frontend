@@ -98,5 +98,12 @@ export const eventService = {
     const response = await apiClient.post<Event>(`/events/${id}/stop`, data || {});
     return response.data;
   },
+
+  sendWhatsAppTimes: async (id: number): Promise<{ queued: number; skipped: number }> => {
+    const response = await apiClient.post<{ queued: number; skipped: number }>(
+      `/events/${id}/send-whatsapp-times`,
+    );
+    return response.data;
+  },
 };
 

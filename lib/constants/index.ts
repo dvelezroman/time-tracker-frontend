@@ -44,6 +44,8 @@ export const ROUTES = {
   USERS: '/users',
   USERS_CREATE: '/users/create',
   COMPETITORS: '/competitors',
+  SETTINGS: '/settings',
+  NOTIFICATIONS: '/notifications',
 } as const;
 
 export const STORAGE_KEYS = {
