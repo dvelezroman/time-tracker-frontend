@@ -22,6 +22,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useUIStore } from '@/store/useUIStore';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/lib/constants';
+import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -33,6 +35,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const router = useRouter();
   const { user, clearAuth } = useAuthStore();
   const { themeMode, toggleTheme } = useUIStore();
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -81,6 +84,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <LanguageSwitcher />
           <IconButton color="inherit" onClick={toggleTheme}>
             {themeMode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
           </IconButton>
@@ -116,11 +120,11 @@ export function Header({ onMenuClick }: HeaderProps) {
               >
                 <MenuItem onClick={handleProfile}>
                   <AccountCircleIcon sx={{ mr: 1 }} />
-                  Profile
+                  {t('nav.profile')}
                 </MenuItem>
                 <MenuItem onClick={handleLogout}>
                   <LogoutIcon sx={{ mr: 1 }} />
-                  Logout
+                  {t('nav.logout')}
                 </MenuItem>
               </Menu>
             </>

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 type ThemeMode = 'light' | 'dark';
+type Locale = 'en' | 'es';
 
 interface UIState {
   themeMode: ThemeMode;
@@ -9,6 +10,8 @@ interface UIState {
   toggleTheme: () => void;
   isLoading: boolean;
   setLoading: (loading: boolean) => void;
+  locale: Locale;
+  setLocale: (locale: Locale) => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -22,10 +25,12 @@ export const useUIStore = create<UIState>()(
         })),
       isLoading: false,
       setLoading: (loading) => set({ isLoading: loading }),
+      locale: 'en',
+      setLocale: (locale) => set({ locale }),
     }),
     {
       name: 'ui-storage',
-      partialize: (state) => ({ themeMode: state.themeMode }),
+      partialize: (state) => ({ themeMode: state.themeMode, locale: state.locale }),
     }
   )
 );

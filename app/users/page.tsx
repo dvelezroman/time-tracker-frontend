@@ -44,11 +44,13 @@ import { userService, UpdateUserRequest, UserWithDates } from '@/lib/api/service
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function UsersPage() {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { t } = useTranslation();
 
   const [users, setUsers] = useState<UserWithDates[]>([]);
   const [loading, setLoading] = useState(true);
@@ -197,7 +199,7 @@ export default function UsersPage() {
       setEditing(true);
       setError('');
       await userService.updateUser(userToEdit.id, updateData);
-      showToast('User updated successfully!', 'success');
+      showToast(t('users.userUpdated'), 'success');
       handleEditClose();
       loadUsers();
     } catch (err: any) {
@@ -221,7 +223,7 @@ export default function UsersPage() {
     try {
       setDeleting(true);
       await userService.deleteUser(userToDelete.id);
-      showToast('User deleted successfully!', 'success');
+      showToast(t('users.userDeleted'), 'success');
       setDeleteDialogOpen(false);
       setUserToDelete(null);
       loadUsers();
@@ -267,7 +269,7 @@ export default function UsersPage() {
                   color: theme.palette.mode === 'dark' ? '#e6edf3' : '#1a1a1a',
                 }}
               >
-                Users
+                {t('users.title')}
               </Typography>
               <Button
                 variant="contained"
@@ -275,7 +277,7 @@ export default function UsersPage() {
                 onClick={handleCreate}
                 size={isMobile ? 'medium' : 'large'}
               >
-                Create User
+                {t('users.createUser')}
               </Button>
             </Box>
 
@@ -297,7 +299,7 @@ export default function UsersPage() {
                   }}
                 >
                   <TextField
-                    placeholder="Search by email..."
+                    placeholder={t('users.searchByEmail')}
                     value={search}
                     onChange={handleSearchChange}
                     InputProps={{
@@ -310,22 +312,22 @@ export default function UsersPage() {
                     sx={{ flex: isMobile ? '1 1 100%' : '1 1 200px', minWidth: 180 }}
                     size={isMobile ? 'medium' : 'small'}
                   >
-                    <InputLabel>Role</InputLabel>
-                    <Select value={roleFilter} onChange={handleRoleFilterChange} label="Role">
-                      <MenuItem value="">All Roles</MenuItem>
-                      <MenuItem value="ADMIN">Admin</MenuItem>
-                      <MenuItem value="OPERATOR">Operator</MenuItem>
+                    <InputLabel>{t('users.role')}</InputLabel>
+                    <Select value={roleFilter} onChange={handleRoleFilterChange} label={t('users.role')}>
+                      <MenuItem value="">{t('users.allRoles')}</MenuItem>
+                      <MenuItem value="ADMIN">{t('users.admin')}</MenuItem>
+                      <MenuItem value="OPERATOR">{t('users.operator')}</MenuItem>
                     </Select>
                   </FormControl>
                   <FormControl
                     sx={{ flex: isMobile ? '1 1 100%' : '1 1 200px', minWidth: 180 }}
                     size={isMobile ? 'medium' : 'small'}
                   >
-                    <InputLabel>Status</InputLabel>
-                    <Select value={statusFilter} onChange={handleStatusFilterChange} label="Status">
-                      <MenuItem value="">All Statuses</MenuItem>
-                      <MenuItem value="ACTIVE">Active</MenuItem>
-                      <MenuItem value="INACTIVE">Inactive</MenuItem>
+                    <InputLabel>{t('users.status')}</InputLabel>
+                    <Select value={statusFilter} onChange={handleStatusFilterChange} label={t('users.status')}>
+                      <MenuItem value="">{t('users.allStatuses')}</MenuItem>
+                      <MenuItem value="ACTIVE">{t('users.active')}</MenuItem>
+                      <MenuItem value="INACTIVE">{t('users.inactive')}</MenuItem>
                     </Select>
                   </FormControl>
                 </Box>
@@ -337,7 +339,7 @@ export default function UsersPage() {
                 ) : users.length === 0 ? (
                   <Box textAlign="center" py={4}>
                     <Typography variant="body1" color="text.secondary">
-                      No users found
+                      {t('users.noUsers')}
                     </Typography>
                   </Box>
                 ) : (
@@ -355,16 +357,16 @@ export default function UsersPage() {
                       <Table size={isMobile ? 'small' : 'medium'}>
                         <TableHead>
                           <TableRow>
-                            <TableCell>Email</TableCell>
+                            <TableCell>{t('auth.email')}</TableCell>
                             <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
-                              Phone
+                              {t('users.phone')}
                             </TableCell>
-                            <TableCell>Role</TableCell>
-                            <TableCell>Status</TableCell>
+                            <TableCell>{t('users.role')}</TableCell>
+                            <TableCell>{t('users.status')}</TableCell>
                             <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                              Created At
+                              {t('users.createdAt')}
                             </TableCell>
-                            <TableCell align="right">Actions</TableCell>
+                            <TableCell align="right">{t('common.actions')}</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
@@ -459,7 +461,7 @@ export default function UsersPage() {
 
         {/* Edit User Dialog */}
         <Dialog open={editDialogOpen} onClose={handleEditClose} maxWidth="sm" fullWidth>
-          <DialogTitle>Edit User</DialogTitle>
+          <DialogTitle>{t('users.editUser')}</DialogTitle>
           <DialogContent>
             {error && (
               <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
@@ -469,7 +471,7 @@ export default function UsersPage() {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
               <TextField
                 fullWidth
-                label="Email"
+                label={t('auth.email')}
                 type="email"
                 value={editFormData.email}
                 onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
@@ -477,36 +479,36 @@ export default function UsersPage() {
                 disabled={editing}
               />
               <FormControl fullWidth>
-                <InputLabel>Role</InputLabel>
+                <InputLabel>{t('users.role')}</InputLabel>
                 <Select
                   value={editFormData.role}
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, role: e.target.value as 'ADMIN' | 'OPERATOR' })
                   }
-                  label="Role"
+                  label={t('users.role')}
                   disabled={editing}
                 >
-                  <MenuItem value="OPERATOR">Operator</MenuItem>
-                  <MenuItem value="ADMIN">Admin</MenuItem>
+                  <MenuItem value="OPERATOR">{t('users.operator')}</MenuItem>
+                  <MenuItem value="ADMIN">{t('users.admin')}</MenuItem>
                 </Select>
               </FormControl>
               <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
+                <InputLabel>{t('users.status')}</InputLabel>
                 <Select
                   value={editFormData.status}
                   onChange={(e) =>
                     setEditFormData({ ...editFormData, status: e.target.value as 'ACTIVE' | 'INACTIVE' })
                   }
-                  label="Status"
+                  label={t('users.status')}
                   disabled={editing}
                 >
-                  <MenuItem value="ACTIVE">Active</MenuItem>
-                  <MenuItem value="INACTIVE">Inactive</MenuItem>
+                  <MenuItem value="ACTIVE">{t('users.active')}</MenuItem>
+                  <MenuItem value="INACTIVE">{t('users.inactive')}</MenuItem>
                 </Select>
               </FormControl>
               <TextField
                 fullWidth
-                label="Phone Number"
+                label={t('users.phone')}
                 type="tel"
                 value={editFormData.phone}
                 onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
@@ -514,40 +516,39 @@ export default function UsersPage() {
               />
               <TextField
                 fullWidth
-                label="New Password (leave empty to keep current)"
+                label={t('users.newPassword')}
                 type="password"
                 value={editFormData.password}
                 onChange={(e) => setEditFormData({ ...editFormData, password: e.target.value })}
                 disabled={editing}
-                helperText="Leave empty to keep the current password"
+                helperText={t('users.passwordHelper')}
               />
             </Box>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleEditClose} disabled={editing}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleEditSubmit} variant="contained" disabled={editing}>
-              {editing ? <CircularProgress size={24} /> : 'Save'}
+              {editing ? <CircularProgress size={24} /> : t('common.save')}
             </Button>
           </DialogActions>
         </Dialog>
 
         {/* Delete User Dialog */}
         <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-          <DialogTitle>Delete User</DialogTitle>
+          <DialogTitle>{t('users.deleteUser')}</DialogTitle>
           <DialogContent>
             <Typography>
-              Are you sure you want to delete the user &quot;{userToDelete?.email}&quot;? This action
-              cannot be undone.
+              {t('users.deleteConfirm', { email: userToDelete?.email || '' })}
             </Typography>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleDeleteConfirm} color="error" disabled={deleting}>
-              {deleting ? <CircularProgress size={24} /> : 'Delete'}
+              {deleting ? <CircularProgress size={24} /> : t('common.delete')}
             </Button>
           </DialogActions>
         </Dialog>

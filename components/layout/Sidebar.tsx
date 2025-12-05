@@ -23,6 +23,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useRouter, usePathname } from 'next/navigation';
 import { ROUTES } from '@/lib/constants';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const drawerWidth = 240;
 
@@ -32,7 +33,7 @@ interface SidebarProps {
 }
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   icon: React.ReactNode;
   path: string;
   roles?: ('ADMIN' | 'OPERATOR')[];
@@ -40,42 +41,42 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    label: 'Dashboard',
+    labelKey: 'nav.dashboard',
     icon: <DashboardIcon />,
     path: ROUTES.DASHBOARD,
   },
   {
-    label: 'Events',
+    labelKey: 'nav.events',
     icon: <EventIcon />,
     path: ROUTES.EVENTS,
     roles: ['ADMIN', 'OPERATOR'],
   },
   {
-    label: 'Categories',
+    labelKey: 'nav.categories',
     icon: <CategoryIcon />,
     path: ROUTES.CATEGORIES,
     roles: ['ADMIN', 'OPERATOR'],
   },
   {
-    label: 'Competitors',
+    labelKey: 'nav.competitors',
     icon: <EmojiEventsIcon />,
     path: ROUTES.COMPETITORS,
     roles: ['ADMIN', 'OPERATOR'],
   },
   {
-    label: 'Users',
+    labelKey: 'nav.users',
     icon: <PeopleIcon />,
     path: ROUTES.USERS,
     roles: ['ADMIN'],
   },
   {
-    label: 'Notifications',
+    labelKey: 'nav.notifications',
     icon: <NotificationsIcon />,
     path: ROUTES.NOTIFICATIONS,
     roles: ['ADMIN', 'OPERATOR'],
   },
   {
-    label: 'Settings',
+    labelKey: 'nav.settings',
     icon: <SettingsIcon />,
     path: '/settings',
   },
@@ -87,6 +88,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuthStore();
+  const { t } = useTranslation();
 
   const handleNavigation = (path: string) => {
     router.push(path);
@@ -104,7 +106,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     <Box>
       <Box sx={{ p: 2 }}>
         <Typography variant="h6" noWrap component="div">
-          Menu
+          {t('common.menu') || 'Menu'}
         </Typography>
       </Box>
       <Divider />
@@ -116,7 +118,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               onClick={() => handleNavigation(item.path)}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
+              <ListItemText primary={t(item.labelKey)} />
             </ListItemButton>
           </ListItem>
         ))}
