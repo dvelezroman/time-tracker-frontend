@@ -14,10 +14,24 @@ import {
   CircularProgress,
   useTheme,
   useMediaQuery,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Divider,
 } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import InfoIcon from '@mui/icons-material/Info';
+import DescriptionIcon from '@mui/icons-material/Description';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { eventService, Event, EventStatus } from '@/lib/api/services/event.service';
@@ -468,44 +482,224 @@ export default function EventDetailPage() {
           {/* Excel Import Section */}
           <Card sx={{ mt: 3 }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Import Competitors from Excel
-              </Typography>
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <CloudUploadIcon color="primary" />
+                <Typography variant="h6">
+                  Import Competitors from Excel
+                </Typography>
+              </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 Upload an Excel file (.xlsx or .xls) to import competitors and register them to this event.
               </Typography>
 
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Excel File Format:
-                </Typography>
-                <Box component="ul" sx={{ pl: 2, mb: 2 }}>
-                  <li>
-                    <strong>Column A:</strong> First Name (required)
-                  </li>
-                  <li>
-                    <strong>Column B:</strong> Last Name (required)
-                  </li>
-                  <li>
-                    <strong>Column C:</strong> Email (optional)
-                  </li>
-                  <li>
-                    <strong>Column D:</strong> Phone (optional)
-                  </li>
-                  <li>
-                    <strong>Column E:</strong> Event ID (optional, defaults to current event)
-                  </li>
-                  <li>
-                    <strong>Column F:</strong> Category Name or Category ID (optional)
-                  </li>
-                  <li>
-                    <strong>Column G:</strong> Sequential Number (optional, auto-assigned if not provided)
-                  </li>
-                </Box>
-                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
-                  Note: The first row is treated as a header and will be skipped. Maximum file size: 10MB
-                </Typography>
-              </Box>
+              {/* Instructions Accordion */}
+              <Accordion sx={{ mb: 3 }}>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls="instructions-content"
+                  id="instructions-header"
+                >
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <InfoIcon color="primary" />
+                    <Typography variant="subtitle1" fontWeight="medium">
+                      View Detailed Instructions
+                    </Typography>
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box>
+                    <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <DescriptionIcon />
+                      Excel File Format
+                    </Typography>
+                    
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                      Your Excel file must follow this exact column structure. The first row is treated as a header and will be skipped.
+                    </Typography>
+
+                    <TableContainer component={Paper} variant="outlined" sx={{ mb: 3 }}>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell><strong>Column</strong></TableCell>
+                            <TableCell><strong>Field</strong></TableCell>
+                            <TableCell><strong>Required</strong></TableCell>
+                            <TableCell><strong>Description</strong></TableCell>
+                            <TableCell><strong>Example</strong></TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell><strong>A</strong></TableCell>
+                            <TableCell>First Name</TableCell>
+                            <TableCell><Chip label="Required" color="error" size="small" /></TableCell>
+                            <TableCell>Competitor's first name</TableCell>
+                            <TableCell>John</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell><strong>B</strong></TableCell>
+                            <TableCell>Last Name</TableCell>
+                            <TableCell><Chip label="Required" color="error" size="small" /></TableCell>
+                            <TableCell>Competitor's last name</TableCell>
+                            <TableCell>Doe</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell><strong>C</strong></TableCell>
+                            <TableCell>Email</TableCell>
+                            <TableCell><Chip label="Optional" color="default" size="small" /></TableCell>
+                            <TableCell>Valid email address (recommended for duplicate detection)</TableCell>
+                            <TableCell>john.doe@example.com</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell><strong>D</strong></TableCell>
+                            <TableCell>Phone</TableCell>
+                            <TableCell><Chip label="Optional" color="default" size="small" /></TableCell>
+                            <TableCell>Phone number</TableCell>
+                            <TableCell>+1234567890</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell><strong>E</strong></TableCell>
+                            <TableCell>Event ID</TableCell>
+                            <TableCell><Chip label="Optional*" color="warning" size="small" /></TableCell>
+                            <TableCell>Event ID (defaults to current event if not provided)</TableCell>
+                            <TableCell>1</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell><strong>F</strong></TableCell>
+                            <TableCell>Category Name/ID</TableCell>
+                            <TableCell><Chip label="Optional" color="default" size="small" /></TableCell>
+                            <TableCell>Category name (text) or Category ID (number). Must exist in the event.</TableCell>
+                            <TableCell>Men's Elite or 2</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell><strong>G</strong></TableCell>
+                            <TableCell>Sequential Number</TableCell>
+                            <TableCell><Chip label="Optional" color="default" size="small" /></TableCell>
+                            <TableCell>Competitor number to assign (must be unique). Auto-assigned if empty.</TableCell>
+                            <TableCell>101</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+
+                    <Divider sx={{ my: 3 }} />
+
+                    <Typography variant="h6" gutterBottom>
+                      Example Excel File
+                    </Typography>
+                    <TableContainer component={Paper} variant="outlined" sx={{ mb: 3 }}>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell><strong>First Name</strong></TableCell>
+                            <TableCell><strong>Last Name</strong></TableCell>
+                            <TableCell><strong>Email</strong></TableCell>
+                            <TableCell><strong>Phone</strong></TableCell>
+                            <TableCell><strong>Event ID</strong></TableCell>
+                            <TableCell><strong>Category Name/ID</strong></TableCell>
+                            <TableCell><strong>Sequential Number</strong></TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>John</TableCell>
+                            <TableCell>Doe</TableCell>
+                            <TableCell>john.doe@example.com</TableCell>
+                            <TableCell>+1234567890</TableCell>
+                            <TableCell>1</TableCell>
+                            <TableCell>Men's Elite</TableCell>
+                            <TableCell>101</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Jane</TableCell>
+                            <TableCell>Smith</TableCell>
+                            <TableCell>jane.smith@example.com</TableCell>
+                            <TableCell>+0987654321</TableCell>
+                            <TableCell>1</TableCell>
+                            <TableCell>Women's Elite</TableCell>
+                            <TableCell>201</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Bob</TableCell>
+                            <TableCell>Johnson</TableCell>
+                            <TableCell></TableCell>
+                            <TableCell>+1122334455</TableCell>
+                            <TableCell>2</TableCell>
+                            <TableCell>3</TableCell>
+                            <TableCell></TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+
+                    <Divider sx={{ my: 3 }} />
+
+                    <Typography variant="h6" gutterBottom>
+                      Important Notes
+                    </Typography>
+                    <Box component="ul" sx={{ pl: 2, mb: 2 }}>
+                      <li>
+                        <Typography variant="body2" component="span">
+                          <strong>Header Row:</strong> The first row is treated as a header and will be skipped.
+                        </Typography>
+                      </li>
+                      <li>
+                        <Typography variant="body2" component="span">
+                          <strong>Category Column (F):</strong> If you provide a number (e.g., 2), it will be treated as a Category ID. If you provide text (e.g., "Men's Elite"), it will be treated as a Category Name and looked up. The category must exist in the target event.
+                        </Typography>
+                      </li>
+                      <li>
+                        <Typography variant="body2" component="span">
+                          <strong>Sequential Number (G):</strong> Must be a positive integer (greater than 0) and unique within the event. If not provided, a sequential number will be auto-assigned automatically.
+                        </Typography>
+                      </li>
+                      <li>
+                        <Typography variant="body2" component="span">
+                          <strong>Email Matching:</strong> If a competitor with the same email already exists, the existing competitor will be updated. If no email is provided, a new competitor will always be created.
+                        </Typography>
+                      </li>
+                      <li>
+                        <Typography variant="body2" component="span">
+                          <strong>File Requirements:</strong> Format: .xlsx or .xls | Maximum size: 10MB
+                        </Typography>
+                      </li>
+                    </Box>
+
+                    <Divider sx={{ my: 3 }} />
+
+                    <Typography variant="h6" gutterBottom>
+                      Best Practices
+                    </Typography>
+                    <Box component="ul" sx={{ pl: 2 }}>
+                      <li>
+                        <Typography variant="body2" component="span">
+                          Always include email addresses to help prevent duplicate competitors
+                        </Typography>
+                      </li>
+                      <li>
+                        <Typography variant="body2" component="span">
+                          Verify category names match exactly (including capitalization)
+                        </Typography>
+                      </li>
+                      <li>
+                        <Typography variant="body2" component="span">
+                          If assigning custom sequential numbers, ensure they're unique
+                        </Typography>
+                      </li>
+                      <li>
+                        <Typography variant="body2" component="span">
+                          Test with a small file (5-10 rows) first to verify the format
+                        </Typography>
+                      </li>
+                      <li>
+                        <Typography variant="body2" component="span">
+                          Keep a backup of your original Excel file before importing
+                        </Typography>
+                      </li>
+                    </Box>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
 
               <Box sx={{ mb: 2 }}>
                 <input
