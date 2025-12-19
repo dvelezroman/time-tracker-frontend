@@ -55,7 +55,8 @@ export default function DashboardPage() {
           if (leaderboard.finished) {
             leaderboard.finished.forEach(entry => {
               if (entry.duration) {
-                totalTimeSeconds += entry.duration;
+                // Convert milliseconds to seconds
+                totalTimeSeconds += Math.floor(entry.duration / 1000);
               }
             });
           }

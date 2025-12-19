@@ -69,7 +69,21 @@ export default function EventDetailPage() {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       await eventService.start(eventId, { timezone });
       showToast('Event started successfully!', 'success');
-      // Redirect to timer page
+      
+      // Open full screen timer in a new tab immediately after success
+      const fullScreenUrl = ROUTES.EVENTS_TIMER_FULLSCREEN(eventId);
+      const newTab = window.open(fullScreenUrl, '_blank', 'noopener,noreferrer');
+      
+      // Check if popup was blocked
+      if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
+        // Popup was blocked - show a message with a link
+        showToast(
+          'Popup blocked. Use the "Full Screen Timer" button to open it, or allow popups for this site.',
+          'warning',
+        );
+      }
+      
+      // Also redirect to timer page in current tab
       router.push(ROUTES.EVENTS_TIMER(eventId));
     } catch (err: any) {
       const errorMessage =
@@ -224,6 +238,22 @@ export default function EventDetailPage() {
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>
               {error}
+            </Alert>
+          )}
+
+          {event.status === 'ONGOING' && (
+            <Alert severity="info" sx={{ mb: 3 }}>
+              <Typography variant="body2" fontWeight="bold" gutterBottom>
+                How to Record Competitor Finish Times:
+              </Typography>
+              <Typography variant="body2" component="div">
+                <ul style={{ margin: 0, paddingLeft: 20 }}>
+                  <li>Click &quot;Scan QR Code&quot; button to open the QR scanner</li>
+                  <li>Use your device camera to scan each competitor&apos;s QR code when they finish</li>
+                  <li>Or use &quot;Manual Entry&quot; to enter the QR code data manually</li>
+                  <li>Finish times are automatically recorded and appear on the leaderboard</li>
+                </ul>
+              </Typography>
             </Alert>
           )}
 

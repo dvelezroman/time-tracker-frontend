@@ -14,10 +14,7 @@ import {
   TextField,
   useTheme,
   useMediaQuery,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  InputAdornment,
 } from '@mui/material';
 import { Html5Qrcode } from 'html5-qrcode';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -36,12 +33,12 @@ export default function QRScannerPage() {
   const eventId = Number(params.id);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const scanAreaRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
-  const [manualQR, setManualQR] = useState('');
-  const [showManualInput, setShowManualInput] = useState(false);
+  const [sequentialNumber, setSequentialNumber] = useState('');
   const [recording, setRecording] = useState(false);
   const [lastRecorded, setLastRecorded] = useState<RecordFinishResponse | null>(null);
   const [error, setError] = useState('');
@@ -51,6 +48,15 @@ export default function QRScannerPage() {
       loadEvent();
     }
   }, [eventId]);
+
+  // Auto-focus input when page loads and event is loaded
+  useEffect(() => {
+    if (event && event.status === 'ONGOING' && !loading) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [event, loading]);
 
   useEffect(() => {
     return () => {
@@ -134,70 +140,78 @@ export default function QRScannerPage() {
     setScanning(false);
   };
 
-  const handleQRCodeScanned = async (qrCode: string) => {
-    if (recording) return; // Prevent duplicate scans
+  const handleSequentialNumberSubmit = async (seqNum: string) => {
+    if (recording) return; // Prevent duplicate submissions
+
+    const trimmedSeqNum = seqNum.trim();
+    if (!trimmedSeqNum) {
+      showToast('Please enter a competitor number', 'error');
+      return;
+    }
+
+    const seqNumber = parseInt(trimmedSeqNum, 10);
+    if (isNaN(seqNumber) || seqNumber <= 0) {
+      showToast('Please enter a valid competitor number', 'error');
+      return;
+    }
 
     try {
       setRecording(true);
-      // Don't stop scanning - keep it running for continuous scanning
-      
-      // Parse QR code JSON
-      let qrData: { eventId: number; ticketId: number; registrationId: number };
-      try {
-        qrData = JSON.parse(qrCode);
-        if (!qrData.eventId || !qrData.ticketId || !qrData.registrationId) {
-          throw new Error('Invalid QR code format');
-        }
-      } catch (parseError) {
-        setRecording(false);
-        showToast('Invalid QR code format. Expected JSON with eventId, ticketId, and registrationId.', 'error');
-        return;
-      }
-
-      // Verify eventId matches
-      if (qrData.eventId !== eventId) {
-        setRecording(false);
-        showToast(`QR code is for a different event (Event ID: ${qrData.eventId})`, 'error');
-        return;
-      }
-
+      setError('');
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const result = await timeEntryService.recordFinishById(
-        qrData.eventId,
-        qrData.ticketId,
-        qrData.registrationId,
-        timezone,
-      );
+      const result = await timeEntryService.recordFinishBySequentialNumber(eventId, seqNumber, timezone);
 
       setLastRecorded(result);
       showToast(
-        `Finish time recorded for ${result.competitor.firstName} ${result.competitor.lastName}!`,
+        `Finish time recorded for ${result.competitor.firstName} ${result.competitor.lastName} (#${seqNumber})!`,
         'success',
       );
 
-      // Resume recording after a short delay (scanner keeps running)
+      // Clear input and refocus
+      setSequentialNumber('');
       setTimeout(() => {
         setRecording(false);
-      }, 1500);
+        inputRef.current?.focus();
+      }, 1000);
     } catch (err: any) {
       setRecording(false);
       const errorMessage =
         err.response?.data?.message || err.message || 'Failed to record finish time.';
       setError(errorMessage);
       showToast(errorMessage, 'error');
-      // Scanner continues running - no need to restart
+      // Keep input focused for next entry
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 500);
     }
   };
 
-  const handleManualSubmit = async () => {
-    if (!manualQR.trim()) {
-      showToast('Please enter a QR code', 'error');
+  const handleQRCodeScanned = async (qrCode: string) => {
+    // Parse sequential number from QR code (can be plain number or JSON)
+    let seqNumber: number | null = null;
+    
+    try {
+      // Try parsing as JSON first (backward compatibility)
+      const parsed = JSON.parse(qrCode);
+      if (typeof parsed === 'number') {
+        seqNumber = parsed;
+      } else if (parsed.sequentialNumber) {
+        seqNumber = parsed.sequentialNumber;
+      }
+    } catch {
+      // If not JSON, try parsing as plain number
+      const num = parseInt(qrCode.trim(), 10);
+      if (!isNaN(num) && num > 0) {
+        seqNumber = num;
+      }
+    }
+
+    if (!seqNumber) {
+      showToast('Invalid QR code format. Expected a competitor number.', 'error');
       return;
     }
 
-    setShowManualInput(false);
-    await handleQRCodeScanned(manualQR.trim());
-    setManualQR('');
+    await handleSequentialNumberSubmit(seqNumber.toString());
   };
 
   if (loading) {
@@ -287,8 +301,13 @@ export default function QRScannerPage() {
               </Typography>
               {lastRecorded.duration !== null && (
                 <Typography variant="body2">
-                  Duration: {Math.floor(lastRecorded.duration / 60)}:
-                  {String(lastRecorded.duration % 60).padStart(2, '0')}
+                  Duration: {(() => {
+                    const totalSeconds = Math.floor(lastRecorded.duration / 1000);
+                    const ms = lastRecorded.duration % 1000;
+                    const mins = Math.floor(totalSeconds / 60);
+                    const secs = totalSeconds % 60;
+                    return `${mins}:${String(secs).padStart(2, '0')}.${String(ms).padStart(3, '0')}`;
+                  })()}
                 </Typography>
               )}
             </Alert>

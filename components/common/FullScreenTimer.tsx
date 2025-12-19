@@ -42,11 +42,12 @@ export function FullScreenTimer({ startDate }: FullScreenTimerProps) {
 
   // Responsive font sizes optimized for large displays (TVs/monitors)
   // Uses viewport-based sizing for better scaling on large screens
+  // Reduced max sizes to prevent overflow on very large screens
   const fontSize = isMobile 
     ? 'clamp(3rem, 15vw, 6rem)' 
     : isTablet 
-    ? 'clamp(5rem, 20vw, 10rem)' 
-    : 'clamp(8rem, 25vw, 20rem)'; // Large screens: scales up to 20rem (320px) on very large displays
+    ? 'clamp(4rem, 12vw, 8rem)' 
+    : 'clamp(4rem, 10vw, 12rem)'; // Large screens: max 12rem (192px) to prevent overflow
 
   return (
     <Typography
@@ -67,6 +68,9 @@ export function FullScreenTimer({ startDate }: FullScreenTimerProps) {
         userSelect: 'none',
         WebkitFontSmoothing: 'antialiased', // Better font rendering
         MozOsxFontSmoothing: 'grayscale',
+        maxWidth: '100%', // Prevent overflow
+        overflow: 'hidden',
+        wordBreak: 'break-word', // Handle edge cases
       }}
     >
       {formatTime(elapsed)}

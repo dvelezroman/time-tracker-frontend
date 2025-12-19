@@ -41,7 +41,8 @@ export interface ValidateQRResponse {
 }
 
 export interface LeaderboardEntry {
-  rank: number | null;
+  rank: number | null; // Overall rank
+  categoryRank?: number | null; // Rank within category
   timeEntryId: number | null;
   competitor: Competitor;
   category: Category | null;
@@ -79,6 +80,23 @@ export const timeEntryService = {
     const response = await apiClient.post<RecordFinishResponse>(
       '/time-entries/record-finish',
       { qrCode },
+      { params },
+    );
+    return response.data;
+  },
+
+  recordFinishBySequentialNumber: async (
+    eventId: number,
+    sequentialNumber: number,
+    timezone?: string,
+  ): Promise<RecordFinishResponse> => {
+    const params: any = {};
+    if (timezone) {
+      params.timezone = timezone;
+    }
+    const response = await apiClient.post<RecordFinishResponse>(
+      '/time-entries/record-finish-by-sequential',
+      { eventId, sequentialNumber },
       { params },
     );
     return response.data;

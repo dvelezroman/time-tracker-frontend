@@ -94,14 +94,17 @@ export default function LeaderboardPage() {
     }
   };
 
-  const formatDuration = (minutes: number | null): string => {
-    if (minutes === null) return '-';
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
+  const formatDuration = (milliseconds: number | null): string => {
+    if (milliseconds === null) return '-';
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const ms = milliseconds % 1000;
+    const hours = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
     if (hours > 0) {
-      return `${hours}:${String(mins).padStart(2, '0')}`;
+      return `${hours}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(ms).padStart(3, '0')}`;
     }
-    return `${mins}`;
+    return `${mins}:${String(secs).padStart(2, '0')}.${String(ms).padStart(3, '0')}`;
   };
 
   const formatTime = (dateString: string | null, localDateString?: string): string => {
