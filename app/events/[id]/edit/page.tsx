@@ -28,6 +28,7 @@ import {
 } from '@/lib/api/services/event.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
+import { getTimezoneOptions } from '@/lib/utils/timezones';
 
 export default function EditEventPage() {
   const router = useRouter();
@@ -116,10 +117,62 @@ export default function EditEventPage() {
     setTimezone(e.target.value);
   };
 
-  const convertLocalToUTC = (localDateTime: string): string => {
+  const convertLocalToUTC = (localDateTime: string, selectedTimezone: string): string => {
     if (!localDateTime) return '';
-    const localDate = new Date(localDateTime);
-    return localDate.toISOString();
+    
+    try {
+      // Parse the datetime-local string (format: "YYYY-MM-DDTHH:mm")
+      const [datePart, timePart] = localDateTime.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hours, minutes] = timePart.split(':').map(Number);
+      
+      // Create a test date in UTC
+      const testDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+      
+      // Get the offset of the selected timezone at this UTC time
+      const offsetFormatter = new Intl.DateTimeFormat('en', {
+        timeZone: selectedTimezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+      
+      const utcFormatter = new Intl.DateTimeFormat('en', {
+        timeZone: 'UTC',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+      
+      // Format the test date in both UTC and target timezone
+      const utcParts = utcFormatter.formatToParts(testDate);
+      const tzParts = offsetFormatter.formatToParts(testDate);
+      
+      const utcHour = parseInt(utcParts.find(p => p.type === 'hour')?.value || '0');
+      const utcMin = parseInt(utcParts.find(p => p.type === 'minute')?.value || '0');
+      const tzHour = parseInt(tzParts.find(p => p.type === 'hour')?.value || '0');
+      const tzMin = parseInt(tzParts.find(p => p.type === 'minute')?.value || '0');
+      
+      // Calculate offset in minutes
+      const utcMinutes = utcHour * 60 + utcMin;
+      const tzMinutes = tzHour * 60 + tzMin;
+      let offsetMinutes = tzMinutes - utcMinutes;
+      
+      // Handle day boundary
+      if (Math.abs(offsetMinutes) > 720) {
+        if (offsetMinutes > 0) offsetMinutes -= 1440;
+        else offsetMinutes += 1440;
+      }
+      
+      // Adjust the test date by the negative of this offset
+      const adjustedDate = new Date(testDate.getTime() - offsetMinutes * 60000);
+      
+      return adjustedDate.toISOString();
+    } catch (error) {
+      // Fallback: interpret in browser's local timezone
+      console.warn('Failed to convert with timezone, using browser local timezone:', error);
+      return new Date(localDateTime).toISOString();
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,8 +184,8 @@ export default function EditEventPage() {
       return;
     }
 
-    const startDateUTC = convertLocalToUTC(formData.startDate);
-    const endDateUTC = convertLocalToUTC(formData.endDate);
+    const startDateUTC = convertLocalToUTC(formData.startDate, timezone);
+    const endDateUTC = convertLocalToUTC(formData.endDate, timezone);
 
     if (new Date(startDateUTC) >= new Date(endDateUTC)) {
       setError('Start date must be before end date');
@@ -349,15 +402,19 @@ export default function EditEventPage() {
                       sx={{
                         borderRadius: 2,
                       }}
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 400,
+                          },
+                        },
+                      }}
                     >
-                      <MenuItem value="America/New_York">America/New_York (EST/EDT)</MenuItem>
-                      <MenuItem value="America/Chicago">America/Chicago (CST/CDT)</MenuItem>
-                      <MenuItem value="America/Denver">America/Denver (MST/MDT)</MenuItem>
-                      <MenuItem value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</MenuItem>
-                      <MenuItem value="Europe/London">Europe/London (GMT/BST)</MenuItem>
-                      <MenuItem value="Europe/Paris">Europe/Paris (CET/CEST)</MenuItem>
-                      <MenuItem value="Asia/Tokyo">Asia/Tokyo (JST)</MenuItem>
-                      <MenuItem value="UTC">UTC</MenuItem>
+                      {getTimezoneOptions().map((tz) => (
+                        <MenuItem key={tz.value} value={tz.value}>
+                          {tz.label}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
 

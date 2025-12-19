@@ -35,6 +35,7 @@ import {
 } from '@/lib/api/services/notifications.service';
 import { eventService, Event } from '@/lib/api/services/event.service';
 import { showToast } from '@/components/common/Toast';
+import { format } from 'date-fns';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -100,7 +101,8 @@ function NotificationsPageContent() {
     try {
       setLoading(true);
       setError('');
-      const response = await eventService.getAll({ limit: 1000 });
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const response = await eventService.getAll({ limit: 1000, timezone });
       console.log('Events API response:', response);
       console.log('Events data:', response.data);
       // Filter to only show COMPLETED or ONGOING events
@@ -165,7 +167,9 @@ function NotificationsPageContent() {
 
     let message = '';
 
-    const eventDate = new Date(event.startDate).toLocaleString();
+    const eventDate = event.startDateLocal
+      ? format(new Date(event.startDateLocal), 'PPpp')
+      : format(new Date(event.startDate), 'PPpp');
 
     if (customMessage) {
       message = customMessage

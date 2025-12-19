@@ -38,6 +38,7 @@ import { eventService, CreateEventRequest } from '@/lib/api/services/event.servi
 import { categoryService, CreateCategoryRequest, Category } from '@/lib/api/services/category.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
+import { getTimezoneOptions } from '@/lib/utils/timezones';
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -87,10 +88,83 @@ export default function CreateEventPage() {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  const convertLocalToUTC = (localDateTime: string): string => {
+  const convertLocalToUTC = (localDateTime: string, selectedTimezone: string): string => {
     if (!localDateTime) return '';
-    const localDate = new Date(localDateTime);
-    return localDate.toISOString();
+    
+    try {
+      // Parse the datetime-local string (format: "YYYY-MM-DDTHH:mm")
+      const [datePart, timePart] = localDateTime.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hours, minutes] = timePart.split(':').map(Number);
+      
+      // Create a date string in ISO format that we'll interpret in the selected timezone
+      // We'll use a trick: create a date in UTC, then adjust based on timezone offset
+      
+      // Create a temporary date to get the timezone offset
+      const tempDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+      
+      // Format this date in the selected timezone to see what the offset is
+      const formatter = new Intl.DateTimeFormat('en', {
+        timeZone: selectedTimezone,
+        timeZoneName: 'longOffset',
+      });
+      
+      // Get what this UTC time would be in the target timezone
+      const tzString = formatter.format(tempDate);
+      
+      // Now we need to work backwards: if the user entered 10:00 in timezone X,
+      // we need to find what UTC time that corresponds to
+      // We'll use a binary search approach or calculate the offset
+      
+      // Simpler approach: create a date assuming the input is in UTC,
+      // then calculate what the offset should be to make it match
+      const testDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+      
+      // Get the offset of the selected timezone at this UTC time
+      const offsetFormatter = new Intl.DateTimeFormat('en', {
+        timeZone: selectedTimezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+      
+      const utcFormatter = new Intl.DateTimeFormat('en', {
+        timeZone: 'UTC',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+      
+      // Format the test date in both UTC and target timezone
+      const utcParts = utcFormatter.formatToParts(testDate);
+      const tzParts = offsetFormatter.formatToParts(testDate);
+      
+      const utcHour = parseInt(utcParts.find(p => p.type === 'hour')?.value || '0');
+      const utcMin = parseInt(utcParts.find(p => p.type === 'minute')?.value || '0');
+      const tzHour = parseInt(tzParts.find(p => p.type === 'hour')?.value || '0');
+      const tzMin = parseInt(tzParts.find(p => p.type === 'minute')?.value || '0');
+      
+      // Calculate offset in minutes
+      const utcMinutes = utcHour * 60 + utcMin;
+      const tzMinutes = tzHour * 60 + tzMin;
+      let offsetMinutes = tzMinutes - utcMinutes;
+      
+      // Handle day boundary
+      if (Math.abs(offsetMinutes) > 720) {
+        if (offsetMinutes > 0) offsetMinutes -= 1440;
+        else offsetMinutes += 1440;
+      }
+      
+      // Now adjust the test date by the negative of this offset
+      // If the user entered 10:00 in timezone with +5 offset, that's 05:00 UTC
+      const adjustedDate = new Date(testDate.getTime() - offsetMinutes * 60000);
+      
+      return adjustedDate.toISOString();
+    } catch (error) {
+      // Fallback: interpret in browser's local timezone (not ideal)
+      console.warn('Failed to convert with timezone, using browser local timezone:', error);
+      return new Date(localDateTime).toISOString();
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -102,8 +176,8 @@ export default function CreateEventPage() {
       return;
     }
 
-    const startDateUTC = convertLocalToUTC(formData.startDate);
-    const endDateUTC = convertLocalToUTC(formData.endDate);
+    const startDateUTC = convertLocalToUTC(formData.startDate, timezone);
+    const endDateUTC = convertLocalToUTC(formData.endDate, timezone);
 
     if (new Date(startDateUTC) >= new Date(endDateUTC)) {
       setError('Start date must be before end date');
@@ -348,15 +422,19 @@ export default function CreateEventPage() {
                       sx={{
                         borderRadius: 2,
                       }}
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 400,
+                          },
+                        },
+                      }}
                     >
-                      <MenuItem value="America/New_York">America/New_York (EST/EDT)</MenuItem>
-                      <MenuItem value="America/Chicago">America/Chicago (CST/CDT)</MenuItem>
-                      <MenuItem value="America/Denver">America/Denver (MST/MDT)</MenuItem>
-                      <MenuItem value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</MenuItem>
-                      <MenuItem value="Europe/London">Europe/London (GMT/BST)</MenuItem>
-                      <MenuItem value="Europe/Paris">Europe/Paris (CET/CEST)</MenuItem>
-                      <MenuItem value="Asia/Tokyo">Asia/Tokyo (JST)</MenuItem>
-                      <MenuItem value="UTC">UTC</MenuItem>
+                      {getTimezoneOptions().map((tz) => (
+                        <MenuItem key={tz.value} value={tz.value}>
+                          {tz.label}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
 
