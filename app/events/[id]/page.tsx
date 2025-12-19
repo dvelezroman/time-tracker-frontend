@@ -17,9 +17,11 @@ import {
 } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { eventService, Event, EventStatus } from '@/lib/api/services/event.service';
+import { eventCompetitorService } from '@/lib/api/services/event-competitor.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
@@ -36,6 +38,15 @@ export default function EventDetailPage() {
   const [starting, setStarting] = useState(false);
   const [sendingWhatsApp, setSendingWhatsApp] = useState(false);
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [uploadResult, setUploadResult] = useState<{
+    created: number;
+    updated: number;
+    skipped: number;
+    failed: number;
+    errors: string[];
+    total: number;
+  } | null>(null);
 
   useEffect(() => {
     if (eventId) {
@@ -97,6 +108,59 @@ export default function EventDetailPage() {
 
   const handleViewTimer = () => {
     router.push(ROUTES.EVENTS_TIMER(eventId));
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validExtensions = ['.xlsx', '.xls'];
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    if (!validExtensions.includes(fileExtension)) {
+      showToast('Invalid file type. Please upload an Excel file (.xlsx or .xls)', 'error');
+      return;
+    }
+
+    // Validate file size (10MB max)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      showToast('File size exceeds 10MB limit', 'error');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setError('');
+      setUploadResult(null);
+
+      const result = await eventCompetitorService.importExcel(file, eventId);
+
+      setUploadResult(result);
+
+      if (result.failed === 0 && result.errors.length === 0) {
+        showToast(
+          `Successfully imported ${result.created + result.updated} competitor(s)!`,
+          'success',
+        );
+        // Reload event to refresh data
+        loadEvent();
+      } else {
+        showToast(
+          `Import completed with ${result.failed} failure(s). ${result.created + result.updated} competitor(s) imported.`,
+          result.failed > 0 ? 'warning' : 'success',
+        );
+      }
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Failed to import Excel file. Please try again.';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
+    } finally {
+      setUploading(false);
+      // Reset file input
+      event.target.value = '';
+    }
   };
 
   const handleSendWhatsAppTimes = async () => {
@@ -398,6 +462,132 @@ export default function EventDetailPage() {
                   </>
                 )}
               </Box>
+            </CardContent>
+          </Card>
+
+          {/* Excel Import Section */}
+          <Card sx={{ mt: 3 }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Import Competitors from Excel
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Upload an Excel file (.xlsx or .xls) to import competitors and register them to this event.
+              </Typography>
+
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Excel File Format:
+                </Typography>
+                <Box component="ul" sx={{ pl: 2, mb: 2 }}>
+                  <li>
+                    <strong>Column A:</strong> First Name (required)
+                  </li>
+                  <li>
+                    <strong>Column B:</strong> Last Name (required)
+                  </li>
+                  <li>
+                    <strong>Column C:</strong> Email (optional)
+                  </li>
+                  <li>
+                    <strong>Column D:</strong> Phone (optional)
+                  </li>
+                  <li>
+                    <strong>Column E:</strong> Event ID (optional, defaults to current event)
+                  </li>
+                  <li>
+                    <strong>Column F:</strong> Category Name or Category ID (optional)
+                  </li>
+                  <li>
+                    <strong>Column G:</strong> Sequential Number (optional, auto-assigned if not provided)
+                  </li>
+                </Box>
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
+                  Note: The first row is treated as a header and will be skipped. Maximum file size: 10MB
+                </Typography>
+              </Box>
+
+              <Box sx={{ mb: 2 }}>
+                <input
+                  accept=".xlsx,.xls"
+                  style={{ display: 'none' }}
+                  id="excel-upload-input"
+                  type="file"
+                  onChange={handleFileUpload}
+                  disabled={uploading}
+                />
+                <label htmlFor="excel-upload-input">
+                  <Button
+                    variant="outlined"
+                    component="span"
+                    startIcon={uploading ? <CircularProgress size={20} /> : <CloudUploadIcon />}
+                    disabled={uploading}
+                    size={isMobile ? 'medium' : 'large'}
+                    sx={{ mb: 2 }}
+                  >
+                    {uploading ? 'Uploading...' : 'Choose Excel File'}
+                  </Button>
+                </label>
+              </Box>
+
+              {uploadResult && (
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Import Results:
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+                    <Chip
+                      label={`Total: ${uploadResult.total}`}
+                      color="default"
+                      variant="outlined"
+                    />
+                    <Chip
+                      label={`Created: ${uploadResult.created}`}
+                      color="success"
+                      variant="outlined"
+                    />
+                    <Chip
+                      label={`Updated: ${uploadResult.updated}`}
+                      color="info"
+                      variant="outlined"
+                    />
+                    <Chip
+                      label={`Skipped: ${uploadResult.skipped}`}
+                      color="warning"
+                      variant="outlined"
+                    />
+                    {uploadResult.failed > 0 && (
+                      <Chip
+                        label={`Failed: ${uploadResult.failed}`}
+                        color="error"
+                        variant="outlined"
+                      />
+                    )}
+                  </Box>
+
+                  {uploadResult.errors.length > 0 && (
+                    <Alert severity="error" sx={{ mt: 2 }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Errors:
+                      </Typography>
+                      <Box component="ul" sx={{ mb: 0, pl: 2 }}>
+                        {uploadResult.errors.slice(0, 10).map((error, index) => (
+                          <li key={index}>
+                            <Typography variant="body2">{error}</Typography>
+                          </li>
+                        ))}
+                        {uploadResult.errors.length > 10 && (
+                          <li>
+                            <Typography variant="body2" color="text.secondary">
+                              ... and {uploadResult.errors.length - 10} more error(s)
+                            </Typography>
+                          </li>
+                        )}
+                      </Box>
+                    </Alert>
+                  )}
+                </Box>
+              )}
             </CardContent>
           </Card>
         </Container>

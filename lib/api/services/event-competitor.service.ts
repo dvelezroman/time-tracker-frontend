@@ -91,6 +91,30 @@ export const eventCompetitorService = {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
   },
+
+  importExcel: async (
+    file: File,
+    eventId?: number,
+  ): Promise<{
+    created: number;
+    updated: number;
+    skipped: number;
+    failed: number;
+    errors: string[];
+    total: number;
+  }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const params = eventId ? { eventId: eventId.toString() } : {};
+    const response = await apiClient.post('/event-competitors/import-excel', formData, {
+      params,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
 };
 
 
