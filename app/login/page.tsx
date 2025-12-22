@@ -16,7 +16,7 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Email, Lock, ArrowBack } from '@mui/icons-material';
 import { useAuth } from '@/hooks/useAuth';
 import { ROUTES } from '@/lib/constants';
 
@@ -58,8 +58,26 @@ export default function LoginPage() {
           ? 'linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%)'
           : 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%)',
         padding: isMobile ? 2 : 4,
+        position: 'relative',
       }}
     >
+      <Button
+        startIcon={<ArrowBack />}
+        onClick={() => router.push(ROUTES.HOME)}
+        sx={{
+          position: 'absolute',
+          top: { xs: 16, sm: 24 },
+          left: { xs: 16, sm: 24 },
+          color: theme.palette.mode === 'dark' ? '#ffffff' : '#1976d2',
+          '&:hover': {
+            backgroundColor: theme.palette.mode === 'dark'
+              ? 'rgba(255, 255, 255, 0.1)'
+              : 'rgba(25, 118, 210, 0.1)',
+          },
+        }}
+      >
+        Back to Home
+      </Button>
       <Card
         sx={{
           width: '100%',
