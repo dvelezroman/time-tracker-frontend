@@ -36,6 +36,7 @@ export const ROUTES = {
   EVENTS_EDIT: (id: number) => `/events/${id}/edit`,
   EVENTS_TIMER: (id: number) => `/events/${id}/timer`,
   EVENTS_TIMER_FULLSCREEN: (id: number) => `/events/${id}/timer-fullscreen`,
+  EVENTS_INDIVIDUAL_TIMER: (id: number) => `/events/${id}/individual-timer`,
   EVENTS_SCAN: (id: number) => `/events/${id}/scan`,
   EVENTS_LEADERBOARD: (id: number) => `/events/${id}/leaderboard`,
   EVENTS_QR_CODES: (id: number) => `/events/${id}/qr-codes`,

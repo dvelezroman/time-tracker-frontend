@@ -205,42 +205,134 @@ export default function Home() {
           </Stack>
 
           {/* Stats */}
-          <Grid container spacing={4} sx={{ mt: 8, mb: 4 }}>
+          <Grid container spacing={4} sx={{ mt: 8, mb: 4 }} justifyContent="center">
             <Grid item xs={6} md={3}>
-              <Typography variant="h3" fontWeight="bold" color="primary">
-                <SpeedIcon sx={{ fontSize: 40, verticalAlign: 'middle', mr: 1 }} />
-                Fast
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Real-time updates
-              </Typography>
+              <Box sx={{ textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 1,
+                  }}
+                >
+                  <SpeedIcon
+                    sx={{
+                      fontSize: 48,
+                      color: 'primary.main',
+                    }}
+                  />
+                </Box>
+                <Typography
+                  variant="h5"
+                  fontWeight="bold"
+                  sx={{
+                    color: 'primary.main',
+                    mb: 0.5,
+                  }}
+                >
+                  Fast
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Real-time updates
+                </Typography>
+              </Box>
             </Grid>
             <Grid item xs={6} md={3}>
-              <Typography variant="h3" fontWeight="bold" color="primary">
-                <SecurityIcon sx={{ fontSize: 40, verticalAlign: 'middle', mr: 1 }} />
-                Secure
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Enterprise-grade security
-              </Typography>
+              <Box sx={{ textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 1,
+                  }}
+                >
+                  <SecurityIcon
+                    sx={{
+                      fontSize: 48,
+                      color: 'primary.main',
+                    }}
+                  />
+                </Box>
+                <Typography
+                  variant="h5"
+                  fontWeight="bold"
+                  sx={{
+                    color: 'primary.main',
+                    mb: 0.5,
+                  }}
+                >
+                  Secure
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Enterprise-grade security
+                </Typography>
+              </Box>
             </Grid>
             <Grid item xs={6} md={3}>
-              <Typography variant="h3" fontWeight="bold" color="primary">
-                <CheckCircleIcon sx={{ fontSize: 40, verticalAlign: 'middle', mr: 1 }} />
-                Accurate
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Millisecond precision
-              </Typography>
+              <Box sx={{ textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 1,
+                  }}
+                >
+                  <CheckCircleIcon
+                    sx={{
+                      fontSize: 48,
+                      color: 'primary.main',
+                    }}
+                  />
+                </Box>
+                <Typography
+                  variant="h5"
+                  fontWeight="bold"
+                  sx={{
+                    color: 'primary.main',
+                    mb: 0.5,
+                  }}
+                >
+                  Accurate
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Millisecond precision
+                </Typography>
+              </Box>
             </Grid>
             <Grid item xs={6} md={3}>
-              <Typography variant="h3" fontWeight="bold" color="primary">
-                <AnalyticsIcon sx={{ fontSize: 40, verticalAlign: 'middle', mr: 1 }} />
-                Complete
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Full event management
-              </Typography>
+              <Box sx={{ textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 1,
+                  }}
+                >
+                  <AnalyticsIcon
+                    sx={{
+                      fontSize: 48,
+                      color: 'primary.main',
+                    }}
+                  />
+                </Box>
+                <Typography
+                  variant="h5"
+                  fontWeight="bold"
+                  sx={{
+                    color: 'primary.main',
+                    mb: 0.5,
+                  }}
+                >
+                  Complete
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Full event management
+                </Typography>
+              </Box>
             </Grid>
           </Grid>
         </Box>

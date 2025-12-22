@@ -45,6 +45,7 @@ export interface LeaderboardEntry {
   categoryRank?: number | null; // Rank within category
   timeEntryId: number | null;
   competitor: Competitor;
+  sequentialNumber?: number | null;
   category: Category | null;
   startDate: string | null;
   startDateLocal?: string;
@@ -80,6 +81,23 @@ export const timeEntryService = {
     const response = await apiClient.post<RecordFinishResponse>(
       '/time-entries/record-finish',
       { qrCode },
+      { params },
+    );
+    return response.data;
+  },
+
+  recordStartBySequentialNumber: async (
+    eventId: number,
+    sequentialNumber: number,
+    timezone?: string,
+  ): Promise<RecordFinishResponse> => {
+    const params: any = {};
+    if (timezone) {
+      params.timezone = timezone;
+    }
+    const response = await apiClient.post<RecordFinishResponse>(
+      '/time-entries/record-start-by-sequential',
+      { eventId, sequentialNumber },
       { params },
     );
     return response.data;

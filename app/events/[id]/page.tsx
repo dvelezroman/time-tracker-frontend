@@ -416,6 +416,14 @@ export default function EventDetailPage() {
                     </Button>
                     <Button
                       variant="contained"
+                      color="secondary"
+                      onClick={() => router.push(ROUTES.EVENTS_INDIVIDUAL_TIMER(event.id))}
+                      size={isMobile ? 'medium' : 'large'}
+                    >
+                      Individual Timer
+                    </Button>
+                    <Button
+                      variant="contained"
                       color="primary"
                       onClick={() => router.push(ROUTES.EVENTS_SCAN(event.id))}
                       size={isMobile ? 'medium' : 'large'}
