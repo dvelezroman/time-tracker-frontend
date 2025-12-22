@@ -55,6 +55,7 @@ export interface EventListResponse {
 
 export interface StartEventRequest {
   timezone?: string;
+  timerType?: 'collective' | 'individual';
 }
 
 export interface StopEventRequest {

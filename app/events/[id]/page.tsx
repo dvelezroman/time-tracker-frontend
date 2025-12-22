@@ -25,6 +25,14 @@ import {
   TableRow,
   Paper,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
 } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -53,6 +61,8 @@ export default function EventDetailPage() {
   const [sendingWhatsApp, setSendingWhatsApp] = useState(false);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [timerTypeDialogOpen, setTimerTypeDialogOpen] = useState(false);
+  const [selectedTimerType, setSelectedTimerType] = useState<'collective' | 'individual'>('collective');
   const [uploadResult, setUploadResult] = useState<{
     created: number;
     updated: number;
@@ -85,31 +95,45 @@ export default function EventDetailPage() {
     }
   };
 
+  const handleStartEventClick = () => {
+    setTimerTypeDialogOpen(true);
+  };
+
   const handleStartEvent = async () => {
     if (!event) return;
 
     try {
       setStarting(true);
       setError('');
+      setTimerTypeDialogOpen(false);
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      await eventService.start(eventId, { timezone });
+      await eventService.start(eventId, { timezone, timerType: selectedTimerType });
       showToast('Event started successfully!', 'success');
       
-      // Open full screen timer in a new tab immediately after success
-      const fullScreenUrl = ROUTES.EVENTS_TIMER_FULLSCREEN(eventId);
-      const newTab = window.open(fullScreenUrl, '_blank', 'noopener,noreferrer');
-      
-      // Check if popup was blocked
-      if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
-        // Popup was blocked - show a message with a link
-        showToast(
-          'Popup blocked. Use the "Full Screen Timer" button to open it, or allow popups for this site.',
-          'warning',
-        );
+      // Redirect based on timer type
+      if (selectedTimerType === 'individual') {
+        // For individual timer, go to individual timer page
+        router.push(ROUTES.EVENTS_INDIVIDUAL_TIMER(eventId));
+      } else {
+        // For collective timer, open full screen timer in a new tab
+        const fullScreenUrl = ROUTES.EVENTS_TIMER_FULLSCREEN(eventId);
+        const newTab = window.open(fullScreenUrl, '_blank', 'noopener,noreferrer');
+        
+        // Check if popup was blocked
+        if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
+          // Popup was blocked - show a message with a link
+          showToast(
+            'Popup blocked. Use the "Full Screen Timer" button to open it, or allow popups for this site.',
+            'warning',
+          );
+        }
+        
+        // Also redirect to timer page in current tab
+        router.push(ROUTES.EVENTS_TIMER(eventId));
       }
       
-      // Also redirect to timer page in current tab
-      router.push(ROUTES.EVENTS_TIMER(eventId));
+      // Reload event to get updated status
+      loadEvent();
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.message || err.message || 'Failed to start event. Please try again.';
@@ -387,7 +411,7 @@ export default function EventDetailPage() {
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={handleStartEvent}
+                      onClick={handleStartEventClick}
                       disabled={starting}
                       size={isMobile ? 'medium' : 'large'}
                     >
@@ -792,6 +816,74 @@ export default function EventDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Timer Type Selection Dialog */}
+          <Dialog
+            open={timerTypeDialogOpen}
+            onClose={() => !starting && setTimerTypeDialogOpen(false)}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle>Select Timer Type</DialogTitle>
+            <DialogContent>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Choose how competitors will be timed for this event:
+              </Typography>
+              <FormControl component="fieldset" fullWidth>
+                <RadioGroup
+                  value={selectedTimerType}
+                  onChange={(e) => setSelectedTimerType(e.target.value as 'collective' | 'individual')}
+                >
+                  <FormControlLabel
+                    value="collective"
+                    control={<Radio />}
+                    label={
+                      <Box>
+                        <Typography variant="body1" fontWeight="medium">
+                          Collective Timer
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          All competitors start at the same time when the event begins. Use the traditional full-screen timer view.
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ mb: 2, alignItems: 'flex-start' }}
+                  />
+                  <FormControlLabel
+                    value="individual"
+                    control={<Radio />}
+                    label={
+                      <Box>
+                        <Typography variant="body1" fontWeight="medium">
+                          Individual Timer
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Each competitor starts individually. Enter competitor numbers to start and finish timers separately.
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ alignItems: 'flex-start' }}
+                  />
+                </RadioGroup>
+              </FormControl>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => setTimerTypeDialogOpen(false)}
+                disabled={starting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleStartEvent}
+                variant="contained"
+                disabled={starting}
+                startIcon={starting ? <CircularProgress size={20} /> : null}
+              >
+                {starting ? 'Starting...' : 'Start Event'}
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Container>
       </MainLayout>
     </ProtectedRoute>
