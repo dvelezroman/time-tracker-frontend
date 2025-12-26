@@ -30,6 +30,19 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Helper function to check if a request can be cached
+function canCacheRequest(request) {
+  try {
+    const url = new URL(request.url);
+    // Only cache http/https requests from same origin
+    const supportedSchemes = ['http:', 'https:'];
+    return supportedSchemes.includes(url.protocol) && url.origin === self.location.origin;
+  } catch (error) {
+    // If URL parsing fails, don't cache
+    return false;
+  }
+}
+
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests
@@ -39,6 +52,11 @@ self.addEventListener('fetch', (event) => {
 
   // Skip API calls - they're handled by offline client
   if (event.request.url.includes('/v0/')) {
+    return;
+  }
+
+  // Skip requests from unsupported schemes (chrome-extension, etc.)
+  if (!canCacheRequest(event.request)) {
     return;
   }
 
@@ -54,12 +72,20 @@ self.addEventListener('fetch', (event) => {
           return response;
         }
 
-        // Clone the response
-        const responseToCache = response.clone();
+        // Only cache if request is cacheable
+        if (canCacheRequest(event.request)) {
+          // Clone the response
+          const responseToCache = response.clone();
 
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
+          caches.open(CACHE_NAME).then((cache) => {
+            try {
+              cache.put(event.request, responseToCache);
+            } catch (error) {
+              // Silently fail if caching fails (e.g., unsupported scheme)
+              console.warn('Failed to cache request:', event.request.url, error);
+            }
+          });
+        }
 
         return response;
       }).catch(() => {
@@ -69,4 +95,3 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
-
