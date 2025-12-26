@@ -36,9 +36,12 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { eventService, CreateEventRequest } from '@/lib/api/services/event.service';
 import { categoryService, CreateCategoryRequest, Category } from '@/lib/api/services/category.service';
+import { userService, UserWithDates } from '@/lib/api/services/user.service';
+import apiClient from '@/lib/api/client';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { getTimezoneOptions } from '@/lib/utils/timezones';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -60,6 +63,10 @@ export default function CreateEventPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [categoryFormData, setCategoryFormData] = useState({ name: '', description: '' });
   const [categoryLoading, setCategoryLoading] = useState(false);
+  const [operators, setOperators] = useState<UserWithDates[]>([]);
+  const [assignedTo, setAssignedTo] = useState<number | undefined>(undefined);
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
     // Set timezone on client side only to avoid hydration mismatch
@@ -67,6 +74,28 @@ export default function CreateEventPage() {
       setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
     }
   }, []);
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadOperators();
+    }
+  }, [isAdmin]);
+
+  const loadOperators = async () => {
+    try {
+      // Fetch all users with a high limit to get all operators
+      const response = await apiClient.get<{ data: UserWithDates[]; total: number }>('/users', {
+        params: { limit: 1000, role: 'OPERATOR', status: 'ACTIVE' },
+      });
+      const allUsers = response.data.data || [];
+      const operatorUsers = allUsers.filter((u) => u.role === 'OPERATOR' && u.status === 'ACTIVE');
+      setOperators(operatorUsers);
+      console.log('Loaded operators:', operatorUsers);
+    } catch (err) {
+      console.error('Failed to load operators:', err);
+      showToast('Failed to load operators. Please try again.', 'error');
+    }
+  };
 
   const handleChange = (field: keyof CreateEventRequest) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -192,6 +221,7 @@ export default function CreateEventPage() {
           ...formData,
           startDate: startDateUTC,
           endDate: endDateUTC,
+          assignedTo: assignedTo,
         },
         timezone
       );
@@ -412,6 +442,29 @@ export default function CreateEventPage() {
                       },
                     }}
                   />
+
+                  {isAdmin && (
+                    <FormControl fullWidth margin="normal">
+                      <InputLabel>Assign to Operator</InputLabel>
+                      <Select
+                        value={assignedTo || ''}
+                        onChange={(e) => setAssignedTo(e.target.value ? Number(e.target.value) : undefined)}
+                        label="Assign to Operator"
+                        sx={{
+                          borderRadius: 2,
+                        }}
+                      >
+                        <MenuItem value="">
+                          <em>None (Unassigned)</em>
+                        </MenuItem>
+                        {operators.map((operator) => (
+                          <MenuItem key={operator.id} value={operator.id}>
+                            {operator.email}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
 
                   <FormControl fullWidth margin="normal">
                     <InputLabel>Timezone</InputLabel>

@@ -17,6 +17,11 @@ export interface Event {
   updatedAt: string;
   deletedAt?: string;
   timezone?: string;
+  assignedTo?: number | null;
+  assignee?: {
+    id: number;
+    email: string;
+  } | null;
 }
 
 export interface CreateEventRequest {
@@ -25,6 +30,7 @@ export interface CreateEventRequest {
   startDate: string; // ISO 8601 UTC
   endDate: string; // ISO 8601 UTC
   location?: string;
+  assignedTo?: number; // Operator ID (Admin only)
 }
 
 export interface UpdateEventRequest {
@@ -34,6 +40,7 @@ export interface UpdateEventRequest {
   endDate?: string;
   location?: string;
   status?: EventStatus;
+  assignedTo?: number | null; // Operator ID or null to unassign (Admin only)
 }
 
 export interface FilterEventParams {

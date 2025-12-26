@@ -27,9 +27,12 @@ import {
   Event,
   EventStatus,
 } from '@/lib/api/services/event.service';
+import { userService, UserWithDates } from '@/lib/api/services/user.service';
+import apiClient from '@/lib/api/client';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { getTimezoneOptions } from '@/lib/utils/timezones';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function EditEventPage() {
   const router = useRouter();
@@ -54,9 +57,13 @@ export default function EditEventPage() {
   });
   const [timezone, setTimezone] = useState<string>('UTC');
   const [status, setStatus] = useState<EventStatus>('DRAFT');
+  const [assignedTo, setAssignedTo] = useState<number | null | undefined>(undefined);
+  const [operators, setOperators] = useState<UserWithDates[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
     // Set timezone on client side only to avoid hydration mismatch
@@ -70,6 +77,28 @@ export default function EditEventPage() {
       loadEvent();
     }
   }, [eventId]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadOperators();
+    }
+  }, [isAdmin]);
+
+  const loadOperators = async () => {
+    try {
+      // Fetch all users with a high limit to get all operators
+      const response = await apiClient.get<{ data: UserWithDates[]; total: number }>('/users', {
+        params: { limit: 1000, role: 'OPERATOR', status: 'ACTIVE' },
+      });
+      const allUsers = response.data.data || [];
+      const operatorUsers = allUsers.filter((u) => u.role === 'OPERATOR' && u.status === 'ACTIVE');
+      setOperators(operatorUsers);
+      console.log('Loaded operators:', operatorUsers);
+    } catch (err) {
+      console.error('Failed to load operators:', err);
+      showToast('Failed to load operators. Please try again.', 'error');
+    }
+  };
 
   const loadEvent = async () => {
     try {
@@ -99,7 +128,7 @@ export default function EditEventPage() {
         location: eventData.location || '',
       });
       setStatus(eventData.status);
-      setStatus(eventData.status);
+      setAssignedTo(eventData.assignedTo ?? null);
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.message || err.message || 'Failed to load event. Please try again.';
@@ -206,6 +235,7 @@ export default function EditEventPage() {
           startDate: startDateUTC,
           endDate: endDateUTC,
           status,
+          assignedTo: isAdmin ? assignedTo : undefined,
         },
         timezone,
       );
@@ -413,6 +443,29 @@ export default function EditEventPage() {
                       <MenuItem value="CANCELLED">Cancelled</MenuItem>
                     </Select>
                   </FormControl>
+
+                  {isAdmin && (
+                    <FormControl fullWidth margin="normal">
+                      <InputLabel>Assign to Operator</InputLabel>
+                      <Select
+                        value={assignedTo ?? ''}
+                        onChange={(e) => setAssignedTo(e.target.value ? Number(e.target.value) : null)}
+                        label="Assign to Operator"
+                        sx={{
+                          borderRadius: 2,
+                        }}
+                      >
+                        <MenuItem value="">
+                          <em>None (Unassigned)</em>
+                        </MenuItem>
+                        {operators.map((operator) => (
+                          <MenuItem key={operator.id} value={operator.id}>
+                            {operator.email}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
 
                   <FormControl fullWidth margin="normal">
                     <InputLabel>Timezone</InputLabel>
