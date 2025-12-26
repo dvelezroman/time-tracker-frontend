@@ -33,6 +33,8 @@ import {
   RadioGroup,
   FormControlLabel,
   FormControl,
+  Checkbox,
+  IconButton,
 } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -41,6 +43,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import DescriptionIcon from '@mui/icons-material/Description';
 import StopIcon from '@mui/icons-material/Stop';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { EventCompetitor } from '@/lib/api/services/event-competitor.service';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { eventService, Event, EventStatus } from '@/lib/api/services/event.service';
@@ -73,10 +77,15 @@ export default function EventDetailPage() {
     errors: string[];
     total: number;
   } | null>(null);
+  const [competitors, setCompetitors] = useState<EventCompetitor[]>([]);
+  const [loadingCompetitors, setLoadingCompetitors] = useState(false);
+  const [selectedCompetitors, setSelectedCompetitors] = useState<number[]>([]);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (eventId) {
       loadEvent();
+      loadCompetitors();
     }
   }, [eventId]);
 
@@ -94,6 +103,55 @@ export default function EventDetailPage() {
       showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadCompetitors = async () => {
+    try {
+      setLoadingCompetitors(true);
+      const competitorsData = await eventCompetitorService.getByEvent(eventId);
+      setCompetitors(competitorsData);
+    } catch (err: any) {
+      console.error('Failed to load competitors:', err);
+    } finally {
+      setLoadingCompetitors(false);
+    }
+  };
+
+  const handleSelectCompetitor = (id: number) => {
+    setSelectedCompetitors((prev) =>
+      prev.includes(id) ? prev.filter((compId) => compId !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedCompetitors.length === competitors.length) {
+      setSelectedCompetitors([]);
+    } else {
+      setSelectedCompetitors(competitors.map((c) => c.id));
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedCompetitors.length === 0) return;
+
+    if (!confirm(`Are you sure you want to delete ${selectedCompetitors.length} competitor(s) from this event?`)) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      await Promise.all(selectedCompetitors.map((id) => eventCompetitorService.delete(id)));
+      showToast(`Successfully deleted ${selectedCompetitors.length} competitor(s)`, 'success');
+      setSelectedCompetitors([]);
+      await loadCompetitors();
+      await loadEvent(); // Refresh event to update competitor count
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Failed to delete competitors. Please try again.';
+      showToast(errorMessage, 'error');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -863,6 +921,122 @@ export default function EventDetailPage() {
                     </Alert>
                   )}
                 </Box>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Competitors List Section */}
+          <Card sx={{ mt: 3 }}>
+            <CardContent>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="h6">
+                  Registered Competitors ({competitors.length})
+                </Typography>
+                {selectedCompetitors.length > 0 && (
+                  <Button
+                    variant="contained"
+                    color="error"
+                    startIcon={<DeleteIcon />}
+                    onClick={handleDeleteSelected}
+                    disabled={deleting}
+                    size={isMobile ? 'medium' : 'small'}
+                  >
+                    {deleting ? 'Deleting...' : `Delete Selected (${selectedCompetitors.length})`}
+                  </Button>
+                )}
+              </Box>
+
+              {loadingCompetitors ? (
+                <Box display="flex" justifyContent="center" py={4}>
+                  <CircularProgress />
+                </Box>
+              ) : competitors.length === 0 ? (
+                <Box textAlign="center" py={4}>
+                  <Typography variant="body2" color="text.secondary">
+                    No competitors registered for this event yet.
+                  </Typography>
+                </Box>
+              ) : (
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            checked={competitors.length > 0 && selectedCompetitors.length === competitors.length}
+                            indeterminate={selectedCompetitors.length > 0 && selectedCompetitors.length < competitors.length}
+                            onChange={handleSelectAll}
+                          />
+                        </TableCell>
+                        <TableCell>#</TableCell>
+                        <TableCell>Name</TableCell>
+                        <TableCell>Email</TableCell>
+                        <TableCell>Phone</TableCell>
+                        <TableCell>Category</TableCell>
+                        <TableCell>Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {competitors.map((competitor) => (
+                        <TableRow key={competitor.id} hover>
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              checked={selectedCompetitors.includes(competitor.id)}
+                              onChange={() => handleSelectCompetitor(competitor.id)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {competitor.sequentialNumber || '-'}
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" fontWeight="medium">
+                              {competitor.competitor.firstName} {competitor.competitor.lastName}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary">
+                              {competitor.competitor.email || '-'}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary">
+                              {competitor.competitor.phone || '-'}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            {competitor.category ? (
+                              <Chip label={competitor.category.name} size="small" color="primary" variant="outlined" />
+                            ) : (
+                              <Typography variant="body2" color="text.secondary">-</Typography>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={async () => {
+                                if (confirm(`Are you sure you want to delete ${competitor.competitor.firstName} ${competitor.competitor.lastName} from this event?`)) {
+                                  try {
+                                    await eventCompetitorService.delete(competitor.id);
+                                    showToast('Competitor deleted successfully', 'success');
+                                    await loadCompetitors();
+                                    await loadEvent();
+                                  } catch (err: any) {
+                                    const errorMessage =
+                                      err.response?.data?.message || err.message || 'Failed to delete competitor.';
+                                    showToast(errorMessage, 'error');
+                                  }
+                                }
+                              }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               )}
             </CardContent>
           </Card>

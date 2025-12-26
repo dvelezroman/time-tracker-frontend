@@ -116,6 +116,10 @@ export const eventCompetitorService = {
     });
     return response.data;
   },
+
+  delete: async (id: number): Promise<void> => {
+    await offlineApiClient.delete(`/event-competitors/${id}`);
+  },
 };
 
 
