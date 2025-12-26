@@ -293,7 +293,7 @@ export default function CreateEventPage() {
   };
 
   return (
-    <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
+    <ProtectedRoute roles={['ADMIN']}>
       <MainLayout>
         <Container maxWidth="md" sx={{ px: { xs: 1, sm: 2, md: 3 } }}>
           <Box sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
