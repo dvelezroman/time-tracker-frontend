@@ -487,6 +487,15 @@ export default function EventDetailPage() {
                 </Box>
               )}
 
+              {event.assignee && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                    Assigned Operator
+                  </Typography>
+                  <Typography variant="body1">{event.assignee.email}</Typography>
+                </Box>
+              )}
+
               <Box display="flex" gap={2} flexWrap="wrap" mt={4}>
                 {(event.status === 'DRAFT' || event.status === 'PUBLISHED') && (
                   <>

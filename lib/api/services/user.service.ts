@@ -25,8 +25,8 @@ export interface UserWithDates extends User {
 }
 
 export const userService = {
-  getUsers: async (): Promise<UserWithDates[]> => {
-    const response = await apiClient.get<PaginatedResponse<UserWithDates>>('/users');
+  getUsers: async (params?: { limit?: number; role?: string; status?: string }): Promise<UserWithDates[]> => {
+    const response = await apiClient.get<PaginatedResponse<UserWithDates>>('/users', { params });
     // API returns paginated response, extract the data array
     return response.data.data || response.data;
   },

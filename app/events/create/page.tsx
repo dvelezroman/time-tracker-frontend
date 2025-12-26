@@ -37,7 +37,6 @@ import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { eventService, CreateEventRequest } from '@/lib/api/services/event.service';
 import { categoryService, CreateCategoryRequest, Category } from '@/lib/api/services/category.service';
 import { userService, UserWithDates } from '@/lib/api/services/user.service';
-import apiClient from '@/lib/api/client';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { getTimezoneOptions } from '@/lib/utils/timezones';
@@ -83,17 +82,29 @@ export default function CreateEventPage() {
 
   const loadOperators = async () => {
     try {
-      // Fetch all users with a high limit to get all operators
-      const response = await apiClient.get<{ data: UserWithDates[]; total: number }>('/users', {
-        params: { limit: 1000, role: 'OPERATOR', status: 'ACTIVE' },
+      console.log('Loading operators...');
+      // Fetch operators with filtering on backend
+      const allUsers = await userService.getUsers({ 
+        limit: 1000, 
+        role: 'OPERATOR', 
+        status: 'ACTIVE' 
       });
-      const allUsers = response.data.data || [];
+      console.log('All users from API:', allUsers);
+      
+      // Double-check filtering (backend should already filter, but ensure)
       const operatorUsers = allUsers.filter((u) => u.role === 'OPERATOR' && u.status === 'ACTIVE');
+      console.log('Filtered operators:', operatorUsers);
+      
       setOperators(operatorUsers);
-      console.log('Loaded operators:', operatorUsers);
-    } catch (err) {
+      
+      if (operatorUsers.length === 0) {
+        console.warn('No active operators found in database');
+        showToast('No active operators found. Please create operators first.', 'info');
+      }
+    } catch (err: any) {
       console.error('Failed to load operators:', err);
-      showToast('Failed to load operators. Please try again.', 'error');
+      console.error('Error details:', err.response?.data || err.message);
+      showToast(`Failed to load operators: ${err.response?.data?.message || err.message}`, 'error');
     }
   };
 
@@ -447,7 +458,7 @@ export default function CreateEventPage() {
                     <FormControl fullWidth margin="normal">
                       <InputLabel>Assign to Operator</InputLabel>
                       <Select
-                        value={assignedTo || ''}
+                        value={assignedTo ? String(assignedTo) : ''}
                         onChange={(e) => setAssignedTo(e.target.value ? Number(e.target.value) : undefined)}
                         label="Assign to Operator"
                         sx={{
@@ -458,7 +469,7 @@ export default function CreateEventPage() {
                           <em>None (Unassigned)</em>
                         </MenuItem>
                         {operators.map((operator) => (
-                          <MenuItem key={operator.id} value={operator.id}>
+                          <MenuItem key={operator.id} value={String(operator.id)}>
                             {operator.email}
                           </MenuItem>
                         ))}
