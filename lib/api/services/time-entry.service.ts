@@ -52,7 +52,7 @@ export interface LeaderboardEntry {
   endDate: string | null;
   endDateLocal?: string;
   duration: number | null;
-  status?: 'IN_PROGRESS';
+  status?: 'IN_PROGRESS' | 'NOT_FINISHED' | 'ABSENT';
   timezone?: string;
 }
 

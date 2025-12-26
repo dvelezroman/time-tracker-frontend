@@ -31,6 +31,9 @@ import {
   useMediaQuery,
   Container,
   Chip,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -76,6 +79,9 @@ export default function EventsPage() {
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [timezone, setTimezone] = useState<string>('UTC');
+  const [timerTypeDialogOpen, setTimerTypeDialogOpen] = useState(false);
+  const [selectedTimerType, setSelectedTimerType] = useState<'collective' | 'individual'>('collective');
+  const [eventToStart, setEventToStart] = useState<Event | null>(null);
 
   useEffect(() => {
     // Set timezone on client side only to avoid hydration mismatch
@@ -165,11 +171,21 @@ export default function EventsPage() {
     router.push(ROUTES.EVENTS_EDIT(event.id));
   };
 
-  const handleStart = async (event: Event) => {
+  const handleStartClick = (event: Event) => {
+    setEventToStart(event);
+    setSelectedTimerType('collective');
+    setTimerTypeDialogOpen(true);
+  };
+
+  const handleStartEvent = async () => {
+    if (!eventToStart) return;
+
     try {
-      setActionLoading(event.id);
-      await eventService.start(event.id, { timezone });
+      setActionLoading(eventToStart.id);
+      setTimerTypeDialogOpen(false);
+      await eventService.start(eventToStart.id, { timezone, timerType: selectedTimerType });
       showToast('Event started successfully!', 'success');
+      setEventToStart(null);
       loadEvents();
     } catch (err: any) {
       const errorMessage =
@@ -479,7 +495,7 @@ export default function EventsPage() {
                                     </IconButton>
                                     <IconButton
                                       size="small"
-                                      onClick={() => handleStart(event)}
+                                      onClick={() => handleStartClick(event)}
                                       color="success"
                                       disabled={actionLoading === event.id}
                                       title="Start Event"
@@ -567,6 +583,74 @@ export default function EventsPage() {
             </Button>
             <Button onClick={handleDeleteConfirm} color="error" disabled={deleting}>
               {deleting ? <CircularProgress size={24} /> : 'Delete'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Timer Type Selection Dialog */}
+        <Dialog
+          open={timerTypeDialogOpen}
+          onClose={() => !actionLoading && setTimerTypeDialogOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Select Timer Type</DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Choose how competitors will be timed for this event:
+            </Typography>
+            <FormControl component="fieldset" fullWidth>
+              <RadioGroup
+                value={selectedTimerType}
+                onChange={(e) => setSelectedTimerType(e.target.value as 'collective' | 'individual')}
+              >
+                <FormControlLabel
+                  value="collective"
+                  control={<Radio />}
+                  label={
+                    <Box>
+                      <Typography variant="body1" fontWeight="medium">
+                        Collective Timer
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        All competitors start at the same time when the event begins. Use the traditional full-screen timer view.
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ mb: 2, alignItems: 'flex-start' }}
+                />
+                <FormControlLabel
+                  value="individual"
+                  control={<Radio />}
+                  label={
+                    <Box>
+                      <Typography variant="body1" fontWeight="medium">
+                        Individual Timer
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Each competitor starts individually. Enter competitor numbers to start and finish timers separately.
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ alignItems: 'flex-start' }}
+                />
+              </RadioGroup>
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setTimerTypeDialogOpen(false)}
+              disabled={actionLoading !== null}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleStartEvent}
+              variant="contained"
+              disabled={actionLoading !== null}
+              startIcon={actionLoading !== null ? <CircularProgress size={20} /> : null}
+            >
+              {actionLoading !== null ? 'Starting...' : 'Start Event'}
             </Button>
           </DialogActions>
         </Dialog>

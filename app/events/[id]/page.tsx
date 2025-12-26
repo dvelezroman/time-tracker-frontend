@@ -40,6 +40,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import DescriptionIcon from '@mui/icons-material/Description';
+import StopIcon from '@mui/icons-material/Stop';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { eventService, Event, EventStatus } from '@/lib/api/services/event.service';
@@ -58,6 +59,7 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
+  const [stopping, setStopping] = useState(false);
   const [sendingWhatsApp, setSendingWhatsApp] = useState(false);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -112,8 +114,18 @@ export default function EventDetailPage() {
       
       // Redirect based on timer type
       if (selectedTimerType === 'individual') {
-        // For individual timer, go to individual timer page
-        router.push(ROUTES.EVENTS_INDIVIDUAL_TIMER(eventId));
+        // For individual timer, open in full screen in a new tab
+        const individualTimerUrl = ROUTES.EVENTS_INDIVIDUAL_TIMER(eventId);
+        const newTab = window.open(individualTimerUrl, '_blank', 'noopener,noreferrer');
+        
+        // Check if popup was blocked
+        if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
+          // Popup was blocked - show a message with a link
+          showToast(
+            'Popup blocked. Use the "Individual Timer" button to open it, or allow popups for this site.',
+            'warning',
+          );
+        }
       } else {
         // For collective timer, open full screen timer in a new tab
         const fullScreenUrl = ROUTES.EVENTS_TIMER_FULLSCREEN(eventId);
@@ -146,6 +158,26 @@ export default function EventDetailPage() {
 
   const handleViewTimer = () => {
     router.push(ROUTES.EVENTS_TIMER(eventId));
+  };
+
+  const handleStopEvent = async () => {
+    if (!event) return;
+
+    try {
+      setStopping(true);
+      setError('');
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      await eventService.stop(eventId, { timezone });
+      showToast('Event stopped successfully!', 'success');
+      loadEvent();
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Failed to stop event. Please try again.';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
+    } finally {
+      setStopping(false);
+    }
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -462,6 +494,16 @@ export default function EventDetailPage() {
                     >
                       Leaderboard
                     </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      startIcon={stopping ? <CircularProgress size={20} /> : <StopIcon />}
+                      onClick={handleStopEvent}
+                      disabled={stopping}
+                      size={isMobile ? 'medium' : 'large'}
+                    >
+                      {stopping ? 'Stopping...' : 'Stop Event'}
+                    </Button>
                   </>
                 )}
 
@@ -487,6 +529,14 @@ export default function EventDetailPage() {
 
                 {event.status === 'COMPLETED' && (
                   <>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => router.push(ROUTES.EVENTS_LEADERBOARD(event.id))}
+                      size={isMobile ? 'medium' : 'large'}
+                    >
+                      View Leaderboard
+                    </Button>
                     <Button
                       variant="contained"
                       color="success"

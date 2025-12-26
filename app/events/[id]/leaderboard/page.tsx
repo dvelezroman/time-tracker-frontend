@@ -20,6 +20,10 @@ import {
   Chip,
   useTheme,
   useMediaQuery,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
@@ -29,6 +33,7 @@ import {
   LeaderboardResponse,
   LeaderboardEntry,
 } from '@/lib/api/services/time-entry.service';
+import { categoryService, Category } from '@/lib/api/services/category.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
@@ -45,6 +50,8 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | ''>('');
 
   useEffect(() => {
     if (eventId) {
@@ -67,12 +74,14 @@ export default function LeaderboardPage() {
       setLoading(true);
       setError('');
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const [eventData, leaderboardData] = await Promise.all([
+      const [eventData, leaderboardData, categoriesData] = await Promise.all([
         eventService.getById(eventId, timezone),
         timeEntryService.getLeaderboard(eventId, timezone),
+        categoryService.getAll({ eventId, limit: 1000 }),
       ]);
       setEvent(eventData);
       setLeaderboard(leaderboardData);
+      setCategories(categoriesData.data);
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.message || err.message || 'Failed to load data. Please try again.';
@@ -181,7 +190,24 @@ export default function LeaderboardPage() {
                   {leaderboard.finishedCount} of {leaderboard.total} competitors finished
                 </Typography>
               </Box>
-              <Box display="flex" gap={2} flexWrap="wrap">
+              <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
+                {categories.length > 0 && (
+                  <FormControl sx={{ minWidth: 200 }} size={isMobile ? 'medium' : 'small'}>
+                    <InputLabel>Filter by Category</InputLabel>
+                    <Select
+                      value={selectedCategoryId}
+                      onChange={(e) => setSelectedCategoryId(e.target.value as number | '')}
+                      label="Filter by Category"
+                    >
+                      <MenuItem value="">All Categories</MenuItem>
+                      {categories.map((category) => (
+                        <MenuItem key={category.id} value={category.id}>
+                          {category.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
                 <Button
                   variant={autoRefresh ? 'contained' : 'outlined'}
                   onClick={() => setAutoRefresh(!autoRefresh)}
@@ -212,19 +238,31 @@ export default function LeaderboardPage() {
               </Alert>
             )}
 
-            {leaderboard.finished.length === 0 && leaderboard.inProgress.length === 0 ? (
-              <Card>
-                <CardContent>
-                  <Box textAlign="center" py={4}>
-                    <Typography variant="body1" color="text.secondary">
-                      No competitors registered for this event yet.
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            ) : (
-              <>
-                {leaderboard.finished.length > 0 && (
+            {(() => {
+              const filteredFinished = leaderboard.finished.filter((entry) => {
+                if (selectedCategoryId === '') return true;
+                return entry.category?.id === selectedCategoryId;
+              });
+              const filteredInProgress = leaderboard.inProgress.filter((entry) => {
+                if (selectedCategoryId === '') return true;
+                return entry.category?.id === selectedCategoryId;
+              });
+
+              return filteredFinished.length === 0 && filteredInProgress.length === 0 ? (
+                <Card>
+                  <CardContent>
+                    <Box textAlign="center" py={4}>
+                      <Typography variant="body1" color="text.secondary">
+                        {selectedCategoryId === ''
+                          ? 'No competitors registered for this event yet.'
+                          : 'No competitors found for the selected category.'}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  {filteredFinished.length > 0 && (
                   <Card sx={{ mb: 3 }}>
                     <CardContent>
                       <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
@@ -243,7 +281,7 @@ export default function LeaderboardPage() {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {leaderboard.finished.map((entry) => (
+                            {filteredFinished.map((entry) => (
                               <TableRow key={entry.timeEntryId} hover>
                                 <TableCell>
                                   <Chip
@@ -287,11 +325,11 @@ export default function LeaderboardPage() {
                   </Card>
                 )}
 
-                {leaderboard.inProgress.length > 0 && (
+                  {filteredInProgress.length > 0 && (
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                        In Progress
+                        {event.status === 'COMPLETED' ? 'Not Finished / Absent' : 'In Progress'}
                       </Typography>
                       <TableContainer>
                         <Table>
@@ -304,36 +342,49 @@ export default function LeaderboardPage() {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {leaderboard.inProgress.map((entry) => (
-                              <TableRow key={entry.timeEntryId || entry.competitor.id} hover>
-                                <TableCell>
-                                  <Typography variant="body2" fontWeight="medium">
-                                    {entry.competitor.firstName} {entry.competitor.lastName}
-                                  </Typography>
-                                </TableCell>
-                                <TableCell>
-                                  <Typography variant="body2" color="text.secondary">
-                                    {entry.category?.name || '-'}
-                                  </Typography>
-                                </TableCell>
-                                <TableCell>
-                                  <Typography variant="body2" color="text.secondary">
-                                    {formatTime(entry.startDate, entry.startDateLocal)}
-                                  </Typography>
-                                </TableCell>
-                                <TableCell>
-                                  <Chip label="In Progress" color="warning" size="small" />
-                                </TableCell>
-                              </TableRow>
-                            ))}
+                            {filteredInProgress.map((entry) => {
+                              const getStatusChip = () => {
+                                if (entry.status === 'ABSENT') {
+                                  return <Chip label="Absent" color="error" size="small" />;
+                                } else if (entry.status === 'NOT_FINISHED') {
+                                  return <Chip label="Not Finished" color="warning" size="small" />;
+                                } else {
+                                  return <Chip label="In Progress" color="warning" size="small" />;
+                                }
+                              };
+
+                              return (
+                                <TableRow key={entry.timeEntryId || entry.competitor.id} hover>
+                                  <TableCell>
+                                    <Typography variant="body2" fontWeight="medium">
+                                      {entry.competitor.firstName} {entry.competitor.lastName}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Typography variant="body2" color="text.secondary">
+                                      {entry.category?.name || '-'}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Typography variant="body2" color="text.secondary">
+                                      {entry.startDate ? formatTime(entry.startDate, entry.startDateLocal) : '-'}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell>
+                                    {getStatusChip()}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
                           </TableBody>
                         </Table>
                       </TableContainer>
                     </CardContent>
                   </Card>
-                )}
-              </>
-            )}
+                  )}
+                </>
+              );
+            })()}
           </Box>
         </Container>
       </MainLayout>

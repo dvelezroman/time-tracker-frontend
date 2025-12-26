@@ -23,7 +23,6 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { eventService, Event } from '@/lib/api/services/event.service';
 import {
@@ -254,11 +253,17 @@ export default function IndividualTimerPage() {
   if (loading) {
     return (
       <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
-        <MainLayout>
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-            <CircularProgress />
-          </Box>
-        </MainLayout>
+        <Box 
+          sx={{
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <CircularProgress />
+        </Box>
       </ProtectedRoute>
     );
   }
@@ -266,11 +271,18 @@ export default function IndividualTimerPage() {
   if (error && !event) {
     return (
       <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
-        <MainLayout>
-          <Box p={3}>
-            <Alert severity="error">{error}</Alert>
-          </Box>
-        </MainLayout>
+        <Box 
+          sx={{
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            p: 3,
+          }}
+        >
+          <Alert severity="error">{error}</Alert>
+        </Box>
       </ProtectedRoute>
     );
   }
@@ -278,18 +290,24 @@ export default function IndividualTimerPage() {
   if (!event) {
     return (
       <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
-        <MainLayout>
-          <Box p={3}>
-            <Alert severity="info">Event not found</Alert>
-          </Box>
-        </MainLayout>
+        <Box 
+          sx={{
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            p: 3,
+          }}
+        >
+          <Alert severity="info">Event not found</Alert>
+        </Box>
       </ProtectedRoute>
     );
   }
 
   return (
     <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
-      <MainLayout>
         <Box
           sx={{
             width: '100vw',
@@ -297,6 +315,7 @@ export default function IndividualTimerPage() {
             display: 'flex',
             flexDirection: isMobile ? 'column' : 'row',
             overflow: 'hidden',
+            backgroundColor: theme.palette.mode === 'dark' ? '#121212' : '#f5f5f5',
           }}
         >
           {/* Left Side - Leaderboard (30-40% width) */}
@@ -498,7 +517,6 @@ export default function IndividualTimerPage() {
             </Box>
           </Box>
         </Box>
-      </MainLayout>
     </ProtectedRoute>
   );
 }
