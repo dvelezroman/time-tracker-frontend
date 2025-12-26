@@ -25,6 +25,7 @@ import {
   eventService,
   UpdateEventRequest,
   Event,
+  EventStatus,
 } from '@/lib/api/services/event.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
@@ -52,6 +53,7 @@ export default function EditEventPage() {
     location: '',
   });
   const [timezone, setTimezone] = useState<string>('UTC');
+  const [status, setStatus] = useState<EventStatus>('DRAFT');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -96,6 +98,8 @@ export default function EditEventPage() {
         endDate: formatDateTimeLocal(eventData.endDate, eventData.endDateLocal),
         location: eventData.location || '',
       });
+      setStatus(eventData.status);
+      setStatus(eventData.status);
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.message || err.message || 'Failed to load event. Please try again.';
@@ -201,6 +205,7 @@ export default function EditEventPage() {
           ...formData,
           startDate: startDateUTC,
           endDate: endDateUTC,
+          status,
         },
         timezone,
       );
@@ -392,6 +397,22 @@ export default function EditEventPage() {
                       },
                     }}
                   />
+
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value as EventStatus)}
+                      label="Status"
+                      sx={{
+                        borderRadius: 2,
+                      }}
+                    >
+                      <MenuItem value="DRAFT">Draft</MenuItem>
+                      <MenuItem value="PUBLISHED">Published</MenuItem>
+                      <MenuItem value="CANCELLED">Cancelled</MenuItem>
+                    </Select>
+                  </FormControl>
 
                   <FormControl fullWidth margin="normal">
                     <InputLabel>Timezone</InputLabel>
