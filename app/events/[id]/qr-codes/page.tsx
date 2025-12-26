@@ -14,7 +14,6 @@ import {
   useTheme,
   useMediaQuery,
   Paper,
-  Grid2,
 } from '@mui/material';
 import { Download as DownloadIcon } from '@mui/icons-material';
 import { QRCodeSVG } from 'qrcode.react';
@@ -235,9 +234,15 @@ export default function QRCodesPage() {
                 </CardContent>
               </Card>
             ) : (
-              <Grid2 container spacing={{ xs: 2, sm: 3 }}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+                  gap: { xs: 2, sm: 3 },
+                }}
+              >
                 {competitorsWithQR.map((competitor) => (
-                  <Grid2 xs={12} sm={6} md={4} lg={3} key={competitor.id}>
+                  <Box key={competitor.id}>
                     <Paper
                       elevation={2}
                       sx={{
@@ -306,9 +311,9 @@ export default function QRCodesPage() {
                         {competitor.qrCode}
                       </Typography>
                     </Paper>
-                  </Grid2>
+                  </Box>
                 ))}
-              </Grid2>
+              </Box>
             )}
           </Box>
         </Container>

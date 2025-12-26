@@ -14,7 +14,6 @@ import {
   Paper,
   Stack,
   Divider,
-  Grid2,
 } from '@mui/material';
 import {
   Timer as TimerIcon,
@@ -231,8 +230,16 @@ export default function Home() {
           </Stack>
 
           {/* Stats */}
-          <Grid2 container spacing={4} sx={{ mt: 8, mb: 4 }} justifyContent="center">
-            <Grid2 xs={6} md={3}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+              gap: 4,
+              mt: 8,
+              mb: 4,
+            }}
+          >
+            <Box>
               <Box sx={{ textAlign: 'center' }}>
                 <Box
                   sx={{
@@ -263,8 +270,8 @@ export default function Home() {
                   Real-time updates
                 </Typography>
               </Box>
-            </Grid2>
-            <Grid2 xs={6} md={3}>
+            </Box>
+            <Box>
               <Box sx={{ textAlign: 'center' }}>
                 <Box
                   sx={{
@@ -295,8 +302,8 @@ export default function Home() {
                   Enterprise-grade security
                 </Typography>
               </Box>
-            </Grid2>
-            <Grid2 xs={6} md={3}>
+            </Box>
+            <Box>
               <Box sx={{ textAlign: 'center' }}>
                 <Box
                   sx={{
@@ -327,8 +334,8 @@ export default function Home() {
                   Millisecond precision
                 </Typography>
               </Box>
-            </Grid2>
-            <Grid2 xs={6} md={3}>
+            </Box>
+            <Box>
               <Box sx={{ textAlign: 'center' }}>
                 <Box
                   sx={{
@@ -359,8 +366,8 @@ export default function Home() {
                   Full event management
                 </Typography>
               </Box>
-            </Grid2>
-          </Grid2>
+            </Box>
+          </Box>
         </Box>
 
         {/* Features Section */}
@@ -385,9 +392,15 @@ export default function Home() {
           >
             Everything you need to manage and track sports events professionally
           </Typography>
-          <Grid2 container spacing={4}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+              gap: 4,
+            }}
+          >
             {features.map((feature, index) => (
-              <Grid2 xs={12} sm={6} md={4} key={index}>
+              <Box key={index}>
                 <Card
                   sx={{
                     height: '100%',
@@ -427,9 +440,9 @@ export default function Home() {
                     </Typography>
                   </CardContent>
                 </Card>
-              </Grid2>
+              </Box>
             ))}
-          </Grid2>
+          </Box>
         </Box>
 
         {/* How It Works Section */}
@@ -454,9 +467,15 @@ export default function Home() {
           >
             Get started in minutes with our simple 4-step process
           </Typography>
-          <Grid2 container spacing={4}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+              gap: 4,
+            }}
+          >
             {steps.map((step, index) => (
-              <Grid2 xs={12} sm={6} md={3} key={index}>
+              <Box key={index}>
                 <Paper
                   elevation={0}
                   sx={{
@@ -503,9 +522,9 @@ export default function Home() {
                     {step.description}
                   </Typography>
                 </Paper>
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         </Box>
 
         {/* Benefits Section */}
@@ -531,18 +550,25 @@ export default function Home() {
           >
             Why Choose Time Tracker?
           </Typography>
-          <Grid2 container spacing={2} sx={{ mt: 4 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+              gap: 2,
+              mt: 4,
+            }}
+          >
             {benefits.map((benefit, index) => (
-              <Grid2 xs={12} sm={6} md={4} key={index}>
+              <Box key={index}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <CheckCircleIcon color="primary" />
                   <Typography variant="body1" fontWeight="medium">
                     {benefit}
                   </Typography>
                 </Box>
-              </Grid2>
+              </Box>
             ))}
-          </Grid2>
+          </Box>
         </Box>
 
         {/* CTA Section */}

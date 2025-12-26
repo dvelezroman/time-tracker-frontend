@@ -53,6 +53,11 @@ const checkOperatorAccess = (endpoint: string): void => {
 };
 
 export const userService = {
+  getProfile: async (): Promise<UserWithDates> => {
+    const response = await apiClient.get<UserWithDates>('/users/profile');
+    return response.data;
+  },
+
   getUsers: async (params?: { limit?: number; role?: string; status?: string }): Promise<UserWithDates[]> => {
     // Check if current user is an operator - operators should never call GET /users
     checkOperatorAccess('GET /users');
