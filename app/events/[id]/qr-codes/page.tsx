@@ -13,8 +13,8 @@ import {
   CircularProgress,
   useTheme,
   useMediaQuery,
-  Grid,
   Paper,
+  Grid2,
 } from '@mui/material';
 import { Download as DownloadIcon } from '@mui/icons-material';
 import { QRCodeSVG } from 'qrcode.react';
@@ -235,9 +235,9 @@ export default function QRCodesPage() {
                 </CardContent>
               </Card>
             ) : (
-              <Grid container spacing={{ xs: 2, sm: 3 }}>
+              <Grid2 container spacing={{ xs: 2, sm: 3 }}>
                 {competitorsWithQR.map((competitor) => (
-                  <Grid item xs={12} sm={6} md={4} lg={3} key={competitor.id}>
+                  <Grid2 xs={12} sm={6} md={4} lg={3} key={competitor.id}>
                     <Paper
                       elevation={2}
                       sx={{
@@ -306,9 +306,9 @@ export default function QRCodesPage() {
                         {competitor.qrCode}
                       </Typography>
                     </Paper>
-                  </Grid>
+                  </Grid2>
                 ))}
-              </Grid>
+              </Grid2>
             )}
           </Box>
         </Container>

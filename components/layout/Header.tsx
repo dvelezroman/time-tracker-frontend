@@ -24,6 +24,7 @@ import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/lib/constants';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import { useTranslation } from '@/lib/i18n/useTranslation';
+import Image from 'next/image';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -72,16 +73,36 @@ export function Header({ onMenuClick }: HeaderProps) {
           </IconButton>
         )}
 
-        <Typography 
-          variant="h6" 
-          component="div" 
-          sx={{ 
-            flexGrow: 1,
-            fontSize: { xs: '1rem', sm: '1.25rem' },
-          }}
-        >
-          Time Tracker
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexGrow: 1 }}>
+          {process.env.NEXT_PUBLIC_BITFLOW_LOGO_URL && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                height: 40,
+                position: 'relative',
+                width: { xs: 80, sm: 120 },
+              }}
+            >
+              <Image
+                src={process.env.NEXT_PUBLIC_BITFLOW_LOGO_URL}
+                alt="Bitflow Logo"
+                fill
+                style={{ objectFit: 'contain' }}
+                priority
+              />
+            </Box>
+          )}
+          <Typography 
+            variant="h6" 
+            component="div" 
+            sx={{ 
+              fontSize: { xs: '1rem', sm: '1.25rem' },
+            }}
+          >
+            Time Tracker
+          </Typography>
+        </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LanguageSwitcher />

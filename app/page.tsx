@@ -7,7 +7,6 @@ import {
   Typography,
   Box,
   Button,
-  Grid,
   Card,
   CardContent,
   useTheme,
@@ -15,6 +14,7 @@ import {
   Paper,
   Stack,
   Divider,
+  Grid2,
 } from '@mui/material';
 import {
   Timer as TimerIcon,
@@ -31,6 +31,7 @@ import {
 } from '@mui/icons-material';
 import { useAuthStore } from '@/store/useAuthStore';
 import { ROUTES } from '@/lib/constants';
+import Image from 'next/image';
 
 export default function Home() {
   const router = useRouter();
@@ -129,6 +130,31 @@ export default function Home() {
             mb: { xs: 8, md: 12 },
           }}
         >
+          {process.env.NEXT_PUBLIC_BITFLOW_LOGO_URL && (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                mb: 4,
+              }}
+            >
+              <Box
+                sx={{
+                  position: 'relative',
+                  height: { xs: 60, sm: 80, md: 100 },
+                  width: { xs: 200, sm: 250, md: 300 },
+                }}
+              >
+                <Image
+                  src={process.env.NEXT_PUBLIC_BITFLOW_LOGO_URL}
+                  alt="Bitflow Logo"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                  priority
+                />
+              </Box>
+            </Box>
+          )}
           <Typography
             variant="h1"
             component="h1"
@@ -205,8 +231,8 @@ export default function Home() {
           </Stack>
 
           {/* Stats */}
-          <Grid container spacing={4} sx={{ mt: 8, mb: 4 }} justifyContent="center">
-            <Grid item xs={6} md={3}>
+          <Grid2 container spacing={4} sx={{ mt: 8, mb: 4 }} justifyContent="center">
+            <Grid2 xs={6} md={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Box
                   sx={{
@@ -237,8 +263,8 @@ export default function Home() {
                   Real-time updates
                 </Typography>
               </Box>
-            </Grid>
-            <Grid item xs={6} md={3}>
+            </Grid2>
+            <Grid2 xs={6} md={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Box
                   sx={{
@@ -269,8 +295,8 @@ export default function Home() {
                   Enterprise-grade security
                 </Typography>
               </Box>
-            </Grid>
-            <Grid item xs={6} md={3}>
+            </Grid2>
+            <Grid2 xs={6} md={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Box
                   sx={{
@@ -301,8 +327,8 @@ export default function Home() {
                   Millisecond precision
                 </Typography>
               </Box>
-            </Grid>
-            <Grid item xs={6} md={3}>
+            </Grid2>
+            <Grid2 xs={6} md={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Box
                   sx={{
@@ -333,8 +359,8 @@ export default function Home() {
                   Full event management
                 </Typography>
               </Box>
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </Box>
 
         {/* Features Section */}
@@ -359,9 +385,9 @@ export default function Home() {
           >
             Everything you need to manage and track sports events professionally
           </Typography>
-          <Grid container spacing={4}>
+          <Grid2 container spacing={4}>
             {features.map((feature, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
+              <Grid2 xs={12} sm={6} md={4} key={index}>
                 <Card
                   sx={{
                     height: '100%',
@@ -401,9 +427,9 @@ export default function Home() {
                     </Typography>
                   </CardContent>
                 </Card>
-              </Grid>
+              </Grid2>
             ))}
-          </Grid>
+          </Grid2>
         </Box>
 
         {/* How It Works Section */}
@@ -428,9 +454,9 @@ export default function Home() {
           >
             Get started in minutes with our simple 4-step process
           </Typography>
-          <Grid container spacing={4}>
+          <Grid2 container spacing={4}>
             {steps.map((step, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
+              <Grid2 xs={12} sm={6} md={3} key={index}>
                 <Paper
                   elevation={0}
                   sx={{
@@ -505,18 +531,18 @@ export default function Home() {
           >
             Why Choose Time Tracker?
           </Typography>
-          <Grid container spacing={2} sx={{ mt: 4 }}>
+          <Grid2 container spacing={2} sx={{ mt: 4 }}>
             {benefits.map((benefit, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
+              <Grid2 xs={12} sm={6} md={4} key={index}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <CheckCircleIcon color="primary" />
                   <Typography variant="body1" fontWeight="medium">
                     {benefit}
                   </Typography>
                 </Box>
-              </Grid>
+              </Grid2>
             ))}
-          </Grid>
+          </Grid2>
         </Box>
 
         {/* CTA Section */}
