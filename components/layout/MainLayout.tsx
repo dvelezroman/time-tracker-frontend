@@ -5,6 +5,7 @@ import { Box, useTheme, useMediaQuery } from '@mui/material';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { Footer } from './Footer';
+import { OfflineIndicator } from '@/components/common/OfflineIndicator';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -22,6 +23,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header onMenuClick={handleSidebarToggle} />
+      <OfflineIndicator />
       <Box sx={{ display: 'flex', flex: 1 }}>
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <Box

@@ -1,4 +1,5 @@
 import apiClient from '../client';
+import { offlineApiClient } from '../offline-client';
 
 export interface Competitor {
   id: number;
@@ -78,12 +79,12 @@ export const timeEntryService = {
     if (timezone) {
       params.timezone = timezone;
     }
-    const response = await apiClient.post<RecordFinishResponse>(
+    const response = await offlineApiClient.post<RecordFinishResponse>(
       '/time-entries/record-finish',
       { qrCode },
       { params },
     );
-    return response.data;
+    return response as RecordFinishResponse;
   },
 
   recordStartBySequentialNumber: async (
@@ -95,12 +96,19 @@ export const timeEntryService = {
     if (timezone) {
       params.timezone = timezone;
     }
-    const response = await apiClient.post<RecordFinishResponse>(
+    const localId = `offline-${Date.now()}-${Math.random()}`;
+    const response = await offlineApiClient.post<RecordFinishResponse>(
       '/time-entries/record-start-by-sequential',
-      { eventId, sequentialNumber },
+      { 
+        eventId, 
+        sequentialNumber,
+        localId,
+        operationType: 'START',
+        startDate: new Date().toISOString(),
+      },
       { params },
     );
-    return response.data;
+    return response as RecordFinishResponse;
   },
 
   recordFinishBySequentialNumber: async (
@@ -112,12 +120,19 @@ export const timeEntryService = {
     if (timezone) {
       params.timezone = timezone;
     }
-    const response = await apiClient.post<RecordFinishResponse>(
+    const localId = `offline-${Date.now()}-${Math.random()}`;
+    const response = await offlineApiClient.post<RecordFinishResponse>(
       '/time-entries/record-finish-by-sequential',
-      { eventId, sequentialNumber },
+      { 
+        eventId, 
+        sequentialNumber,
+        localId,
+        operationType: 'FINISH',
+        endDate: new Date().toISOString(),
+      },
       { params },
     );
-    return response.data;
+    return response as RecordFinishResponse;
   },
 
   recordFinishById: async (

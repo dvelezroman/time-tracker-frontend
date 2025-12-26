@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ThemeProvider } from '@/lib/theme/ThemeProvider';
 import { AuthProvider } from '@/components/common/AuthProvider';
 import { Toast } from '@/components/common/Toast';
+import { ServiceWorkerRegistration } from '@/components/common/ServiceWorkerRegistration';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -20,6 +21,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <AuthProvider>
+            <ServiceWorkerRegistration />
             {children}
             <Toast />
           </AuthProvider>

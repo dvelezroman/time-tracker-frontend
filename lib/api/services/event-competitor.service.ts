@@ -1,4 +1,5 @@
 import apiClient from '../client';
+import { offlineApiClient } from '../offline-client';
 
 export interface EventCompetitor {
   id: number;

@@ -1,4 +1,5 @@
 import apiClient from '../client';
+import { offlineApiClient } from '../offline-client';
 
 export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'ONGOING' | 'COMPLETED' | 'CANCELLED';
 
@@ -65,8 +66,8 @@ export interface StopEventRequest {
 export const eventService = {
   create: async (data: CreateEventRequest, timezone?: string): Promise<Event> => {
     const params = timezone ? { timezone } : {};
-    const response = await apiClient.post<Event>('/events', data, { params });
-    return response.data;
+    const response = await offlineApiClient.post<Event>('/events', data, { params });
+    return response as Event;
   },
 
   getAll: async (params?: FilterEventParams): Promise<EventListResponse> => {
@@ -82,8 +83,8 @@ export const eventService = {
 
   update: async (id: number, data: UpdateEventRequest, timezone?: string): Promise<Event> => {
     const params = timezone ? { timezone } : {};
-    const response = await apiClient.patch<Event>(`/events/${id}`, data, { params });
-    return response.data;
+    const response = await offlineApiClient.patch<Event>(`/events/${id}`, data, { params });
+    return response as Event;
   },
 
   delete: async (id: number): Promise<void> => {
@@ -91,13 +92,13 @@ export const eventService = {
   },
 
   start: async (id: number, data?: StartEventRequest): Promise<Event> => {
-    const response = await apiClient.post<Event>(`/events/${id}/start`, data || {});
-    return response.data;
+    const response = await offlineApiClient.post<Event>(`/events/${id}/start`, data || {});
+    return response as Event;
   },
 
   stop: async (id: number, data?: StopEventRequest): Promise<Event> => {
-    const response = await apiClient.post<Event>(`/events/${id}/stop`, data || {});
-    return response.data;
+    const response = await offlineApiClient.post<Event>(`/events/${id}/stop`, data || {});
+    return response as Event;
   },
 
   sendWhatsAppTimes: async (id: number): Promise<{ queued: number; skipped: number }> => {
