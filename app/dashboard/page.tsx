@@ -10,6 +10,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { eventService } from '@/lib/api/services/event.service';
 import { userService } from '@/lib/api/services/user.service';
 import { timeEntryService } from '@/lib/api/services/time-entry.service';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface DashboardStats {
   totalTime: number; // in seconds
@@ -18,6 +19,9 @@ interface DashboardStats {
 }
 
 export default function DashboardPage() {
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'ADMIN';
+  
   const [stats, setStats] = useState<DashboardStats>({
     totalTime: 0,
     totalUsers: 0,
@@ -33,12 +37,17 @@ export default function DashboardPage() {
     try {
       setLoading(true);
       
-      // Fetch all data in parallel
-      const [eventsResponse, users, allEvents] = await Promise.all([
+      // Fetch events (both admin and operators can access)
+      const [eventsResponse, allEvents] = await Promise.all([
         eventService.getAll({ limit: 1000 }),
-        userService.getUsers(),
         eventService.getAll({ limit: 1000 }),
       ]);
+      
+      // Only fetch users if admin, operators should not request user list
+      let users: any[] = [];
+      if (isAdmin) {
+        users = await userService.getUsers();
+      }
 
       // Calculate total time from all time entries
       // We need to get time entries for all events

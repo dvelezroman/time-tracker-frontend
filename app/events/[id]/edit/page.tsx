@@ -58,6 +58,8 @@ export default function EditEventPage() {
   const [status, setStatus] = useState<EventStatus>('DRAFT');
   const [assignedTo, setAssignedTo] = useState<number | null | undefined>(undefined);
   const [operators, setOperators] = useState<UserWithDates[]>([]);
+  const [loadingOperators, setLoadingOperators] = useState(false);
+  const [operatorsLoaded, setOperatorsLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -73,51 +75,66 @@ export default function EditEventPage() {
 
   useEffect(() => {
     if (eventId) {
-      loadEvent();
+      // Load operators first if admin, then load event
+      if (isAdmin) {
+        loadOperators().then(() => {
+          setOperatorsLoaded(true);
+          loadEvent();
+        });
+      } else {
+        loadEvent();
+      }
     }
-  }, [eventId]);
+  }, [eventId, isAdmin]);
 
+  // Set assignedTo after operators are loaded if event is already loaded
   useEffect(() => {
-    if (isAdmin) {
-      loadOperators();
+    if (isAdmin && operatorsLoaded && operators.length > 0 && event) {
+      // Use event.assignedTo if available, otherwise try event.assignee?.id
+      const eventAssignedTo = event.assignedTo ?? event.assignee?.id;
+      
+      if (eventAssignedTo !== undefined && eventAssignedTo !== null) {
+        const operatorExists = operators.some((op) => op.id === eventAssignedTo);
+        
+        if (operatorExists) {
+          if (assignedTo !== eventAssignedTo) {
+            setAssignedTo(eventAssignedTo);
+          }
+        } else {
+          if (assignedTo !== null && assignedTo !== undefined) {
+            setAssignedTo(null);
+          }
+        }
+      } else {
+        if (assignedTo !== null && assignedTo !== undefined) {
+          setAssignedTo(null);
+        }
+      }
     }
-  }, [isAdmin]);
-
-  // Debug: Log when assignedTo or operators change
-  useEffect(() => {
-    console.log('AssignedTo state changed:', assignedTo);
-    console.log('Operators available:', operators);
-    if (assignedTo && operators.length > 0) {
-      const foundOperator = operators.find((op) => op.id === assignedTo);
-      console.log('Found operator for assignedTo:', foundOperator);
-    }
-  }, [assignedTo, operators]);
+  }, [operators, operatorsLoaded, event, isAdmin]);
 
   const loadOperators = async () => {
     try {
-      console.log('Loading operators...');
+      setLoadingOperators(true);
       // Fetch operators with filtering on backend
       const allUsers = await userService.getUsers({ 
         limit: 1000, 
         role: 'OPERATOR', 
         status: 'ACTIVE' 
       });
-      console.log('All users from API:', allUsers);
       
       // Double-check filtering (backend should already filter, but ensure)
       const operatorUsers = allUsers.filter((u) => u.role === 'OPERATOR' && u.status === 'ACTIVE');
-      console.log('Filtered operators:', operatorUsers);
       
       setOperators(operatorUsers);
       
       if (operatorUsers.length === 0) {
-        console.warn('No active operators found in database');
         showToast('No active operators found. Please create operators first.', 'info');
       }
     } catch (err: any) {
-      console.error('Failed to load operators:', err);
-      console.error('Error details:', err.response?.data || err.message);
       showToast(`Failed to load operators: ${err.response?.data?.message || err.message}`, 'error');
+    } finally {
+      setLoadingOperators(false);
     }
   };
 
@@ -149,10 +166,14 @@ export default function EditEventPage() {
         location: eventData.location || '',
       });
       setStatus(eventData.status);
-      console.log('Event data loaded:', eventData);
-      console.log('AssignedTo from API:', eventData.assignedTo);
-      setAssignedTo(eventData.assignedTo ?? null);
-      console.log('AssignedTo state set to:', eventData.assignedTo ?? null);
+      
+      // For admins, don't set assignedTo here - let the useEffect handle it after operators load
+      // This ensures operators are loaded first
+      if (!isAdmin) {
+        // Not admin, set it directly
+        setAssignedTo(eventData.assignedTo ?? null);
+      }
+      // For admins, the useEffect will set assignedTo after operators load
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.message || err.message || 'Failed to load event. Please try again.';
@@ -227,7 +248,6 @@ export default function EditEventPage() {
       return adjustedDate.toISOString();
     } catch (error) {
       // Fallback: interpret in browser's local timezone
-      console.warn('Failed to convert with timezone, using browser local timezone:', error);
       return new Date(localDateTime).toISOString();
     }
   };
@@ -472,11 +492,25 @@ export default function EditEventPage() {
                     <FormControl fullWidth margin="normal">
                       <InputLabel>Assign to Operator</InputLabel>
                       <Select
-                        value={assignedTo ? String(assignedTo) : ''}
+                        value={
+                          !operatorsLoaded || loadingOperators || operators.length === 0
+                            ? ''
+                            : assignedTo !== null && assignedTo !== undefined && operators.some((op) => op.id === assignedTo)
+                            ? String(assignedTo)
+                            : ''
+                        }
                         onChange={(e) => setAssignedTo(e.target.value ? Number(e.target.value) : null)}
                         label="Assign to Operator"
+                        disabled={!operatorsLoaded || loadingOperators || operators.length === 0}
                         sx={{
                           borderRadius: 2,
+                        }}
+                        renderValue={(selected) => {
+                          if (!selected || selected === '') {
+                            return <em>None (Unassigned)</em>;
+                          }
+                          const operator = operators.find((op) => String(op.id) === selected);
+                          return operator ? operator.email : selected;
                         }}
                       >
                         <MenuItem value="">
@@ -488,6 +522,11 @@ export default function EditEventPage() {
                           </MenuItem>
                         ))}
                       </Select>
+                      {loadingOperators && (
+                        <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
+                          <CircularProgress size={20} />
+                        </Box>
+                      )}
                     </FormControl>
                   )}
 

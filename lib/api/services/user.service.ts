@@ -27,8 +27,15 @@ export interface UserWithDates extends User {
 export const userService = {
   getUsers: async (params?: { limit?: number; role?: string; status?: string }): Promise<UserWithDates[]> => {
     const response = await apiClient.get<PaginatedResponse<UserWithDates>>('/users', { params });
-    // API returns paginated response, extract the data array
-    return response.data.data || response.data;
+    // API returns paginated response: { data: [...], total, page, limit, totalPages }
+    // response.data is the response body, response.data.data is the array
+    const paginatedResponse = response.data;
+    if (Array.isArray(paginatedResponse)) {
+      // If response is already an array (shouldn't happen, but handle it)
+      return paginatedResponse;
+    }
+    // Extract the data array from paginated response
+    return paginatedResponse.data || [];
   },
 
   getUserById: async (id: number): Promise<User> => {

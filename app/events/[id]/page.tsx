@@ -95,6 +95,8 @@ export default function EventDetailPage() {
       setError('');
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const eventData = await eventService.getById(eventId, timezone);
+      console.log('Event data loaded:', eventData);
+      console.log('Assignee data:', eventData.assignee);
       setEvent(eventData);
     } catch (err: any) {
       const errorMessage =
