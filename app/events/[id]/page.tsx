@@ -35,6 +35,10 @@ import {
   FormControl,
   Checkbox,
   IconButton,
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
 } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -44,11 +48,15 @@ import InfoIcon from '@mui/icons-material/Info';
 import DescriptionIcon from '@mui/icons-material/Description';
 import StopIcon from '@mui/icons-material/Stop';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { EventCompetitor } from '@/lib/api/services/event-competitor.service';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { eventService, Event, EventStatus } from '@/lib/api/services/event.service';
 import { eventCompetitorService } from '@/lib/api/services/event-competitor.service';
+import { competitorService, CreateCompetitorRequest } from '@/lib/api/services/competitor.service';
+import { categoryService, Category } from '@/lib/api/services/category.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
@@ -81,11 +89,24 @@ export default function EventDetailPage() {
   const [loadingCompetitors, setLoadingCompetitors] = useState(false);
   const [selectedCompetitors, setSelectedCompetitors] = useState<number[]>([]);
   const [deleting, setDeleting] = useState(false);
+  const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
+  const [registering, setRegistering] = useState(false);
+  const [exportingExcel, setExportingExcel] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [competitorFormData, setCompetitorFormData] = useState<CreateCompetitorRequest & { categoryId?: number }>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    categoryId: undefined,
+  });
 
   useEffect(() => {
     if (eventId) {
       loadEvent();
       loadCompetitors();
+      loadCategories();
     }
   }, [eventId]);
 
@@ -117,6 +138,18 @@ export default function EventDetailPage() {
       console.error('Failed to load competitors:', err);
     } finally {
       setLoadingCompetitors(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const categoriesData = await categoryService.getAll({ eventId, limit: 1000 });
+      setCategories(categoriesData.data);
+    } catch (err: any) {
+      console.error('Failed to load categories:', err);
+    } finally {
+      setLoadingCategories(false);
     }
   };
 
@@ -154,6 +187,90 @@ export default function EventDetailPage() {
       showToast(errorMessage, 'error');
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleOpenRegisterDialog = () => {
+    setCompetitorFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      categoryId: undefined,
+    });
+    setRegisterDialogOpen(true);
+  };
+
+  const handleCloseRegisterDialog = () => {
+    if (!registering) {
+      setRegisterDialogOpen(false);
+      setCompetitorFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        categoryId: undefined,
+      });
+    }
+  };
+
+  const handleRegisterCompetitor = async () => {
+    if (!competitorFormData.firstName.trim() || !competitorFormData.lastName.trim()) {
+      showToast('First name and last name are required', 'error');
+      return;
+    }
+
+    try {
+      setRegistering(true);
+      
+      // Create competitor
+      const competitorData: CreateCompetitorRequest = {
+        firstName: competitorFormData.firstName.trim(),
+        lastName: competitorFormData.lastName.trim(),
+        email: competitorFormData.email?.trim() || undefined,
+        phone: competitorFormData.phone?.trim() || undefined,
+      };
+      
+      const competitor = await competitorService.create(competitorData);
+      
+      // Register competitor to event
+      await eventCompetitorService.register({
+        eventId,
+        competitorId: competitor.id,
+        categoryId: competitorFormData.categoryId,
+      });
+      
+      showToast('Competitor created and registered successfully!', 'success');
+      setRegisterDialogOpen(false);
+      setCompetitorFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        categoryId: undefined,
+      });
+      await loadCompetitors();
+      await loadEvent(); // Refresh event to update competitor count
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Failed to register competitor. Please try again.';
+      showToast(errorMessage, 'error');
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const handleExportToExcel = async () => {
+    try {
+      setExportingExcel(true);
+      await eventCompetitorService.exportToExcel(eventId);
+      showToast('Excel file downloaded successfully!', 'success');
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Failed to export Excel file. Please try again.';
+      showToast(errorMessage, 'error');
+    } finally {
+      setExportingExcel(false);
     }
   };
 
@@ -939,22 +1056,44 @@ export default function EventDetailPage() {
           {/* Competitors List Section */}
           <Card sx={{ mt: 3 }}>
             <CardContent>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} flexWrap="wrap" gap={2}>
                 <Typography variant="h6">
                   Registered Competitors ({competitors.length})
                 </Typography>
-                {selectedCompetitors.length > 0 && (
+                <Box display="flex" gap={1} flexWrap="wrap" alignItems="center">
                   <Button
                     variant="contained"
-                    color="error"
-                    startIcon={<DeleteIcon />}
-                    onClick={handleDeleteSelected}
-                    disabled={deleting}
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    onClick={handleOpenRegisterDialog}
                     size={isMobile ? 'medium' : 'small'}
                   >
-                    {deleting ? 'Deleting...' : `Delete Selected (${selectedCompetitors.length})`}
+                    Register Competitor
                   </Button>
-                )}
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    startIcon={exportingExcel ? <CircularProgress size={20} /> : <FileDownloadIcon />}
+                    onClick={handleExportToExcel}
+                    disabled={exportingExcel || loadingCompetitors || competitors.length === 0}
+                    size={isMobile ? 'medium' : 'small'}
+                    title={competitors.length === 0 ? 'No competitors to export' : 'Download competitors list as Excel'}
+                  >
+                    {exportingExcel ? 'Exporting...' : 'Download Excel'}
+                  </Button>
+                  {selectedCompetitors.length > 0 && (
+                    <Button
+                      variant="contained"
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={handleDeleteSelected}
+                      disabled={deleting}
+                      size={isMobile ? 'medium' : 'small'}
+                    >
+                      {deleting ? 'Deleting...' : `Delete Selected (${selectedCompetitors.length})`}
+                    </Button>
+                  )}
+                </Box>
               </Box>
 
               {loadingCompetitors ? (
@@ -963,8 +1102,11 @@ export default function EventDetailPage() {
                 </Box>
               ) : competitors.length === 0 ? (
                 <Box textAlign="center" py={4}>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     No competitors registered for this event yet.
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Use "Register Competitor" button above to add competitors, or import from Excel.
                   </Typography>
                 </Box>
               ) : (
@@ -1116,6 +1258,97 @@ export default function EventDetailPage() {
                 startIcon={starting ? <CircularProgress size={20} /> : null}
               >
                 {starting ? 'Starting...' : 'Start Event'}
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Register Competitor Dialog */}
+          <Dialog
+            open={registerDialogOpen}
+            onClose={handleCloseRegisterDialog}
+            maxWidth="sm"
+            fullWidth
+            disableEnforceFocus={false}
+            disableAutoFocus={false}
+          >
+            <DialogTitle>Register New Competitor</DialogTitle>
+            <DialogContent>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+                <TextField
+                  fullWidth
+                  label="First Name"
+                  value={competitorFormData.firstName}
+                  onChange={(e) =>
+                    setCompetitorFormData({ ...competitorFormData, firstName: e.target.value })
+                  }
+                  required
+                  disabled={registering}
+                  autoFocus
+                />
+                <TextField
+                  fullWidth
+                  label="Last Name"
+                  value={competitorFormData.lastName}
+                  onChange={(e) =>
+                    setCompetitorFormData({ ...competitorFormData, lastName: e.target.value })
+                  }
+                  required
+                  disabled={registering}
+                />
+                <TextField
+                  fullWidth
+                  label="Email"
+                  type="email"
+                  value={competitorFormData.email}
+                  onChange={(e) =>
+                    setCompetitorFormData({ ...competitorFormData, email: e.target.value })
+                  }
+                  disabled={registering}
+                />
+                <TextField
+                  fullWidth
+                  label="Phone"
+                  value={competitorFormData.phone}
+                  onChange={(e) =>
+                    setCompetitorFormData({ ...competitorFormData, phone: e.target.value })
+                  }
+                  disabled={registering}
+                />
+                <FormControl fullWidth disabled={registering || loadingCategories}>
+                  <InputLabel>Category (Optional)</InputLabel>
+                  <Select
+                    value={competitorFormData.categoryId || ''}
+                    onChange={(e) =>
+                      setCompetitorFormData({
+                        ...competitorFormData,
+                        categoryId: e.target.value ? Number(e.target.value) : undefined,
+                      })
+                    }
+                    label="Category (Optional)"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {categories.map((category) => (
+                      <MenuItem key={category.id} value={category.id}>
+                        {category.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseRegisterDialog} disabled={registering}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleRegisterCompetitor}
+                variant="contained"
+                disabled={registering || !competitorFormData.firstName.trim() || !competitorFormData.lastName.trim()}
+                startIcon={registering ? <CircularProgress size={20} /> : null}
+              >
+                {registering ? 'Registering...' : 'Register Competitor'}
               </Button>
             </DialogActions>
           </Dialog>

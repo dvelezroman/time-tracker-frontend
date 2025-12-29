@@ -457,7 +457,8 @@ export default function IndividualTimerPage() {
               <TextField
                 inputRef={inputRef}
                 fullWidth
-                label="Competitor Number"
+                label="Sequential Number (#)"
+                placeholder="Enter the # from competitor list"
                 type="number"
                 value={competitorNumber}
                 onChange={(e) => setCompetitorNumber(e.target.value)}
@@ -465,6 +466,7 @@ export default function IndividualTimerPage() {
                 disabled={starting || finishing}
                 variant="outlined"
                 size="large"
+                helperText="Use the sequential number (#) shown in the competitors list"
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     fontSize: '1.5rem',
@@ -512,7 +514,7 @@ export default function IndividualTimerPage() {
 
             <Box sx={{ mt: 4, textAlign: 'center', maxWidth: 500 }}>
               <Typography variant="body2" color="text.secondary">
-                Enter competitor number and click Start Timer to begin timing, then click Finish Timer when they complete.
+                Enter the <strong>sequential number (#)</strong> from the competitors list and click Start Timer to begin timing, then click Finish Timer when they complete.
               </Typography>
             </Box>
           </Box>

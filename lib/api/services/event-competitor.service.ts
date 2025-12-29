@@ -44,7 +44,18 @@ export interface EventCompetitorListResponse {
   totalPages: number;
 }
 
+export interface RegisterCompetitorRequest {
+  eventId: number;
+  competitorId: number;
+  categoryId?: number;
+}
+
 export const eventCompetitorService = {
+  register: async (data: RegisterCompetitorRequest): Promise<EventCompetitor> => {
+    const response = await offlineApiClient.post<EventCompetitor>('/event-competitors', data);
+    return response.data;
+  },
+
   getAll: async (params?: FilterEventCompetitorParams): Promise<EventCompetitorListResponse> => {
     const response = await apiClient.get<EventCompetitorListResponse>('/event-competitors', {
       params,
@@ -87,6 +98,25 @@ export const eventCompetitorService = {
     const link = document.createElement('a');
     link.href = url;
     link.download = `QR_Codes_Event_${eventId}_${new Date().getTime()}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  },
+
+  exportToExcel: async (eventId: number): Promise<void> => {
+    const response = await apiClient.get(`/event-competitors/event/${eventId}/export-excel`, {
+      responseType: 'blob',
+    });
+
+    // Create blob and download
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Competidores_Event_${eventId}_${new Date().getTime()}.xlsx`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

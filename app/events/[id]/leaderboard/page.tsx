@@ -52,6 +52,8 @@ export default function LeaderboardPage() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | ''>('');
+  const [sortBy, setSortBy] = useState<'rank' | 'category' | 'duration' | 'name'>('rank');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     if (eventId) {
@@ -122,6 +124,46 @@ export default function LeaderboardPage() {
       return format(new Date(localDateString), 'HH:mm:ss');
     }
     return format(new Date(dateString), 'HH:mm:ss');
+  };
+
+  const sortEntries = (entries: LeaderboardEntry[]): LeaderboardEntry[] => {
+    const sorted = [...entries].sort((a, b) => {
+      let comparison = 0;
+
+      switch (sortBy) {
+        case 'category':
+          const categoryA = a.category?.name || '';
+          const categoryB = b.category?.name || '';
+          comparison = categoryA.localeCompare(categoryB);
+          // If categories are equal, sort by rank
+          if (comparison === 0) {
+            comparison = (a.rank || 0) - (b.rank || 0);
+          }
+          break;
+        case 'duration':
+          const durationA = a.duration || 0;
+          const durationB = b.duration || 0;
+          comparison = durationA - durationB;
+          // If durations are equal, sort by rank
+          if (comparison === 0) {
+            comparison = (a.rank || 0) - (b.rank || 0);
+          }
+          break;
+        case 'name':
+          const nameA = `${a.competitor.firstName} ${a.competitor.lastName}`.toLowerCase();
+          const nameB = `${b.competitor.firstName} ${b.competitor.lastName}`.toLowerCase();
+          comparison = nameA.localeCompare(nameB);
+          break;
+        case 'rank':
+        default:
+          comparison = (a.rank || 0) - (b.rank || 0);
+          break;
+      }
+
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    return sorted;
   };
 
   if (loading) {
@@ -208,6 +250,30 @@ export default function LeaderboardPage() {
                     </Select>
                   </FormControl>
                 )}
+                <FormControl sx={{ minWidth: 180 }} size={isMobile ? 'medium' : 'small'}>
+                  <InputLabel>Sort By</InputLabel>
+                  <Select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as 'rank' | 'category' | 'duration' | 'name')}
+                    label="Sort By"
+                  >
+                    <MenuItem value="rank">Rank</MenuItem>
+                    <MenuItem value="category">Category</MenuItem>
+                    <MenuItem value="duration">Duration</MenuItem>
+                    <MenuItem value="name">Name</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ minWidth: 120 }} size={isMobile ? 'medium' : 'small'}>
+                  <InputLabel>Order</InputLabel>
+                  <Select
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+                    label="Order"
+                  >
+                    <MenuItem value="asc">Ascending</MenuItem>
+                    <MenuItem value="desc">Descending</MenuItem>
+                  </Select>
+                </FormControl>
                 <Button
                   variant={autoRefresh ? 'contained' : 'outlined'}
                   onClick={() => setAutoRefresh(!autoRefresh)}
@@ -248,7 +314,11 @@ export default function LeaderboardPage() {
                 return entry.category?.id === selectedCategoryId;
               });
 
-              return filteredFinished.length === 0 && filteredInProgress.length === 0 ? (
+              // Sort the filtered entries
+              const sortedFinished = sortEntries(filteredFinished);
+              const sortedInProgress = sortEntries(filteredInProgress);
+
+              return sortedFinished.length === 0 && sortedInProgress.length === 0 ? (
                 <Card>
                   <CardContent>
                     <Box textAlign="center" py={4}>
@@ -262,7 +332,7 @@ export default function LeaderboardPage() {
                 </Card>
               ) : (
                 <>
-                  {filteredFinished.length > 0 && (
+                  {sortedFinished.length > 0 && (
                   <Card sx={{ mb: 3 }}>
                     <CardContent>
                       <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
@@ -281,7 +351,7 @@ export default function LeaderboardPage() {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {filteredFinished.map((entry) => (
+                            {sortedFinished.map((entry) => (
                               <TableRow key={entry.timeEntryId} hover>
                                 <TableCell>
                                   <Chip
@@ -325,7 +395,7 @@ export default function LeaderboardPage() {
                   </Card>
                 )}
 
-                  {filteredInProgress.length > 0 && (
+                  {sortedInProgress.length > 0 && (
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
@@ -342,7 +412,7 @@ export default function LeaderboardPage() {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {filteredInProgress.map((entry) => {
+                            {sortedInProgress.map((entry) => {
                               const getStatusChip = () => {
                                 if (entry.status === 'ABSENT') {
                                   return <Chip label="Absent" color="error" size="small" />;
