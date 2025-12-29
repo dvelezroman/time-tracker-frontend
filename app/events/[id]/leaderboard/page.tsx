@@ -146,9 +146,9 @@ export default function LeaderboardPage() {
   };
 
   const handleSaveManualTime = async (eventCompetitorId: number) => {
-    // Validate format
-    if (!/^\d{2}:\d{2}:\d{2}$/.test(manualTimeValue)) {
-      showToast('Invalid format. Please use HH:MM:SS format (e.g., 01:23:45)', 'error');
+    // Validate format - support both HH:MM:SS and HH:MM:SS.mm
+    if (!/^\d{2}:\d{2}:\d{2}(\.\d{1,3})?$/.test(manualTimeValue)) {
+      showToast('Invalid format. Please use HH:MM:SS or HH:MM:SS.mm format (e.g., 01:23:45 or 01:23:45.123)', 'error');
       return;
     }
 
@@ -429,7 +429,7 @@ export default function LeaderboardPage() {
                                   </Typography>
                                 </TableCell>
                                 <TableCell>
-                                  <Typography variant="body2" fontWeight="medium">
+                                  <Typography variant="body2" fontWeight="bold" color="primary" sx={{ fontSize: '1rem' }}>
                                     {formatDuration(entry.duration)}
                                   </Typography>
                                 </TableCell>
@@ -507,13 +507,14 @@ export default function LeaderboardPage() {
                                             type="text"
                                             value={manualTimeValue}
                                             onChange={(e) => setManualTimeValue(e.target.value)}
-                                            placeholder="HH:MM:SS"
+                                            placeholder="HH:MM:SS.mm"
                                             size="small"
                                             inputProps={{
-                                              pattern: '^\\d{2}:\\d{2}:\\d{2}$',
-                                              style: { textAlign: 'center', width: '80px' },
+                                              pattern: '^\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?$',
+                                              style: { textAlign: 'center', width: '120px' },
                                             }}
-                                            sx={{ width: '100px' }}
+                                            sx={{ width: '140px' }}
+                                            helperText="Format: HH:MM:SS or HH:MM:SS.mm"
                                             disabled={savingManualTime === entry.eventCompetitorId}
                                             onKeyPress={(e) => {
                                               if (e.key === 'Enter') {

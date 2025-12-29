@@ -208,7 +208,7 @@ export const timeEntryService = {
       eventCompetitorId,
       duration,
     });
-    return response.data;
+    return response;
   },
 
   getPublicTimeEntry: async (

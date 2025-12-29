@@ -1,4 +1,5 @@
 import apiClient from '../client';
+import { publicApiClient } from '../public-client';
 
 export interface Category {
   id: number;
@@ -48,6 +49,11 @@ export const categoryService = {
 
   getAll: async (params?: FilterCategoryParams): Promise<CategoryListResponse> => {
     const response = await apiClient.get<CategoryListResponse>('/categories', { params });
+    return response.data;
+  },
+
+  getPublicAll: async (params?: FilterCategoryParams): Promise<CategoryListResponse> => {
+    const response = await publicApiClient.get<CategoryListResponse>('/categories', { params });
     return response.data;
   },
 

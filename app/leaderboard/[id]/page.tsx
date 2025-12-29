@@ -59,7 +59,7 @@ export default function PublicLeaderboardPage() {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const [leaderboardData, categoriesData] = await Promise.all([
         timeEntryService.getPublicLeaderboard(eventId, timezone),
-        categoryService.getAll({ eventId, limit: 1000 }).catch(() => ({ data: [] })),
+        categoryService.getPublicAll({ eventId, limit: 1000 }).catch(() => ({ data: [] })),
       ]);
       setLeaderboard(leaderboardData);
       setEvent(leaderboardData.event);
@@ -109,8 +109,8 @@ export default function PublicLeaderboardPage() {
     return (
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Box sx={{ mb: 2 }}>
-          <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.HOME)}>
-            Back to Home
+          <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.LOOKUP)}>
+            Back to Lookup
           </Button>
         </Box>
         <Alert severity="error">{error}</Alert>
@@ -122,8 +122,8 @@ export default function PublicLeaderboardPage() {
     return (
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Box sx={{ mb: 2 }}>
-          <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.HOME)}>
-            Back to Home
+          <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.LOOKUP)}>
+            Back to Lookup
           </Button>
         </Box>
         <Alert severity="info">Event or leaderboard not found</Alert>
@@ -142,10 +142,10 @@ export default function PublicLeaderboardPage() {
   });
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box sx={{ mb: 4 }}>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.HOME)} sx={{ mb: 2 }}>
-          Back to Home
+        <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.LOOKUP)} sx={{ mb: 2 }}>
+          Back to Lookup
         </Button>
         <Typography
           variant={isMobile ? 'h5' : 'h4'}
@@ -212,12 +212,11 @@ export default function PublicLeaderboardPage() {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell>Rank</TableCell>
-                        <TableCell>Competitor</TableCell>
-                        <TableCell>Category</TableCell>
-                        <TableCell>Start Time</TableCell>
-                        <TableCell>Finish Time</TableCell>
-                        <TableCell>Duration</TableCell>
+                        <TableCell><strong>Rank</strong></TableCell>
+                        <TableCell><strong>Sequential #</strong></TableCell>
+                        <TableCell><strong>Competitor</strong></TableCell>
+                        <TableCell><strong>Category</strong></TableCell>
+                        <TableCell><strong>Duration</strong></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -232,6 +231,11 @@ export default function PublicLeaderboardPage() {
                             />
                           </TableCell>
                           <TableCell>
+                            <Typography variant="body2" fontWeight="bold" color="primary">
+                              {entry.sequentialNumber || '-'}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
                             <Typography variant="body2" fontWeight="medium">
                               {entry.competitor.firstName} {entry.competitor.lastName}
                             </Typography>
@@ -242,17 +246,7 @@ export default function PublicLeaderboardPage() {
                             </Typography>
                           </TableCell>
                           <TableCell>
-                            <Typography variant="body2" color="text.secondary">
-                              {formatTime(entry.startDate, entry.startDateLocal)}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2" fontWeight="medium">
-                              {formatTime(entry.endDate, entry.endDateLocal)}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2" fontWeight="medium">
+                            <Typography variant="body2" fontWeight="bold" color="primary" sx={{ fontSize: '1rem' }}>
                               {formatDuration(entry.duration)}
                             </Typography>
                           </TableCell>
@@ -275,10 +269,10 @@ export default function PublicLeaderboardPage() {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell>Competitor</TableCell>
-                        <TableCell>Category</TableCell>
-                        <TableCell>Start Time</TableCell>
-                        <TableCell>Status</TableCell>
+                        <TableCell><strong>Sequential #</strong></TableCell>
+                        <TableCell><strong>Competitor</strong></TableCell>
+                        <TableCell><strong>Category</strong></TableCell>
+                        <TableCell><strong>Status</strong></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -296,6 +290,11 @@ export default function PublicLeaderboardPage() {
                         return (
                           <TableRow key={index} hover>
                             <TableCell>
+                              <Typography variant="body2" fontWeight="bold" color="primary">
+                                {entry.sequentialNumber || '-'}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
                               <Typography variant="body2" fontWeight="medium">
                                 {entry.competitor.firstName} {entry.competitor.lastName}
                               </Typography>
@@ -303,11 +302,6 @@ export default function PublicLeaderboardPage() {
                             <TableCell>
                               <Typography variant="body2" color="text.secondary">
                                 {entry.category?.name || '-'}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography variant="body2" color="text.secondary">
-                                {entry.startDate ? formatTime(entry.startDate, entry.startDateLocal) : '-'}
                               </Typography>
                             </TableCell>
                             <TableCell>{getStatusChip()}</TableCell>

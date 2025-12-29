@@ -48,6 +48,7 @@ interface TimeEntryResult {
   sequentialNumber: number | null;
   status: 'FINISHED' | 'IN_PROGRESS' | 'NOT_STARTED';
   rank: number | null;
+  categoryRank: number | null;
   startDate: string | null;
   startDateLocal?: string;
   endDate: string | null;
@@ -291,55 +292,40 @@ export default function LookupPage() {
               </Box>
 
               {result.status === 'FINISHED' && result.rank && (
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Overall Rank
-                  </Typography>
-                  <Typography variant="h5" color="primary" fontWeight="bold">
-                    #{result.rank}
-                  </Typography>
-                </Box>
-              )}
-
-              <Divider />
-
-              {result.startDate && (
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Start Time
-                  </Typography>
-                  <Typography variant="body1">
-                    {formatTime(result.startDate, result.startDateLocal)}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {formatDate(result.startDate, result.startDateLocal)}
-                  </Typography>
-                </Box>
-              )}
-
-              {result.endDate && (
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Finish Time
-                  </Typography>
-                  <Typography variant="body1" fontWeight="medium">
-                    {formatTime(result.endDate, result.endDateLocal)}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {formatDate(result.endDate, result.endDateLocal)}
-                  </Typography>
-                </Box>
+                <>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                      Overall Rank
+                    </Typography>
+                    <Typography variant="h5" color="primary" fontWeight="bold">
+                      #{result.rank}
+                    </Typography>
+                  </Box>
+                  {result.category && result.categoryRank && (
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Rank in {result.category.name}
+                      </Typography>
+                      <Typography variant="h5" color="secondary" fontWeight="bold">
+                        #{result.categoryRank}
+                      </Typography>
+                    </Box>
+                  )}
+                </>
               )}
 
               {result.duration !== null && (
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Duration
-                  </Typography>
-                  <Typography variant="h6" color="primary" fontWeight="bold">
-                    {formatDuration(result.duration)}
-                  </Typography>
-                </Box>
+                <>
+                  <Divider />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                      Duration
+                    </Typography>
+                    <Typography variant="h6" color="primary" fontWeight="bold">
+                      {formatDuration(result.duration)}
+                    </Typography>
+                  </Box>
+                </>
               )}
 
               {result.status === 'NOT_STARTED' && (
