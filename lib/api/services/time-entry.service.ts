@@ -1,5 +1,6 @@
 import apiClient from '../client';
 import { offlineApiClient } from '../offline-client';
+import { publicApiClient } from '../public-client';
 
 export interface Competitor {
   id: number;
@@ -231,7 +232,22 @@ export const timeEntryService = {
     if (timezone) {
       params.timezone = timezone;
     }
-    const response = await apiClient.get('/time-entries/public/lookup', { params });
+    const response = await publicApiClient.get('/time-entries/public/lookup', { params });
+    return response.data;
+  },
+
+  getPublicLeaderboard: async (
+    eventId: number,
+    timezone?: string,
+  ): Promise<LeaderboardResponse> => {
+    const params: any = {};
+    if (timezone) {
+      params.timezone = timezone;
+    }
+    const response = await publicApiClient.get<LeaderboardResponse>(
+      `/time-entries/public/event/${eventId}/leaderboard`,
+      { params },
+    );
     return response.data;
   },
 };

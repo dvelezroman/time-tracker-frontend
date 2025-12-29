@@ -23,6 +23,7 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import { eventService } from '@/lib/api/services/event.service';
 import { timeEntryService } from '@/lib/api/services/time-entry.service';
 import { ROUTES } from '@/lib/constants';
@@ -352,6 +353,20 @@ export default function LookupPage() {
                   Your time is still being recorded. Please check back later for your final results.
                 </Alert>
               )}
+
+              <Divider sx={{ my: 2 }} />
+
+              <Box>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<LeaderboardIcon />}
+                  onClick={() => router.push(`/leaderboard/${selectedEventId}`)}
+                  sx={{ mt: 2 }}
+                >
+                  View Complete Leaderboard
+                </Button>
+              </Box>
             </Box>
           </CardContent>
         </Card>

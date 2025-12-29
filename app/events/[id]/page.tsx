@@ -94,12 +94,13 @@ export default function EventDetailPage() {
   const [exportingExcel, setExportingExcel] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
-  const [competitorFormData, setCompetitorFormData] = useState<CreateCompetitorRequest & { categoryId?: number }>({
+  const [competitorFormData, setCompetitorFormData] = useState<CreateCompetitorRequest & { categoryId?: number; sequentialNumber?: number }>({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     categoryId: undefined,
+    sequentialNumber: undefined,
   });
   const [editingSequentialNumber, setEditingSequentialNumber] = useState<number | null>(null);
   const [sequentialNumberValue, setSequentialNumberValue] = useState<string>('');
@@ -213,6 +214,7 @@ export default function EventDetailPage() {
         email: '',
         phone: '',
         categoryId: undefined,
+        sequentialNumber: undefined,
       });
     }
   };
@@ -251,6 +253,7 @@ export default function EventDetailPage() {
         eventId,
         competitorId: competitor.id,
         categoryId: competitorFormData.categoryId,
+        sequentialNumber: competitorFormData.sequentialNumber,
       });
       
       showToast('Competitor created and registered successfully!', 'success');
@@ -261,6 +264,7 @@ export default function EventDetailPage() {
         email: '',
         phone: '',
         categoryId: undefined,
+        sequentialNumber: undefined,
       });
       await loadCompetitors();
       await loadEvent(); // Refresh event to update competitor count
@@ -1459,6 +1463,21 @@ export default function EventDetailPage() {
                     ))}
                   </Select>
                 </FormControl>
+                <TextField
+                  fullWidth
+                  label="Sequential Number"
+                  type="number"
+                  value={competitorFormData.sequentialNumber || ''}
+                  onChange={(e) =>
+                    setCompetitorFormData({
+                      ...competitorFormData,
+                      sequentialNumber: e.target.value ? Number(e.target.value) : undefined,
+                    })
+                  }
+                  disabled={registering}
+                  inputProps={{ min: 1 }}
+                  helperText="Optional: Leave empty to auto-assign the next available number"
+                />
               </Box>
             </DialogContent>
             <DialogActions>

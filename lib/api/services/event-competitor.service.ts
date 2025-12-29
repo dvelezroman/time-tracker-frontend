@@ -48,6 +48,7 @@ export interface RegisterCompetitorRequest {
   eventId: number;
   competitorId: number;
   categoryId?: number;
+  sequentialNumber?: number;
 }
 
 export const eventCompetitorService = {

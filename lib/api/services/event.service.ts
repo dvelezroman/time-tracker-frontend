@@ -1,5 +1,6 @@
 import apiClient from '../client';
 import { offlineApiClient } from '../offline-client';
+import { publicApiClient } from '../public-client';
 
 export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'ONGOING' | 'COMPLETED' | 'CANCELLED';
 
@@ -132,7 +133,7 @@ export const eventService = {
     if (timezone) {
       params.timezone = timezone;
     }
-    const response = await apiClient.get('/events/public', { params });
+    const response = await publicApiClient.get('/events/public', { params });
     return response.data;
   },
 };
