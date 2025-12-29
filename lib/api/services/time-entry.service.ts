@@ -45,6 +45,7 @@ export interface LeaderboardEntry {
   rank: number | null; // Overall rank
   categoryRank?: number | null; // Rank within category
   timeEntryId: number | null;
+  eventCompetitorId?: number; // ID of the event-competitor relationship
   competitor: Competitor;
   sequentialNumber?: number | null;
   category: Category | null;
@@ -193,6 +194,19 @@ export const timeEntryService = {
       `/time-entries/competitor/${competitorId}`,
       { params },
     );
+    return response.data;
+  },
+
+  createManualTimeEntry: async (
+    eventId: number,
+    eventCompetitorId: number,
+    duration: string,
+  ): Promise<TimeEntry> => {
+    const response = await offlineApiClient.post<TimeEntry>('/time-entries/manual', {
+      eventId,
+      eventCompetitorId,
+      duration,
+    });
     return response.data;
   },
 };

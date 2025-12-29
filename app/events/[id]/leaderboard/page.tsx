@@ -24,7 +24,12 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  TextField,
+  IconButton,
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { eventService, Event } from '@/lib/api/services/event.service';
@@ -37,6 +42,7 @@ import { categoryService, Category } from '@/lib/api/services/category.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
+import { parseHHMMSSToMilliseconds } from '@/lib/utils';
 
 export default function LeaderboardPage() {
   const router = useRouter();
@@ -54,6 +60,9 @@ export default function LeaderboardPage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | ''>('');
   const [sortBy, setSortBy] = useState<'rank' | 'category' | 'duration' | 'name'>('rank');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [editingManualTime, setEditingManualTime] = useState<number | null>(null);
+  const [manualTimeValue, setManualTimeValue] = useState<string>('');
+  const [savingManualTime, setSavingManualTime] = useState<number | null>(null);
 
   useEffect(() => {
     if (eventId) {
@@ -124,6 +133,38 @@ export default function LeaderboardPage() {
       return format(new Date(localDateString), 'HH:mm:ss');
     }
     return format(new Date(dateString), 'HH:mm:ss');
+  };
+
+  const handleStartEditManualTime = (eventCompetitorId: number) => {
+    setEditingManualTime(eventCompetitorId);
+    setManualTimeValue('');
+  };
+
+  const handleCancelEditManualTime = () => {
+    setEditingManualTime(null);
+    setManualTimeValue('');
+  };
+
+  const handleSaveManualTime = async (eventCompetitorId: number) => {
+    // Validate format
+    if (!/^\d{2}:\d{2}:\d{2}$/.test(manualTimeValue)) {
+      showToast('Invalid format. Please use HH:MM:SS format (e.g., 01:23:45)', 'error');
+      return;
+    }
+
+    try {
+      setSavingManualTime(eventCompetitorId);
+      await timeEntryService.createManualTimeEntry(eventId, eventCompetitorId, manualTimeValue);
+      showToast('Manual time entry added successfully', 'success');
+      handleCancelEditManualTime();
+      await loadData(); // Refresh leaderboard
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Failed to add manual time entry';
+      showToast(errorMessage, 'error');
+    } finally {
+      setSavingManualTime(null);
+    }
   };
 
   const sortEntries = (entries: LeaderboardEntry[]): LeaderboardEntry[] => {
@@ -409,6 +450,9 @@ export default function LeaderboardPage() {
                               <TableCell>Category</TableCell>
                               <TableCell>Start Time</TableCell>
                               <TableCell>Status</TableCell>
+                              {event.status === 'COMPLETED' && (
+                                <TableCell align="right">Actions</TableCell>
+                              )}
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -443,6 +487,67 @@ export default function LeaderboardPage() {
                                   <TableCell>
                                     {getStatusChip()}
                                   </TableCell>
+                                  {event.status === 'COMPLETED' && (
+                                    <TableCell align="right">
+                                      {editingManualTime === entry.eventCompetitorId ? (
+                                        <Box display="flex" alignItems="center" gap={1}>
+                                          <TextField
+                                            type="text"
+                                            value={manualTimeValue}
+                                            onChange={(e) => setManualTimeValue(e.target.value)}
+                                            placeholder="HH:MM:SS"
+                                            size="small"
+                                            inputProps={{
+                                              pattern: '^\\d{2}:\\d{2}:\\d{2}$',
+                                              style: { textAlign: 'center', width: '80px' },
+                                            }}
+                                            sx={{ width: '100px' }}
+                                            disabled={savingManualTime === entry.eventCompetitorId}
+                                            onKeyPress={(e) => {
+                                              if (e.key === 'Enter') {
+                                                handleSaveManualTime(entry.eventCompetitorId!);
+                                              } else if (e.key === 'Escape') {
+                                                handleCancelEditManualTime();
+                                              }
+                                            }}
+                                            autoFocus
+                                          />
+                                          <IconButton
+                                            size="small"
+                                            color="primary"
+                                            onClick={() => handleSaveManualTime(entry.eventCompetitorId!)}
+                                            disabled={savingManualTime === entry.eventCompetitorId}
+                                          >
+                                            {savingManualTime === entry.eventCompetitorId ? (
+                                              <CircularProgress size={16} />
+                                            ) : (
+                                              <CheckIcon fontSize="small" />
+                                            )}
+                                          </IconButton>
+                                          <IconButton
+                                            size="small"
+                                            color="error"
+                                            onClick={handleCancelEditManualTime}
+                                            disabled={savingManualTime === entry.eventCompetitorId}
+                                          >
+                                            <CloseIcon fontSize="small" />
+                                          </IconButton>
+                                        </Box>
+                                      ) : (
+                                        entry.eventCompetitorId &&
+                                        entry.duration === null && (
+                                          <IconButton
+                                            size="small"
+                                            color="primary"
+                                            onClick={() => handleStartEditManualTime(entry.eventCompetitorId!)}
+                                            title="Add manual time entry"
+                                          >
+                                            <EditIcon fontSize="small" />
+                                          </IconButton>
+                                        )
+                                      )}
+                                    </TableCell>
+                                  )}
                                 </TableRow>
                               );
                             })}
