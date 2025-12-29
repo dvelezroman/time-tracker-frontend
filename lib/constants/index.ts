@@ -47,6 +47,7 @@ export const ROUTES = {
   COMPETITORS: '/competitors',
   SETTINGS: '/settings',
   NOTIFICATIONS: '/notifications',
+  LOOKUP: '/lookup',
 } as const;
 
 export const STORAGE_KEYS = {

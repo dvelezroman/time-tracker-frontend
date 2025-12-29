@@ -227,6 +227,22 @@ export default function Home() {
             >
               Sign In
             </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => router.push(ROUTES.LOOKUP)}
+              sx={{
+                px: 4,
+                py: 1.5,
+                fontSize: '1.1rem',
+                borderWidth: 2,
+                '&:hover': {
+                  borderWidth: 2,
+                },
+              }}
+            >
+              Check Your Time
+            </Button>
           </Stack>
 
           {/* Stats */}

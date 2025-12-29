@@ -209,6 +209,31 @@ export const timeEntryService = {
     });
     return response.data;
   },
+
+  getPublicTimeEntry: async (
+    eventId: number,
+    sequentialNumber: number,
+    timezone?: string,
+  ): Promise<{
+    competitor: { firstName: string; lastName: string };
+    category: { id: number; name: string } | null;
+    sequentialNumber: number | null;
+    status: 'FINISHED' | 'IN_PROGRESS' | 'NOT_STARTED';
+    rank: number | null;
+    startDate: string | null;
+    startDateLocal?: string;
+    endDate: string | null;
+    endDateLocal?: string;
+    duration: number | null;
+    timezone?: string;
+  }> => {
+    const params: any = { eventId, sequentialNumber };
+    if (timezone) {
+      params.timezone = timezone;
+    }
+    const response = await apiClient.get('/time-entries/public/lookup', { params });
+    return response.data;
+  },
 };
 
 

@@ -114,5 +114,26 @@ export const eventService = {
     );
     return response.data;
   },
+
+  getPublicEvents: async (timezone?: string): Promise<
+    Array<{
+      id: number;
+      name: string;
+      status: string;
+      startDate: string;
+      endDate: string | null;
+      location: string | null;
+      startDateLocal?: string;
+      endDateLocal?: string | null;
+      timezone?: string;
+    }>
+  > => {
+    const params: any = {};
+    if (timezone) {
+      params.timezone = timezone;
+    }
+    const response = await apiClient.get('/events/public', { params });
+    return response.data;
+  },
 };
 
