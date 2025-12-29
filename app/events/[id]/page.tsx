@@ -220,6 +220,16 @@ export default function EventDetailPage() {
       return;
     }
 
+    if (!competitorFormData.phone?.trim()) {
+      showToast('Phone is required', 'error');
+      return;
+    }
+
+    if (!competitorFormData.categoryId) {
+      showToast('Category is required', 'error');
+      return;
+    }
+
     try {
       setRegistering(true);
       
@@ -651,7 +661,7 @@ export default function EventDetailPage() {
                     <Button
                       variant="contained"
                       color="info"
-                      onClick={() => router.push(ROUTES.EVENTS_TIMER_FULLSCREEN(event.id))}
+                      onClick={() => window.open(ROUTES.EVENTS_TIMER_FULLSCREEN(event.id), '_blank')}
                       size={isMobile ? 'medium' : 'large'}
                     >
                       Full Screen Timer
@@ -659,7 +669,7 @@ export default function EventDetailPage() {
                     <Button
                       variant="contained"
                       color="secondary"
-                      onClick={() => router.push(ROUTES.EVENTS_INDIVIDUAL_TIMER(event.id))}
+                      onClick={() => window.open(ROUTES.EVENTS_INDIVIDUAL_TIMER(event.id), '_blank')}
                       size={isMobile ? 'medium' : 'large'}
                     >
                       Individual Timer
@@ -750,14 +760,25 @@ export default function EventDetailPage() {
           {/* Excel Import Section */}
           <Card sx={{ mt: 3 }}>
             <CardContent>
-              <Box display="flex" alignItems="center" gap={1} mb={2}>
-                <CloudUploadIcon color="primary" />
-                <Typography variant="h6">
-                  Import Competitors from Excel
-                </Typography>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} flexWrap="wrap" gap={2}>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <CloudUploadIcon color="primary" />
+                  <Typography variant="h6">
+                    Import Competitors from Excel
+                  </Typography>
+                </Box>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<AddIcon />}
+                  onClick={handleOpenRegisterDialog}
+                  size={isMobile ? 'medium' : 'small'}
+                >
+                  Register Competitor Manually
+                </Button>
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Upload an Excel file (.xlsx or .xls) to import competitors and register them to this event.
+                Upload an Excel file (.xlsx or .xls) to import competitors and register them to this event, or use the button above to register a competitor manually.
               </Typography>
 
               {/* Instructions Accordion */}
@@ -1067,6 +1088,10 @@ export default function EventDetailPage() {
                     startIcon={<AddIcon />}
                     onClick={handleOpenRegisterDialog}
                     size={isMobile ? 'medium' : 'small'}
+                    sx={{ 
+                      minWidth: { xs: '100%', sm: 'auto' },
+                      order: { xs: 1, sm: 0 }
+                    }}
                   >
                     Register Competitor
                   </Button>
@@ -1312,10 +1337,11 @@ export default function EventDetailPage() {
                   onChange={(e) =>
                     setCompetitorFormData({ ...competitorFormData, phone: e.target.value })
                   }
+                  required
                   disabled={registering}
                 />
-                <FormControl fullWidth disabled={registering || loadingCategories}>
-                  <InputLabel>Category (Optional)</InputLabel>
+                <FormControl fullWidth required disabled={registering || loadingCategories}>
+                  <InputLabel>Category</InputLabel>
                   <Select
                     value={competitorFormData.categoryId || ''}
                     onChange={(e) =>
@@ -1324,11 +1350,8 @@ export default function EventDetailPage() {
                         categoryId: e.target.value ? Number(e.target.value) : undefined,
                       })
                     }
-                    label="Category (Optional)"
+                    label="Category"
                   >
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
                     {categories.map((category) => (
                       <MenuItem key={category.id} value={category.id}>
                         {category.name}
@@ -1345,7 +1368,7 @@ export default function EventDetailPage() {
               <Button
                 onClick={handleRegisterCompetitor}
                 variant="contained"
-                disabled={registering || !competitorFormData.firstName.trim() || !competitorFormData.lastName.trim()}
+                disabled={registering || !competitorFormData.firstName.trim() || !competitorFormData.lastName.trim() || !competitorFormData.phone?.trim() || !competitorFormData.categoryId}
                 startIcon={registering ? <CircularProgress size={20} /> : null}
               >
                 {registering ? 'Registering...' : 'Register Competitor'}

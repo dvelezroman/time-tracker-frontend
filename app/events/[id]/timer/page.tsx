@@ -187,7 +187,7 @@ export default function EventTimerPage() {
                     variant="outlined"
                     color="primary"
                     fullWidth
-                    onClick={() => router.push(ROUTES.EVENTS_TIMER_FULLSCREEN(eventId))}
+                    onClick={() => window.open(ROUTES.EVENTS_TIMER_FULLSCREEN(eventId), '_blank')}
                     size={isMobile ? 'medium' : 'large'}
                   >
                     Full Screen View
