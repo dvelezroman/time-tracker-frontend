@@ -134,6 +134,94 @@
     "totalTime": "Total Time",
     "totalUsers": "Total Users",
     "totalEvents": "Total Events"
+  },
+  "lookup": {
+    "title": "Check Your Time",
+    "subtitle": "Enter your sequential number and select an event to view your finish time and results.",
+    "selectEvent": "Select Event",
+    "sequentialNumber": "Sequential Number",
+    "sequentialNumberHelper": "Enter the sequential number assigned to you for this event",
+    "lookupTime": "Lookup Time",
+    "lookingUp": "Looking up...",
+    "backToHome": "Back to Home",
+    "yourResults": "Your Results",
+    "competitor": "Competitor",
+    "category": "Category",
+    "status": "Status",
+    "overallRank": "Overall Rank",
+    "categoryRank": "Rank in {category}",
+    "duration": "Duration",
+    "finished": "Finished",
+    "inProgress": "In Progress",
+    "notStarted": "Not Started",
+    "notStartedMessage": "You have not started this event yet. Please check with event organizers.",
+    "inProgressMessage": "Your time is still being recorded. Please check back later for your final results.",
+    "viewCompleteLeaderboard": "View Complete Leaderboard",
+    "selectEventError": "Please select an event and enter your sequential number",
+    "invalidSequentialNumber": "Please enter a valid sequential number",
+    "failedToLoadEvents": "Failed to load events. Please try again.",
+    "failedToLookup": "Failed to lookup time entry. Please try again.",
+    "loadingEvents": "Loading events...",
+    "noEventsAvailable": "No events available"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "backToLookup": "Back to Lookup",
+    "finishedCompetitors": "Finished Competitors",
+    "inProgress": "In Progress",
+    "notFinishedAbsent": "Not Finished / Absent",
+    "rank": "Rank",
+    "competitor": "Competitor",
+    "category": "Category",
+    "duration": "Duration",
+    "status": "Status",
+    "absent": "Absent",
+    "notFinished": "Not Finished",
+    "finished": "Finished",
+    "noCompetitors": "No competitors registered for this event yet.",
+    "noCompetitorsCategory": "No competitors found for the selected category.",
+    "filterByCategory": "Filter by Category",
+    "allCategories": "All Categories",
+    "finishedCount": "{finished} of {total} competitors finished"
+  },
+  "landing": {
+    "title": "Time Tracker",
+    "subtitle": "Professional Timing System for Sports Events",
+    "description": "Track competitor times with millisecond precision. Generate live leaderboards, send automated notifications, and manage events effortlessly.",
+    "getStartedFree": "Get Started Free",
+    "signIn": "Sign In",
+    "checkYourTime": "Check Your Time",
+    "fast": "Fast",
+    "secure": "Secure",
+    "accurate": "Accurate",
+    "complete": "Complete",
+    "features": {
+      "title": "Everything You Need to Manage Sports Events",
+      "realTimeTracking": {
+        "title": "Real-Time Tracking",
+        "description": "Track competitor times with millisecond precision using QR code scanning or manual entry."
+      },
+      "liveLeaderboards": {
+        "title": "Live Leaderboards",
+        "description": "Generate and display live leaderboards sorted by finish times with category filtering."
+      },
+      "qrCodeGeneration": {
+        "title": "QR Code Generation",
+        "description": "Automatically generate unique QR codes for each competitor for quick scanning."
+      },
+      "automatedNotifications": {
+        "title": "Automated Notifications",
+        "description": "Send finish time notifications via email and WhatsApp automatically."
+      },
+      "eventManagement": {
+        "title": "Event Management",
+        "description": "Create and manage multiple events with categories, competitors, and time tracking."
+      },
+      "offlineSupport": {
+        "title": "Offline Support",
+        "description": "Continue tracking times even without internet connection. Data syncs automatically when connection is restored."
+      }
+    }
   }
 }
 

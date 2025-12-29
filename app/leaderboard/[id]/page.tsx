@@ -31,12 +31,15 @@ import { categoryService, Category } from '@/lib/api/services/category.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
+import { useTranslation } from '@/lib/i18n/useTranslation';
+import { PublicHeader } from '@/components/layout/PublicHeader';
 
 export default function PublicLeaderboardPage() {
   const router = useRouter();
   const params = useParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { t } = useTranslation();
   const eventId = Number(params.id);
 
   const [event, setEvent] = useState<LeaderboardResponse['event'] | null>(null);
@@ -66,7 +69,7 @@ export default function PublicLeaderboardPage() {
       setCategories(categoriesData.data || []);
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to load leaderboard. Please try again.';
+        err.response?.data?.message || err.message || t('common.error');
       setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
@@ -97,37 +100,46 @@ export default function PublicLeaderboardPage() {
 
   if (loading) {
     return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-          <CircularProgress />
-        </Box>
-      </Container>
+      <>
+        <PublicHeader />
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+            <CircularProgress />
+          </Box>
+        </Container>
+      </>
     );
   }
 
   if (error && !leaderboard) {
     return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Box sx={{ mb: 2 }}>
-          <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.LOOKUP)}>
-            Back to Lookup
-          </Button>
-        </Box>
-        <Alert severity="error">{error}</Alert>
-      </Container>
+      <>
+        <PublicHeader />
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <Box sx={{ mb: 2 }}>
+            <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.LOOKUP)}>
+              {t('leaderboard.backToLookup')}
+            </Button>
+          </Box>
+          <Alert severity="error">{error}</Alert>
+        </Container>
+      </>
     );
   }
 
   if (!event || !leaderboard) {
     return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Box sx={{ mb: 2 }}>
-          <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.LOOKUP)}>
-            Back to Lookup
-          </Button>
-        </Box>
-        <Alert severity="info">Event or leaderboard not found</Alert>
-      </Container>
+      <>
+        <PublicHeader />
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <Box sx={{ mb: 2 }}>
+            <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.LOOKUP)}>
+              {t('leaderboard.backToLookup')}
+            </Button>
+          </Box>
+          <Alert severity="info">{t('common.error')}</Alert>
+        </Container>
+      </>
     );
   }
 
@@ -142,25 +154,27 @@ export default function PublicLeaderboardPage() {
   });
 
   return (
+    <>
+      <PublicHeader />
       <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.LOOKUP)} sx={{ mb: 2 }}>
-          Back to Lookup
-        </Button>
-        <Typography
-          variant={isMobile ? 'h5' : 'h4'}
-          component="h1"
-          sx={{
-            fontWeight: 700,
-            color: theme.palette.mode === 'dark' ? '#e6edf3' : '#1a1a1a',
-          }}
-        >
-          Leaderboard - {event.name}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          {leaderboard.finishedCount} of {leaderboard.total} competitors finished
-        </Typography>
-      </Box>
+        <Box sx={{ mb: 4 }}>
+          <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.LOOKUP)} sx={{ mb: 2 }}>
+            {t('leaderboard.backToLookup')}
+          </Button>
+          <Typography
+            variant={isMobile ? 'h5' : 'h4'}
+            component="h1"
+            sx={{
+              fontWeight: 700,
+              color: theme.palette.mode === 'dark' ? '#e6edf3' : '#1a1a1a',
+            }}
+          >
+            {t('leaderboard.title')} - {event.name}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            {t('leaderboard.finishedCount', { finished: leaderboard.finishedCount, total: leaderboard.total })}
+          </Typography>
+        </Box>
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
@@ -171,13 +185,13 @@ export default function PublicLeaderboardPage() {
       {categories.length > 0 && (
         <Box sx={{ mb: 3 }}>
           <FormControl sx={{ minWidth: 200 }} size={isMobile ? 'medium' : 'small'}>
-            <InputLabel>Filter by Category</InputLabel>
+            <InputLabel>{t('leaderboard.filterByCategory')}</InputLabel>
             <Select
               value={selectedCategoryId}
               onChange={(e) => setSelectedCategoryId(e.target.value as number | '')}
-              label="Filter by Category"
+              label={t('leaderboard.filterByCategory')}
             >
-              <MenuItem value="">All Categories</MenuItem>
+              <MenuItem value="">{t('leaderboard.allCategories')}</MenuItem>
               {categories.map((category) => (
                 <MenuItem key={category.id} value={category.id}>
                   {category.name}
@@ -194,8 +208,8 @@ export default function PublicLeaderboardPage() {
             <Box textAlign="center" py={4}>
               <Typography variant="body1" color="text.secondary">
                 {selectedCategoryId === ''
-                  ? 'No competitors registered for this event yet.'
-                  : 'No competitors found for the selected category.'}
+                  ? t('leaderboard.noCompetitors')
+                  : t('leaderboard.noCompetitorsCategory')}
               </Typography>
             </Box>
           </CardContent>
@@ -206,17 +220,17 @@ export default function PublicLeaderboardPage() {
             <Card sx={{ mb: 3 }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                  Finished Competitors
+                  {t('leaderboard.finishedCompetitors')}
                 </Typography>
                 <TableContainer>
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell><strong>Rank</strong></TableCell>
-                        <TableCell><strong>Sequential #</strong></TableCell>
-                        <TableCell><strong>Competitor</strong></TableCell>
-                        <TableCell><strong>Category</strong></TableCell>
-                        <TableCell><strong>Duration</strong></TableCell>
+                        <TableCell><strong>{t('leaderboard.rank')}</strong></TableCell>
+                        <TableCell><strong>{t('competitors.sequentialNumber')}</strong></TableCell>
+                        <TableCell><strong>{t('leaderboard.competitor')}</strong></TableCell>
+                        <TableCell><strong>{t('leaderboard.category')}</strong></TableCell>
+                        <TableCell><strong>{t('leaderboard.duration')}</strong></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -263,27 +277,27 @@ export default function PublicLeaderboardPage() {
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                  {event.status === 'COMPLETED' ? 'Not Finished / Absent' : 'In Progress'}
+                  {event.status === 'COMPLETED' ? t('leaderboard.notFinishedAbsent') : t('leaderboard.inProgress')}
                 </Typography>
                 <TableContainer>
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell><strong>Sequential #</strong></TableCell>
-                        <TableCell><strong>Competitor</strong></TableCell>
-                        <TableCell><strong>Category</strong></TableCell>
-                        <TableCell><strong>Status</strong></TableCell>
+                        <TableCell><strong>{t('competitors.sequentialNumber')}</strong></TableCell>
+                        <TableCell><strong>{t('leaderboard.competitor')}</strong></TableCell>
+                        <TableCell><strong>{t('leaderboard.category')}</strong></TableCell>
+                        <TableCell><strong>{t('leaderboard.status')}</strong></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {filteredInProgress.map((entry, index) => {
                         const getStatusChip = () => {
                           if (entry.status === 'ABSENT') {
-                            return <Chip label="Absent" color="error" size="small" />;
+                            return <Chip label={t('leaderboard.absent')} color="error" size="small" />;
                           } else if (entry.status === 'NOT_FINISHED') {
-                            return <Chip label="Not Finished" color="warning" size="small" />;
+                            return <Chip label={t('leaderboard.notFinished')} color="warning" size="small" />;
                           } else {
-                            return <Chip label="In Progress" color="warning" size="small" />;
+                            return <Chip label={t('leaderboard.inProgress')} color="warning" size="small" />;
                           }
                         };
 
@@ -316,7 +330,8 @@ export default function PublicLeaderboardPage() {
           )}
         </>
       )}
-    </Container>
+      </Container>
+    </>
   );
 }
 

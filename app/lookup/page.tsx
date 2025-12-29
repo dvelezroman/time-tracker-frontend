@@ -29,6 +29,8 @@ import { timeEntryService } from '@/lib/api/services/time-entry.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
+import { useTranslation } from '@/lib/i18n/useTranslation';
+import { PublicHeader } from '@/components/layout/PublicHeader';
 
 interface PublicEvent {
   id: number;
@@ -61,6 +63,7 @@ export default function LookupPage() {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { t } = useTranslation();
   const [events, setEvents] = useState<PublicEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [selectedEventId, setSelectedEventId] = useState<number | ''>('');
@@ -81,7 +84,7 @@ export default function LookupPage() {
       setEvents(eventsData);
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to load events. Please try again.';
+        err.response?.data?.message || err.message || t('lookup.failedToLoadEvents');
       showToast(errorMessage, 'error');
     } finally {
       setLoadingEvents(false);
@@ -91,13 +94,13 @@ export default function LookupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEventId || !sequentialNumber.trim()) {
-      showToast('Please select an event and enter your sequential number', 'error');
+      showToast(t('lookup.selectEventError'), 'error');
       return;
     }
 
     const seqNum = parseInt(sequentialNumber.trim(), 10);
     if (isNaN(seqNum) || seqNum < 1) {
-      showToast('Please enter a valid sequential number', 'error');
+      showToast(t('lookup.invalidSequentialNumber'), 'error');
       return;
     }
 
@@ -114,7 +117,7 @@ export default function LookupPage() {
       setResult(timeEntryData);
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to lookup time entry. Please try again.';
+        err.response?.data?.message || err.message || t('lookup.failedToLookup');
       setError(errorMessage);
       setResult(null);
     } finally {
@@ -154,59 +157,61 @@ export default function LookupPage() {
   const getStatusChip = () => {
     if (!result) return null;
     if (result.status === 'FINISHED') {
-      return <Chip label="Finished" color="success" size="small" />;
+      return <Chip label={t('lookup.finished')} color="success" size="small" />;
     } else if (result.status === 'IN_PROGRESS') {
-      return <Chip label="In Progress" color="warning" size="small" />;
+      return <Chip label={t('lookup.inProgress')} color="warning" size="small" />;
     } else {
-      return <Chip label="Not Started" color="default" size="small" />;
+      return <Chip label={t('lookup.notStarted')} color="default" size="small" />;
     }
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => router.push(ROUTES.HOME)}
-          sx={{ mb: 2 }}
-        >
-          Back to Home
-        </Button>
-        <Typography
-          variant={isMobile ? 'h4' : 'h3'}
-          component="h1"
-          gutterBottom
-          sx={{
-            fontWeight: 700,
-            color: theme.palette.mode === 'dark' ? '#e6edf3' : '#1a1a1a',
-          }}
-        >
-          Check Your Time
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Enter your sequential number and select an event to view your finish time and results.
-        </Typography>
-      </Box>
+    <>
+      <PublicHeader />
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Box sx={{ mb: 4 }}>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => router.push(ROUTES.HOME)}
+            sx={{ mb: 2 }}
+          >
+            {t('lookup.backToHome')}
+          </Button>
+          <Typography
+            variant={isMobile ? 'h4' : 'h3'}
+            component="h1"
+            gutterBottom
+            sx={{
+              fontWeight: 700,
+              color: theme.palette.mode === 'dark' ? '#e6edf3' : '#1a1a1a',
+            }}
+          >
+            {t('lookup.title')}
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            {t('lookup.subtitle')}
+          </Typography>
+        </Box>
 
       <Card>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <FormControl fullWidth required>
-                <InputLabel>Select Event</InputLabel>
+                <InputLabel>{t('lookup.selectEvent')}</InputLabel>
                 <Select
                   value={selectedEventId}
                   onChange={(e) => setSelectedEventId(e.target.value as number | '')}
-                  label="Select Event"
+                  label={t('lookup.selectEvent')}
                   disabled={loadingEvents || loading}
                 >
                   {loadingEvents ? (
                     <MenuItem disabled>
                       <CircularProgress size={20} sx={{ mr: 1 }} />
-                      Loading events...
+                      {t('lookup.loadingEvents')}
                     </MenuItem>
                   ) : events.length === 0 ? (
-                    <MenuItem disabled>No events available</MenuItem>
+                    <MenuItem disabled>{t('lookup.noEventsAvailable')}</MenuItem>
                   ) : (
                     events.map((event) => (
                       <MenuItem key={event.id} value={event.id}>
@@ -218,7 +223,7 @@ export default function LookupPage() {
               </FormControl>
 
               <TextField
-                label="Sequential Number"
+                label={t('lookup.sequentialNumber')}
                 type="number"
                 value={sequentialNumber}
                 onChange={(e) => setSequentialNumber(e.target.value)}
@@ -226,7 +231,7 @@ export default function LookupPage() {
                 fullWidth
                 disabled={loading}
                 inputProps={{ min: 1 }}
-                helperText="Enter the sequential number assigned to you for this event"
+                helperText={t('lookup.sequentialNumberHelper')}
               />
 
               <Button
@@ -237,7 +242,7 @@ export default function LookupPage() {
                 disabled={loading || loadingEvents || !selectedEventId || !sequentialNumber.trim()}
                 fullWidth
               >
-                {loading ? 'Looking up...' : 'Lookup Time'}
+                {loading ? t('lookup.lookingUp') : t('lookup.lookupTime')}
               </Button>
             </Box>
           </form>
@@ -254,12 +259,12 @@ export default function LookupPage() {
         <Card sx={{ mt: 3 }}>
           <CardContent>
             <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-              Your Results
+              {t('lookup.yourResults')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Box>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Competitor
+                  {t('lookup.competitor')}
                 </Typography>
                 <Typography variant="body1" fontWeight="medium">
                   {result.competitor.firstName} {result.competitor.lastName}
@@ -269,7 +274,7 @@ export default function LookupPage() {
               {result.sequentialNumber && (
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Sequential Number
+                    {t('lookup.sequentialNumber')}
                   </Typography>
                   <Typography variant="body1">#{result.sequentialNumber}</Typography>
                 </Box>
@@ -278,7 +283,7 @@ export default function LookupPage() {
               {result.category && (
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Category
+                    {t('lookup.category')}
                   </Typography>
                   <Typography variant="body1">{result.category.name}</Typography>
                 </Box>
@@ -286,7 +291,7 @@ export default function LookupPage() {
 
               <Box>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Status
+                  {t('lookup.status')}
                 </Typography>
                 {getStatusChip()}
               </Box>
@@ -295,7 +300,7 @@ export default function LookupPage() {
                 <>
                   <Box>
                     <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                      Overall Rank
+                      {t('lookup.overallRank')}
                     </Typography>
                     <Typography variant="h5" color="primary" fontWeight="bold">
                       #{result.rank}
@@ -304,7 +309,7 @@ export default function LookupPage() {
                   {result.category && result.categoryRank && (
                     <Box>
                       <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                        Rank in {result.category.name}
+                        {t('lookup.categoryRank', { category: result.category.name })}
                       </Typography>
                       <Typography variant="h5" color="secondary" fontWeight="bold">
                         #{result.categoryRank}
@@ -319,7 +324,7 @@ export default function LookupPage() {
                   <Divider />
                   <Box>
                     <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                      Duration
+                      {t('lookup.duration')}
                     </Typography>
                     <Typography variant="h6" color="primary" fontWeight="bold">
                       {formatDuration(result.duration)}
@@ -330,13 +335,13 @@ export default function LookupPage() {
 
               {result.status === 'NOT_STARTED' && (
                 <Alert severity="info">
-                  You have not started this event yet. Please check with event organizers.
+                  {t('lookup.notStartedMessage')}
                 </Alert>
               )}
 
               {result.status === 'IN_PROGRESS' && (
                 <Alert severity="warning">
-                  Your time is still being recorded. Please check back later for your final results.
+                  {t('lookup.inProgressMessage')}
                 </Alert>
               )}
 
@@ -350,14 +355,15 @@ export default function LookupPage() {
                   onClick={() => router.push(`/leaderboard/${selectedEventId}`)}
                   sx={{ mt: 2 }}
                 >
-                  View Complete Leaderboard
+                  {t('lookup.viewCompleteLeaderboard')}
                 </Button>
               </Box>
             </Box>
           </CardContent>
         </Card>
       )}
-    </Container>
+      </Container>
+    </>
   );
 }
 

@@ -134,6 +134,94 @@
     "totalTime": "Tiempo Total",
     "totalUsers": "Total de Usuarios",
     "totalEvents": "Total de Eventos"
+  },
+  "lookup": {
+    "title": "Consulta Tu Tiempo",
+    "subtitle": "Ingresa tu número secuencial y selecciona un evento para ver tu tiempo de llegada y resultados.",
+    "selectEvent": "Seleccionar Evento",
+    "sequentialNumber": "Número Secuencial",
+    "sequentialNumberHelper": "Ingresa el número secuencial asignado para este evento",
+    "lookupTime": "Consultar Tiempo",
+    "lookingUp": "Consultando...",
+    "backToHome": "Volver al Inicio",
+    "yourResults": "Tus Resultados",
+    "competitor": "Competidor",
+    "category": "Categoría",
+    "status": "Estado",
+    "overallRank": "Ranking General",
+    "categoryRank": "Ranking en {category}",
+    "duration": "Duración",
+    "finished": "Finalizado",
+    "inProgress": "En Progreso",
+    "notStarted": "No Iniciado",
+    "notStartedMessage": "Aún no has iniciado este evento. Por favor, consulta con los organizadores del evento.",
+    "inProgressMessage": "Tu tiempo aún se está registrando. Por favor, vuelve más tarde para ver tus resultados finales.",
+    "viewCompleteLeaderboard": "Ver Clasificación Completa",
+    "selectEventError": "Por favor selecciona un evento e ingresa tu número secuencial",
+    "invalidSequentialNumber": "Por favor ingresa un número secuencial válido",
+    "failedToLoadEvents": "Error al cargar eventos. Por favor intenta de nuevo.",
+    "failedToLookup": "Error al consultar el tiempo. Por favor intenta de nuevo.",
+    "loadingEvents": "Cargando eventos...",
+    "noEventsAvailable": "No hay eventos disponibles"
+  },
+  "leaderboard": {
+    "title": "Clasificación",
+    "backToLookup": "Volver a Consulta",
+    "finishedCompetitors": "Competidores Finalizados",
+    "inProgress": "En Progreso",
+    "notFinishedAbsent": "No Finalizado / Ausente",
+    "rank": "Posición",
+    "competitor": "Competidor",
+    "category": "Categoría",
+    "duration": "Duración",
+    "status": "Estado",
+    "absent": "Ausente",
+    "notFinished": "No Finalizado",
+    "finished": "Finalizado",
+    "noCompetitors": "Aún no hay competidores registrados para este evento.",
+    "noCompetitorsCategory": "No se encontraron competidores para la categoría seleccionada.",
+    "filterByCategory": "Filtrar por Categoría",
+    "allCategories": "Todas las Categorías",
+    "finishedCount": "{finished} de {total} competidores finalizados"
+  },
+  "landing": {
+    "title": "Time Tracker",
+    "subtitle": "Sistema Profesional de Cronometraje para Eventos Deportivos",
+    "description": "Rastrea los tiempos de los competidores con precisión de milisegundos. Genera clasificaciones en vivo, envía notificaciones automatizadas y gestiona eventos sin esfuerzo.",
+    "getStartedFree": "Comenzar Gratis",
+    "signIn": "Iniciar Sesión",
+    "checkYourTime": "Consulta Tu Tiempo",
+    "fast": "Rápido",
+    "secure": "Seguro",
+    "accurate": "Preciso",
+    "complete": "Completo",
+    "features": {
+      "title": "Todo lo que Necesitas para Gestionar Eventos Deportivos",
+      "realTimeTracking": {
+        "title": "Seguimiento en Tiempo Real",
+        "description": "Rastrea los tiempos de los competidores con precisión de milisegundos usando escaneo de códigos QR o entrada manual."
+      },
+      "liveLeaderboards": {
+        "title": "Clasificaciones en Vivo",
+        "description": "Genera y muestra clasificaciones en vivo ordenadas por tiempos de llegada con filtrado por categoría."
+      },
+      "qrCodeGeneration": {
+        "title": "Generación de Códigos QR",
+        "description": "Genera automáticamente códigos QR únicos para cada competidor para escaneo rápido."
+      },
+      "automatedNotifications": {
+        "title": "Notificaciones Automatizadas",
+        "description": "Envía notificaciones de tiempo de llegada por correo electrónico y WhatsApp automáticamente."
+      },
+      "eventManagement": {
+        "title": "Gestión de Eventos",
+        "description": "Crea y gestiona múltiples eventos con categorías, competidores y seguimiento de tiempos."
+      },
+      "offlineSupport": {
+        "title": "Soporte Offline",
+        "description": "Continúa registrando tiempos incluso sin conexión a internet. Los datos se sincronizan automáticamente cuando se restaura la conexión."
+      }
+    }
   }
 }
 
