@@ -2,8 +2,9 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
-  // Disable caching in development for easier debugging
+  // Optimize for development hot reload
   ...(process.env.NODE_ENV === 'development' && {
+    // Reduce cache time for faster updates
     onDemandEntries: {
       // Period (in ms) where the server will keep pages in the buffer
       maxInactiveAge: 25 * 1000,
