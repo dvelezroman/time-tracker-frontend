@@ -101,6 +101,9 @@ export default function EventDetailPage() {
     phone: '',
     categoryId: undefined,
   });
+  const [editingSequentialNumber, setEditingSequentialNumber] = useState<number | null>(null);
+  const [sequentialNumberValue, setSequentialNumberValue] = useState<string>('');
+  const [updatingSequentialNumber, setUpdatingSequentialNumber] = useState<number | null>(null);
 
   useEffect(() => {
     if (eventId) {
@@ -281,6 +284,63 @@ export default function EventDetailPage() {
       showToast(errorMessage, 'error');
     } finally {
       setExportingExcel(false);
+    }
+  };
+
+  const handleStartEditSequentialNumber = (id: number, currentValue: number | null | undefined) => {
+    setEditingSequentialNumber(id);
+    setSequentialNumberValue(currentValue?.toString() || '');
+  };
+
+  const handleCancelEditSequentialNumber = () => {
+    setEditingSequentialNumber(null);
+    setSequentialNumberValue('');
+  };
+
+  const handleSaveSequentialNumber = async (id: number) => {
+    const newValue = parseInt(sequentialNumberValue, 10);
+    
+    if (isNaN(newValue) || newValue < 1) {
+      showToast('Please enter a valid sequential number (minimum 1)', 'error');
+      handleCancelEditSequentialNumber();
+      return;
+    }
+
+    // Check if the number is already used by another competitor in this event
+    const existingCompetitor = competitors.find(
+      (c) => c.id !== id && c.sequentialNumber === newValue
+    );
+
+    if (existingCompetitor) {
+      showToast(
+        `Sequential number ${newValue} is already assigned to ${existingCompetitor.competitor.firstName} ${existingCompetitor.competitor.lastName}`,
+        'error',
+      );
+      handleCancelEditSequentialNumber();
+      return;
+    }
+
+    try {
+      setUpdatingSequentialNumber(id);
+      await eventCompetitorService.updateSequentialNumber(id, newValue);
+      
+      // Update local state
+      setCompetitors((prev) =>
+        prev.map((c) =>
+          c.id === id
+            ? { ...c, sequentialNumber: newValue }
+            : c
+        )
+      );
+      
+      showToast('Sequential number updated successfully', 'success');
+      handleCancelEditSequentialNumber();
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Failed to update sequential number';
+      showToast(errorMessage, 'error');
+    } finally {
+      setUpdatingSequentialNumber(null);
     }
   };
 
@@ -1164,7 +1224,47 @@ export default function EventDetailPage() {
                             />
                           </TableCell>
                           <TableCell>
-                            {competitor.sequentialNumber || '-'}
+                            {editingSequentialNumber === competitor.id ? (
+                              <TextField
+                                type="number"
+                                value={sequentialNumberValue}
+                                onChange={(e) => setSequentialNumberValue(e.target.value)}
+                                onBlur={() => handleCancelEditSequentialNumber()}
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleSaveSequentialNumber(competitor.id);
+                                  } else if (e.key === 'Escape') {
+                                    handleCancelEditSequentialNumber();
+                                  }
+                                }}
+                                autoFocus
+                                size="small"
+                                inputProps={{
+                                  min: 1,
+                                  style: { textAlign: 'center', width: '60px' },
+                                }}
+                                sx={{ width: '80px' }}
+                                disabled={updatingSequentialNumber === competitor.id}
+                              />
+                            ) : (
+                              <Box
+                                onClick={() => handleStartEditSequentialNumber(competitor.id, competitor.sequentialNumber)}
+                                sx={{
+                                  cursor: 'pointer',
+                                  padding: '4px 8px',
+                                  borderRadius: '4px',
+                                  '&:hover': {
+                                    backgroundColor: 'action.hover',
+                                  },
+                                  display: 'inline-block',
+                                  minWidth: '40px',
+                                  textAlign: 'center',
+                                }}
+                                title="Click to edit sequential number"
+                              >
+                                {competitor.sequentialNumber || '-'}
+                              </Box>
+                            )}
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2" fontWeight="medium">

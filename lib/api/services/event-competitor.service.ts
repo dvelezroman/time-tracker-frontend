@@ -150,6 +150,14 @@ export const eventCompetitorService = {
   delete: async (id: number): Promise<void> => {
     await offlineApiClient.delete(`/event-competitors/${id}`);
   },
+
+  updateSequentialNumber: async (id: number, sequentialNumber: number): Promise<EventCompetitor> => {
+    const response = await offlineApiClient.patch<EventCompetitor>(
+      `/event-competitors/${id}/sequential-number`,
+      { sequentialNumber },
+    );
+    return response.data;
+  },
 };
 
 
