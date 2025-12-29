@@ -383,12 +383,13 @@ export default function LeaderboardPage() {
                         <Table>
                           <TableHead>
                             <TableRow>
-                              <TableCell>Rank</TableCell>
-                              <TableCell>Competitor</TableCell>
-                              <TableCell>Category</TableCell>
-                              <TableCell>Start Time</TableCell>
-                              <TableCell>Finish Time</TableCell>
-                              <TableCell>Duration</TableCell>
+                              <TableCell><strong>Rank</strong></TableCell>
+                              <TableCell><strong>Sequential #</strong></TableCell>
+                              <TableCell><strong>Competitor</strong></TableCell>
+                              <TableCell><strong>Category</strong></TableCell>
+                              <TableCell><strong>Start Time</strong></TableCell>
+                              <TableCell><strong>Finish Time</strong></TableCell>
+                              <TableCell><strong>Duration</strong></TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -401,6 +402,11 @@ export default function LeaderboardPage() {
                                     size="small"
                                     sx={{ fontWeight: 'bold' }}
                                   />
+                                </TableCell>
+                                <TableCell>
+                                  <Typography variant="body2" fontWeight="bold" color="primary">
+                                    {entry.sequentialNumber || '-'}
+                                  </Typography>
                                 </TableCell>
                                 <TableCell>
                                   <Typography variant="body2" fontWeight="medium">
@@ -446,6 +452,7 @@ export default function LeaderboardPage() {
                         <Table>
                           <TableHead>
                             <TableRow>
+                              <TableCell>#</TableCell>
                               <TableCell>Competitor</TableCell>
                               <TableCell>Category</TableCell>
                               <TableCell>Start Time</TableCell>
@@ -469,6 +476,11 @@ export default function LeaderboardPage() {
 
                               return (
                                 <TableRow key={entry.timeEntryId || entry.competitor.id} hover>
+                                  <TableCell>
+                                    <Typography variant="body2" fontWeight="medium" color="text.secondary">
+                                      {entry.sequentialNumber || '-'}
+                                    </Typography>
+                                  </TableCell>
                                   <TableCell>
                                     <Typography variant="body2" fontWeight="medium">
                                       {entry.competitor.firstName} {entry.competitor.lastName}

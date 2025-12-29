@@ -89,6 +89,9 @@ export default function EventDetailPage() {
   const [loadingCompetitors, setLoadingCompetitors] = useState(false);
   const [selectedCompetitors, setSelectedCompetitors] = useState<number[]>([]);
   const [deleting, setDeleting] = useState(false);
+  const [filterCategory, setFilterCategory] = useState<number | ''>('');
+  const [filterName, setFilterName] = useState<string>('');
+  const [filterSequentialNumber, setFilterSequentialNumber] = useState<string>('');
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [exportingExcel, setExportingExcel] = useState(false);
@@ -1185,6 +1188,49 @@ export default function EventDetailPage() {
                 </Box>
               </Box>
 
+              {/* Filters */}
+              {competitors.length > 0 && (
+                <Box display="flex" gap={2} mb={3} flexWrap="wrap" alignItems="center">
+                  <TextField
+                    label="Search by Name"
+                    variant="outlined"
+                    size="small"
+                    value={filterName}
+                    onChange={(e) => setFilterName(e.target.value)}
+                    sx={{ minWidth: 200 }}
+                    placeholder="First or last name"
+                  />
+                  <TextField
+                    label="Search by Sequential #"
+                    variant="outlined"
+                    size="small"
+                    type="number"
+                    value={filterSequentialNumber}
+                    onChange={(e) => setFilterSequentialNumber(e.target.value)}
+                    sx={{ minWidth: 180 }}
+                    placeholder="Sequential number"
+                    inputProps={{ min: 1 }}
+                  />
+                  {categories.length > 0 && (
+                    <FormControl sx={{ minWidth: 200 }} size="small">
+                      <InputLabel>Filter by Category</InputLabel>
+                      <Select
+                        value={filterCategory}
+                        onChange={(e) => setFilterCategory(e.target.value as number | '')}
+                        label="Filter by Category"
+                      >
+                        <MenuItem value="">All Categories</MenuItem>
+                        {categories.map((category) => (
+                          <MenuItem key={category.id} value={category.id}>
+                            {category.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
+                </Box>
+              )}
+
               {loadingCompetitors ? (
                 <Box display="flex" justifyContent="center" py={4}>
                   <CircularProgress />
@@ -1198,16 +1244,62 @@ export default function EventDetailPage() {
                     Use "Register Competitor" button above to add competitors, or import from Excel.
                   </Typography>
                 </Box>
-              ) : (
+              ) : (() => {
+                // Filter and sort competitors
+                let filtered = [...competitors];
+
+                // Filter by category
+                if (filterCategory !== '') {
+                  filtered = filtered.filter((c) => c.category?.id === filterCategory);
+                }
+
+                // Filter by name
+                if (filterName.trim()) {
+                  const searchTerm = filterName.trim().toLowerCase();
+                  filtered = filtered.filter((c) => {
+                    const fullName = `${c.competitor.firstName} ${c.competitor.lastName}`.toLowerCase();
+                    return fullName.includes(searchTerm);
+                  });
+                }
+
+                // Filter by sequential number
+                if (filterSequentialNumber.trim()) {
+                  const searchNum = parseInt(filterSequentialNumber.trim(), 10);
+                  if (!isNaN(searchNum)) {
+                    filtered = filtered.filter((c) => c.sequentialNumber === searchNum);
+                  }
+                }
+
+                // Sort by sequential number (nulls last)
+                filtered.sort((a, b) => {
+                  if (a.sequentialNumber === null && b.sequentialNumber === null) return 0;
+                  if (a.sequentialNumber === null) return 1;
+                  if (b.sequentialNumber === null) return -1;
+                  return a.sequentialNumber - b.sequentialNumber;
+                });
+
+                return filtered.length === 0 ? (
+                  <Box textAlign="center" py={4}>
+                    <Typography variant="body2" color="text.secondary">
+                      No competitors found matching the filters.
+                    </Typography>
+                  </Box>
+                ) : (
                 <TableContainer>
                   <Table>
                     <TableHead>
                       <TableRow>
                         <TableCell padding="checkbox">
                           <Checkbox
-                            checked={competitors.length > 0 && selectedCompetitors.length === competitors.length}
-                            indeterminate={selectedCompetitors.length > 0 && selectedCompetitors.length < competitors.length}
-                            onChange={handleSelectAll}
+                            checked={filtered.length > 0 && selectedCompetitors.length === filtered.length}
+                            indeterminate={selectedCompetitors.length > 0 && selectedCompetitors.length < filtered.length}
+                            onChange={() => {
+                              if (selectedCompetitors.length === filtered.length) {
+                                setSelectedCompetitors([]);
+                              } else {
+                                setSelectedCompetitors(filtered.map((c) => c.id));
+                              }
+                            }}
                           />
                         </TableCell>
                         <TableCell>#</TableCell>
@@ -1219,7 +1311,7 @@ export default function EventDetailPage() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {competitors.map((competitor) => (
+                      {filtered.map((competitor) => (
                         <TableRow key={competitor.id} hover>
                           <TableCell padding="checkbox">
                             <Checkbox
@@ -1319,7 +1411,8 @@ export default function EventDetailPage() {
                     </TableBody>
                   </Table>
                 </TableContainer>
-              )}
+                );
+              })()}
             </CardContent>
           </Card>
 
