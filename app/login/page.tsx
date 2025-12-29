@@ -19,12 +19,15 @@ import {
 import { Visibility, VisibilityOff, Email, Lock, ArrowBack } from '@mui/icons-material';
 import { useAuth } from '@/hooks/useAuth';
 import { ROUTES } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n/useTranslation';
+import { PublicHeader } from '@/components/layout/PublicHeader';
 
 export default function LoginPage() {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { login } = useAuth();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +43,7 @@ export default function LoginPage() {
       await login({ email, password });
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Login failed. Please try again.';
+        err.response?.data?.message || err.message || t('login.loginFailed');
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -48,7 +51,9 @@ export default function LoginPage() {
   };
 
   return (
-    <Box
+    <>
+      <PublicHeader />
+      <Box
       sx={{
         minHeight: '100vh',
         display: 'flex',
@@ -76,7 +81,7 @@ export default function LoginPage() {
           },
         }}
       >
-        Back to Home
+        {t('landing.backToHome')}
       </Button>
       <Card
         sx={{
@@ -108,7 +113,7 @@ export default function LoginPage() {
               fontSize: isMobile ? '1.75rem' : '2rem',
             }}
           >
-            Welcome Back
+            {t('login.title')}
           </Typography>
           <Typography
             variant="body2"
@@ -117,7 +122,7 @@ export default function LoginPage() {
               fontSize: isMobile ? '0.875rem' : '1rem',
             }}
           >
-            Sign in to your account to continue
+            {t('login.subtitle')}
           </Typography>
         </Box>
 
@@ -140,7 +145,7 @@ export default function LoginPage() {
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
               fullWidth
-              label="Email Address"
+              label={t('login.email')}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -174,7 +179,7 @@ export default function LoginPage() {
 
             <TextField
               fullWidth
-              label="Password"
+              label={t('login.password')}
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -245,7 +250,7 @@ export default function LoginPage() {
                 },
               }}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? t('login.signingIn') : t('login.signIn')}
             </Button>
 
             <Box sx={{ textAlign: 'center', mt: 2 }}>
@@ -257,7 +262,7 @@ export default function LoginPage() {
                   mb: 1,
                 }}
               >
-                Don't have an account?{' '}
+                {t('login.dontHaveAccount')}{' '}
                 <Link
                   href={ROUTES.REGISTER}
                   sx={{
@@ -269,7 +274,7 @@ export default function LoginPage() {
                     },
                   }}
                 >
-                  Sign up
+                  {t('login.signUp')}
                 </Link>
               </Typography>
               <Typography
@@ -290,7 +295,7 @@ export default function LoginPage() {
                     },
                   }}
                 >
-                  Forgot your password?
+                  {t('login.forgotPassword')}
                 </Link>
               </Typography>
             </Box>
@@ -298,5 +303,6 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </Box>
+    </>
   );
 }

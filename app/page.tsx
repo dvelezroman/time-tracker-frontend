@@ -31,6 +31,8 @@ import {
 import { useAuthStore } from '@/store/useAuthStore';
 import { ROUTES } from '@/lib/constants';
 import Image from 'next/image';
+import { useTranslation } from '@/lib/i18n/useTranslation';
+import { PublicHeader } from '@/components/layout/PublicHeader';
 
 export default function Home() {
   const router = useRouter();
@@ -38,6 +40,7 @@ export default function Home() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const { isAuthenticated } = useAuthStore();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -92,28 +95,30 @@ export default function Home() {
   const steps = [
     {
       number: '1',
-      title: 'Create Your Event',
-      description: 'Set up your event with dates, location, and categories. Configure timezone settings.',
+      title: t('events.createEvent'),
+      description: t('landing.features.eventManagement.description'),
     },
     {
       number: '2',
-      title: 'Register Competitors',
-      description: 'Add competitors individually or bulk import from Excel. Assign categories and numbers.',
+      title: t('competitors.title'),
+      description: t('landing.features.qrCodeGeneration.description'),
     },
     {
       number: '3',
-      title: 'Start Tracking',
-      description: 'Begin the event and use QR scanning or manual entry to record finish times.',
+      title: t('events.startEvent'),
+      description: t('landing.features.realTimeTracking.description'),
     },
     {
       number: '4',
-      title: 'View Results',
-      description: 'Monitor live leaderboards, generate reports, and send notifications to competitors.',
+      title: t('leaderboard.title'),
+      description: t('landing.features.liveLeaderboards.description'),
     },
   ];
 
   return (
-    <Box
+    <>
+      <PublicHeader />
+      <Box
       sx={{
         minHeight: '100vh',
         background: theme.palette.mode === 'dark'
@@ -170,9 +175,7 @@ export default function Home() {
               lineHeight: 1.2,
             }}
           >
-            Professional Time Tracking
-            <br />
-            for Sports Events
+            {t('landing.subtitle')}
           </Typography>
           <Typography
             variant="h5"
@@ -185,8 +188,7 @@ export default function Home() {
               lineHeight: 1.6,
             }}
           >
-            Track competitor times with millisecond precision. Generate live leaderboards, send
-            automated notifications, and manage events effortlessly.
+            {t('landing.description')}
           </Typography>
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
@@ -209,7 +211,7 @@ export default function Home() {
                 },
               }}
             >
-              Get Started Free
+              {t('landing.getStartedFree')}
             </Button>
             <Button
               variant="outlined"
@@ -225,7 +227,7 @@ export default function Home() {
                 },
               }}
             >
-              Sign In
+              {t('landing.signIn')}
             </Button>
             <Button
               variant="outlined"
@@ -241,7 +243,7 @@ export default function Home() {
                 },
               }}
             >
-              Check Your Time
+              {t('landing.checkYourTime')}
             </Button>
           </Stack>
 
@@ -280,10 +282,10 @@ export default function Home() {
                     mb: 0.5,
                   }}
                 >
-                  Fast
+                  {t('landing.fast')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Real-time updates
+                  {t('landing.fastDescription')}
                 </Typography>
               </Box>
             </Box>
@@ -312,10 +314,10 @@ export default function Home() {
                     mb: 0.5,
                   }}
                 >
-                  Secure
+                  {t('landing.secure')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Enterprise-grade security
+                  {t('landing.secureDescription')}
                 </Typography>
               </Box>
             </Box>
@@ -344,10 +346,10 @@ export default function Home() {
                     mb: 0.5,
                   }}
                 >
-                  Accurate
+                  {t('landing.accurate')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Millisecond precision
+                  {t('landing.accurateDescription')}
                 </Typography>
               </Box>
             </Box>
@@ -376,10 +378,10 @@ export default function Home() {
                     mb: 0.5,
                   }}
                 >
-                  Complete
+                  {t('landing.complete')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Full event management
+                  {t('landing.completeDescription')}
                 </Typography>
               </Box>
             </Box>
@@ -398,7 +400,7 @@ export default function Home() {
               mb: 2,
             }}
           >
-            Powerful Features
+            {t('landing.powerfulFeatures')}
           </Typography>
           <Typography
             variant="h6"
@@ -406,7 +408,7 @@ export default function Home() {
             textAlign="center"
             sx={{ mb: 6, maxWidth: '600px', mx: 'auto' }}
           >
-            Everything you need to manage and track sports events professionally
+            {t('landing.featuresSubtitle')}
           </Typography>
           <Box
             sx={{
@@ -473,7 +475,7 @@ export default function Home() {
               mb: 2,
             }}
           >
-            How It Works
+            {t('landing.howItWorks')}
           </Typography>
           <Typography
             variant="h6"
@@ -481,7 +483,7 @@ export default function Home() {
             textAlign="center"
             sx={{ mb: 6, maxWidth: '600px', mx: 'auto' }}
           >
-            Get started in minutes with our simple 4-step process
+            {t('landing.howItWorksSubtitle')}
           </Typography>
           <Box
             sx={{
@@ -564,7 +566,7 @@ export default function Home() {
               mb: 2,
             }}
           >
-            Why Choose Time Tracker?
+            {t('landing.whyChoose')}
           </Typography>
           <Box
             sx={{
@@ -608,15 +610,14 @@ export default function Home() {
               mb: 2,
             }}
           >
-            Ready to Get Started?
+            {t('landing.readyToGetStarted')}
           </Typography>
           <Typography
             variant="h6"
             color="text.secondary"
             sx={{ mb: 4, maxWidth: '600px', mx: 'auto' }}
           >
-            Join thousands of event organizers who trust Time Tracker for accurate, real-time
-            competitor tracking.
+            {t('landing.readySubtitle')}
           </Typography>
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
@@ -638,7 +639,7 @@ export default function Home() {
                 },
               }}
             >
-              Create Free Account
+              {t('landing.createFreeAccount')}
             </Button>
             <Button
               variant="outlined"
@@ -654,11 +655,12 @@ export default function Home() {
                 },
               }}
             >
-              Sign In to Existing Account
+              {t('landing.signInToExisting')}
             </Button>
           </Stack>
         </Box>
       </Container>
     </Box>
+    </>
   );
 }

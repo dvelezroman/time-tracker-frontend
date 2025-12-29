@@ -195,6 +195,20 @@
     "secure": "Secure",
     "accurate": "Accurate",
     "complete": "Complete",
+    "fastDescription": "Real-time updates",
+    "secureDescription": "Enterprise-grade security",
+    "accurateDescription": "Millisecond precision",
+    "completeDescription": "Full event management",
+    "powerfulFeatures": "Powerful Features",
+    "featuresSubtitle": "Everything you need to manage and track sports events professionally",
+    "howItWorks": "How It Works",
+    "howItWorksSubtitle": "Get started in minutes with our simple 4-step process",
+    "whyChoose": "Why Choose Time Tracker?",
+    "readyToGetStarted": "Ready to Get Started?",
+    "readySubtitle": "Join thousands of event organizers who trust Time Tracker for accurate, real-time competitor tracking.",
+    "createFreeAccount": "Create Free Account",
+    "signInToExisting": "Sign In to Existing Account",
+    "backToHome": "Back to Home",
     "features": {
       "title": "Everything You Need to Manage Sports Events",
       "realTimeTracking": {
@@ -222,6 +236,41 @@
         "description": "Continue tracking times even without internet connection. Data syncs automatically when connection is restored."
       }
     }
+  },
+  "login": {
+    "title": "Welcome Back",
+    "subtitle": "Sign in to your account to continue",
+    "email": "Email Address",
+    "password": "Password",
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "dontHaveAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "forgotPassword": "Forgot your password?",
+    "loginFailed": "Login failed. Please try again."
+  },
+  "register": {
+    "title": "Create Account",
+    "subtitle": "Sign up to get started with Time Tracker",
+    "email": "Email Address",
+    "role": "Role",
+    "phone": "Phone Number (Optional)",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "createAccount": "Create Account",
+    "creatingAccount": "Creating account...",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "passwordTooShort": "Password must be at least 6 characters long",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "registrationFailed": "Registration failed. Please try again."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalTime": "Total Time",
+    "totalUsers": "Total Users",
+    "totalCompetitors": "Competitors",
+    "totalEvents": "Events"
   }
 }
 

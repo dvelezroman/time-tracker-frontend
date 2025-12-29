@@ -195,6 +195,20 @@
     "secure": "Seguro",
     "accurate": "Preciso",
     "complete": "Completo",
+    "fastDescription": "Actualizaciones en tiempo real",
+    "secureDescription": "Seguridad de nivel empresarial",
+    "accurateDescription": "Precisión de milisegundos",
+    "completeDescription": "Gestión completa de eventos",
+    "powerfulFeatures": "Características Poderosas",
+    "featuresSubtitle": "Todo lo que necesitas para gestionar y rastrear eventos deportivos profesionalmente",
+    "howItWorks": "Cómo Funciona",
+    "howItWorksSubtitle": "Comienza en minutos con nuestro proceso simple de 4 pasos",
+    "whyChoose": "¿Por Qué Elegir Time Tracker?",
+    "readyToGetStarted": "¿Listo para Comenzar?",
+    "readySubtitle": "Únete a miles de organizadores de eventos que confían en Time Tracker para el seguimiento preciso y en tiempo real de competidores.",
+    "createFreeAccount": "Crear Cuenta Gratuita",
+    "signInToExisting": "Iniciar Sesión en Cuenta Existente",
+    "backToHome": "Volver al Inicio",
     "features": {
       "title": "Todo lo que Necesitas para Gestionar Eventos Deportivos",
       "realTimeTracking": {
@@ -222,6 +236,41 @@
         "description": "Continúa registrando tiempos incluso sin conexión a internet. Los datos se sincronizan automáticamente cuando se restaura la conexión."
       }
     }
+  },
+  "login": {
+    "title": "Bienvenido de Nuevo",
+    "subtitle": "Inicia sesión en tu cuenta para continuar",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "signIn": "Iniciar Sesión",
+    "signingIn": "Iniciando sesión...",
+    "dontHaveAccount": "¿No tienes una cuenta?",
+    "signUp": "Regístrate",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "loginFailed": "Error al iniciar sesión. Por favor intenta de nuevo."
+  },
+  "register": {
+    "title": "Crear Cuenta",
+    "subtitle": "Regístrate para comenzar con Time Tracker",
+    "email": "Correo Electrónico",
+    "role": "Rol",
+    "phone": "Número de Teléfono (Opcional)",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "createAccount": "Crear Cuenta",
+    "creatingAccount": "Creando cuenta...",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "signIn": "Iniciar sesión",
+    "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+    "passwordsDoNotMatch": "Las contraseñas no coinciden",
+    "registrationFailed": "Error al registrarse. Por favor intenta de nuevo."
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "totalTime": "Tiempo Total",
+    "totalUsers": "Total de Usuarios",
+    "totalCompetitors": "Competidores",
+    "totalEvents": "Total de Eventos"
   }
 }
 

@@ -15,6 +15,7 @@ import { eventCompetitorService } from '@/lib/api/services/event-competitor.serv
 import { useAuthStore } from '@/store/useAuthStore';
 import { ROUTES } from '@/lib/constants';
 import { useMemo } from 'react';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 interface DashboardStats {
   totalTime: number; // in seconds
@@ -25,6 +26,7 @@ interface DashboardStats {
 export default function DashboardPage() {
   const router = useRouter();
   const { user } = useAuthStore();
+  const { t } = useTranslation();
   // Use useMemo to ensure isAdmin is only calculated when user changes
   const isAdmin = useMemo(() => user?.role === 'ADMIN', [user?.role]);
   
@@ -168,7 +170,7 @@ export default function DashboardPage() {
               mb: { xs: 2, sm: 3 }
             }}
           >
-            Dashboard
+            {t('dashboard.title')}
           </Typography>
           {loading || !user ? (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
@@ -202,7 +204,7 @@ export default function DashboardPage() {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <AccessTimeIcon color="primary" sx={{ fontSize: 40 }} />
                     <Box>
-                      <Typography variant="h6">Total Time</Typography>
+                      <Typography variant="h6">{t('dashboard.totalTime')}</Typography>
                       <Typography variant="h4">{formatTime(stats.totalTime)}</Typography>
                     </Box>
                   </Box>
@@ -210,7 +212,7 @@ export default function DashboardPage() {
               </Card>
               {/* Users card - Only show for ADMIN role, never for OPERATOR */}
               {/* Strict check: only render if role is exactly 'ADMIN' */}
-              {user.role === 'ADMIN' && user.role !== 'OPERATOR' && (
+              {user.role === 'ADMIN' && (
                 <Card
                   sx={{
                     cursor: 'pointer',
@@ -226,7 +228,7 @@ export default function DashboardPage() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <PeopleIcon color="secondary" sx={{ fontSize: 40 }} />
                       <Box>
-                        <Typography variant="h6">Users</Typography>
+                        <Typography variant="h6">{t('dashboard.totalUsers')}</Typography>
                         <Typography variant="h4">{stats.totalUsers}</Typography>
                       </Box>
                     </Box>
@@ -251,7 +253,7 @@ export default function DashboardPage() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <PeopleIcon color="secondary" sx={{ fontSize: 40 }} />
                       <Box>
-                        <Typography variant="h6">Competitors</Typography>
+                        <Typography variant="h6">{t('dashboard.totalCompetitors')}</Typography>
                         <Typography variant="h4">{stats.totalUsers}</Typography>
                       </Box>
                     </Box>
@@ -273,7 +275,7 @@ export default function DashboardPage() {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <EventIcon color="success" sx={{ fontSize: 40 }} />
                     <Box>
-                      <Typography variant="h6">Events</Typography>
+                      <Typography variant="h6">{t('dashboard.totalEvents')}</Typography>
                       <Typography variant="h4">{stats.totalEvents}</Typography>
                     </Box>
                   </Box>

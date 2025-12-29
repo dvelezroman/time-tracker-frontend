@@ -32,12 +32,15 @@ import {
 import { authService } from '@/lib/api/services/auth.service';
 import { useAuthStore } from '@/store/useAuthStore';
 import { ROUTES } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n/useTranslation';
+import { PublicHeader } from '@/components/layout/PublicHeader';
 
 export default function RegisterPage() {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { setAuth } = useAuthStore();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -61,11 +64,11 @@ export default function RegisterPage() {
 
   const validateForm = () => {
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError(t('register.passwordTooShort'));
       return false;
     }
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('register.passwordsDoNotMatch'));
       return false;
     }
     return true;
@@ -88,7 +91,7 @@ export default function RegisterPage() {
       router.push(ROUTES.DASHBOARD);
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+        err.response?.data?.message || err.message || t('register.registrationFailed');
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -96,7 +99,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <Box
+    <>
+      <PublicHeader />
+      <Box
       sx={{
         minHeight: '100vh',
         display: 'flex',
@@ -124,7 +129,7 @@ export default function RegisterPage() {
           },
         }}
       >
-        Back to Home
+        {t('landing.backToHome')}
       </Button>
       <Card
         sx={{
@@ -156,7 +161,7 @@ export default function RegisterPage() {
               fontSize: isMobile ? '1.75rem' : '2rem',
             }}
           >
-            Create Account
+            {t('register.title')}
           </Typography>
           <Typography
             variant="body2"
@@ -165,7 +170,7 @@ export default function RegisterPage() {
               fontSize: isMobile ? '0.875rem' : '1rem',
             }}
           >
-            Sign up to get started with Time Tracker
+            {t('register.subtitle')}
           </Typography>
         </Box>
 
@@ -188,7 +193,7 @@ export default function RegisterPage() {
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
               fullWidth
-              label="Email Address"
+              label={t('register.email')}
               type="email"
               value={formData.email}
               onChange={handleChange('email')}
@@ -235,11 +240,11 @@ export default function RegisterPage() {
                 },
               }}
             >
-              <InputLabel>Role</InputLabel>
+              <InputLabel>{t('register.role')}</InputLabel>
               <Select
                 value={formData.role}
                 onChange={handleRoleChange}
-                label="Role"
+                label={t('register.role')}
                 startAdornment={
                   <InputAdornment position="start" sx={{ ml: 1 }}>
                     <Person
@@ -250,14 +255,14 @@ export default function RegisterPage() {
                   </InputAdornment>
                 }
               >
-                <MenuItem value="OPERATOR">Operator</MenuItem>
-                <MenuItem value="ADMIN">Admin</MenuItem>
+                <MenuItem value="OPERATOR">{t('users.operator')}</MenuItem>
+                <MenuItem value="ADMIN">{t('users.admin')}</MenuItem>
               </Select>
             </FormControl>
 
             <TextField
               fullWidth
-              label="Phone Number (Optional)"
+              label={t('register.phone')}
               type="tel"
               value={formData.phone}
               onChange={handleChange('phone')}
@@ -289,7 +294,7 @@ export default function RegisterPage() {
 
             <TextField
               fullWidth
-              label="Password"
+              label={t('register.password')}
               type={showPassword ? 'text' : 'password'}
               value={formData.password}
               onChange={handleChange('password')}
@@ -336,7 +341,7 @@ export default function RegisterPage() {
 
             <TextField
               fullWidth
-              label="Confirm Password"
+              label={t('register.confirmPassword')}
               type={showConfirmPassword ? 'text' : 'password'}
               value={formData.confirmPassword}
               onChange={handleChange('confirmPassword')}
@@ -407,7 +412,7 @@ export default function RegisterPage() {
                 },
               }}
             >
-              {loading ? 'Creating Account...' : 'Create Account'}
+              {loading ? t('register.creatingAccount') : t('register.createAccount')}
             </Button>
 
             <Box sx={{ textAlign: 'center', mt: 2 }}>
@@ -418,7 +423,7 @@ export default function RegisterPage() {
                   fontSize: isMobile ? '0.8125rem' : '0.875rem',
                 }}
               >
-                Already have an account?{' '}
+                {t('register.alreadyHaveAccount')}{' '}
                 <Link
                   href={ROUTES.LOGIN}
                   sx={{
@@ -430,7 +435,7 @@ export default function RegisterPage() {
                     },
                   }}
                 >
-                  Sign in
+                  {t('register.signIn')}
                 </Link>
               </Typography>
             </Box>
@@ -438,6 +443,7 @@ export default function RegisterPage() {
         </CardContent>
       </Card>
     </Box>
+    </>
   );
 }
 

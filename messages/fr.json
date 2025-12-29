@@ -195,6 +195,20 @@
     "secure": "Sécurisé",
     "accurate": "Précis",
     "complete": "Complet",
+    "fastDescription": "Mises à jour en temps réel",
+    "secureDescription": "Sécurité de niveau entreprise",
+    "accurateDescription": "Précision de millisecondes",
+    "completeDescription": "Gestion complète d'événements",
+    "powerfulFeatures": "Fonctionnalités Puissantes",
+    "featuresSubtitle": "Tout ce dont vous avez besoin pour gérer et suivre les événements sportifs professionnellement",
+    "howItWorks": "Comment Ça Marche",
+    "howItWorksSubtitle": "Commencez en quelques minutes avec notre processus simple en 4 étapes",
+    "whyChoose": "Pourquoi Choisir Time Tracker ?",
+    "readyToGetStarted": "Prêt à Commencer ?",
+    "readySubtitle": "Rejoignez des milliers d'organisateurs d'événements qui font confiance à Time Tracker pour le suivi précis et en temps réel des concurrents.",
+    "createFreeAccount": "Créer un Compte Gratuit",
+    "signInToExisting": "Se Connecter à un Compte Existant",
+    "backToHome": "Retour à l'Accueil",
     "features": {
       "title": "Tout ce dont vous avez besoin pour gérer les événements sportifs",
       "realTimeTracking": {
@@ -222,6 +236,41 @@
         "description": "Continuez à suivre les temps même sans connexion Internet. Les données se synchronisent automatiquement lorsque la connexion est rétablie."
       }
     }
+  },
+  "login": {
+    "title": "Bon Retour",
+    "subtitle": "Connectez-vous à votre compte pour continuer",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "signIn": "Se Connecter",
+    "signingIn": "Connexion en cours...",
+    "dontHaveAccount": "Vous n'avez pas de compte ?",
+    "signUp": "S'inscrire",
+    "forgotPassword": "Mot de passe oublié ?",
+    "loginFailed": "Échec de la connexion. Veuillez réessayer."
+  },
+  "register": {
+    "title": "Créer un Compte",
+    "subtitle": "Inscrivez-vous pour commencer avec Time Tracker",
+    "email": "Adresse e-mail",
+    "role": "Rôle",
+    "phone": "Numéro de téléphone (optionnel)",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "createAccount": "Créer un Compte",
+    "creatingAccount": "Création du compte...",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "signIn": "Se connecter",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
+    "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+    "registrationFailed": "Échec de l'inscription. Veuillez réessayer."
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "totalTime": "Temps total",
+    "totalUsers": "Total d'utilisateurs",
+    "totalCompetitors": "Concurrents",
+    "totalEvents": "Total d'événements"
   }
 }
 
