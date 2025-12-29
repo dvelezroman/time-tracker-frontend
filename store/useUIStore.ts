@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 type ThemeMode = 'light' | 'dark';
-type Locale = 'en' | 'es';
+type Locale = 'en' | 'es' | 'fr';
 
 interface UIState {
   themeMode: ThemeMode;

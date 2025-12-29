@@ -17,7 +17,7 @@ export function LanguageSwitcher() {
     setAnchorEl(null);
   };
 
-  const handleLanguageChange = (newLocale: 'en' | 'es') => {
+  const handleLanguageChange = (newLocale: 'en' | 'es' | 'fr') => {
     setLocale(newLocale);
     handleClose();
   };
@@ -51,6 +51,12 @@ export function LanguageSwitcher() {
           selected={locale === 'es'}
         >
           <ListItemText>Español</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => handleLanguageChange('fr')}
+          selected={locale === 'fr'}
+        >
+          <ListItemText>Français</ListItemText>
         </MenuItem>
       </Menu>
     </>
