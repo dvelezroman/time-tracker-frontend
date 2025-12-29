@@ -51,10 +51,25 @@ export interface RegisterCompetitorRequest {
   sequentialNumber?: number;
 }
 
+export interface CreateAndRegisterCompetitorRequest {
+  eventId: number;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone: string;
+  categoryId?: number;
+  sequentialNumber?: number;
+}
+
 export const eventCompetitorService = {
   register: async (data: RegisterCompetitorRequest): Promise<EventCompetitor> => {
     const response = await offlineApiClient.post<EventCompetitor>('/event-competitors', data);
-    return response.data;
+    return response;
+  },
+
+  createAndRegister: async (data: CreateAndRegisterCompetitorRequest): Promise<EventCompetitor> => {
+    const response = await offlineApiClient.post<EventCompetitor>('/event-competitors/create-and-register', data);
+    return response;
   },
 
   getAll: async (params?: FilterEventCompetitorParams): Promise<EventCompetitorListResponse> => {

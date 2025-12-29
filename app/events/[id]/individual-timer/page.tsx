@@ -462,10 +462,9 @@ export default function IndividualTimerPage() {
                 type="number"
                 value={competitorNumber}
                 onChange={(e) => setCompetitorNumber(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyPress}
                 disabled={starting || finishing}
                 variant="outlined"
-                size="large"
                 helperText="Use the sequential number (#) shown in the competitors list"
                 sx={{
                   '& .MuiOutlinedInput-root': {
@@ -475,11 +474,6 @@ export default function IndividualTimerPage() {
                       fontSize: '1.5rem',
                       fontWeight: 'bold',
                     },
-                  },
-                }}
-                InputProps={{
-                  inputProps: {
-                    style: { textAlign: 'center' },
                   },
                 }}
               />

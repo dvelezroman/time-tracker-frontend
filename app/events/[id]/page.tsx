@@ -238,23 +238,22 @@ export default function EventDetailPage() {
     try {
       setRegistering(true);
       
-      // Create competitor
-      const competitorData: CreateCompetitorRequest = {
+      // Create and register competitor in one call
+      const emailValue = competitorFormData.email?.trim();
+      const registrationResult = await eventCompetitorService.createAndRegister({
+        eventId,
         firstName: competitorFormData.firstName.trim(),
         lastName: competitorFormData.lastName.trim(),
-        email: competitorFormData.email?.trim() || undefined,
-        phone: competitorFormData.phone?.trim() || undefined,
-      };
-      
-      const competitor = await competitorService.create(competitorData);
-      
-      // Register competitor to event
-      await eventCompetitorService.register({
-        eventId,
-        competitorId: competitor.id,
+        email: emailValue && emailValue.length > 0 ? emailValue : undefined,
+        phone: competitorFormData.phone?.trim(),
         categoryId: competitorFormData.categoryId,
         sequentialNumber: competitorFormData.sequentialNumber,
       });
+      
+      // Verify registration was successful
+      if (!registrationResult || !registrationResult.id) {
+        throw new Error('Failed to create and register competitor: No registration ID returned');
+      }
       
       showToast('Competitor created and registered successfully!', 'success');
       setRegisterDialogOpen(false);
@@ -269,6 +268,7 @@ export default function EventDetailPage() {
       await loadCompetitors();
       await loadEvent(); // Refresh event to update competitor count
     } catch (err: any) {
+      console.error('Error registering competitor:', err);
       const errorMessage =
         err.response?.data?.message || err.message || 'Failed to register competitor. Please try again.';
       showToast(errorMessage, 'error');

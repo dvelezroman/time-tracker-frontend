@@ -44,7 +44,7 @@ export interface CompetitorListResponse {
 export const competitorService = {
   create: async (data: CreateCompetitorRequest): Promise<Competitor> => {
     const response = await offlineApiClient.post<Competitor>('/competitors', data);
-    return response.data;
+    return response;
   },
 
   getAll: async (params?: FilterCompetitorParams): Promise<CompetitorListResponse> => {
