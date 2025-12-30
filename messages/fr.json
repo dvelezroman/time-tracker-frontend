@@ -275,7 +275,9 @@
         "title": "Support hors ligne",
         "description": "Continuez à suivre les temps même sans connexion Internet. Les données se synchronisent automatiquement lorsque la connexion est rétablie."
       }
-    }
+    },
+    "developedBy": "Développé par",
+    "softwareFactory": "Usine de Logiciels"
   },
   "login": {
     "title": "Bon Retour",

@@ -21,7 +21,7 @@ export function PublicHeader() {
     <AppBar position="sticky" elevation={0}>
       <Toolbar>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexGrow: 1 }}>
-          {process.env.NEXT_PUBLIC_BITFLOW_LOGO_URL && (
+          {process.env.NEXT_PUBLIC_LOGO_URL && (
             <Box
               sx={{
                 display: 'flex',
@@ -32,8 +32,8 @@ export function PublicHeader() {
               }}
             >
               <Image
-                src={process.env.NEXT_PUBLIC_BITFLOW_LOGO_URL}
-                alt="Bitflow Logo"
+                src={process.env.NEXT_PUBLIC_LOGO_URL}
+                alt="BitFlow Logo"
                 fill
                 style={{ objectFit: 'contain' }}
                 priority

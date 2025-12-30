@@ -233,7 +233,9 @@
         "title": "Soporte Offline",
         "description": "Continúa registrando tiempos incluso sin conexión a internet. Los datos se sincronizan automáticamente cuando se restaura la conexión."
       }
-    }
+    },
+    "developedBy": "Desarrollado por",
+    "softwareFactory": "Fábrica de Software"
   },
   "login": {
     "title": "Bienvenido de Nuevo",

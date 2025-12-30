@@ -275,7 +275,9 @@
         "title": "Offline Support",
         "description": "Continue tracking times even without internet connection. Data syncs automatically when connection is restored."
       }
-    }
+    },
+    "developedBy": "Developed by",
+    "softwareFactory": "Software Factory"
   },
   "login": {
     "title": "Welcome Back",

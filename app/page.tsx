@@ -134,7 +134,7 @@ export default function Home() {
             mb: { xs: 8, md: 12 },
           }}
         >
-          {process.env.NEXT_PUBLIC_BITFLOW_LOGO_URL && (
+          {process.env.NEXT_PUBLIC_LOGO_URL && (
             <Box
               sx={{
                 display: 'flex',
@@ -150,8 +150,8 @@ export default function Home() {
                 }}
               >
                 <Image
-                  src={process.env.NEXT_PUBLIC_BITFLOW_LOGO_URL}
-                  alt="Bitflow Logo"
+                  src={process.env.NEXT_PUBLIC_LOGO_URL}
+                  alt="BitFlow Logo"
                   fill
                   style={{ objectFit: 'contain' }}
                   priority
@@ -659,6 +659,57 @@ export default function Home() {
             </Button>
           </Stack>
         </Box>
+
+        {/* Developed by BitFlow Section */}
+        {process.env.NEXT_PUBLIC_LOGO_URL && (
+          <Box
+            sx={{
+              textAlign: 'center',
+              py: { xs: 4, md: 6 },
+              borderTop: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
+              mt: 4,
+            }}
+          >
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 2, fontSize: { xs: '0.875rem', sm: '1rem' } }}
+            >
+              {t('landing.developedBy')}
+            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 2,
+                flexWrap: 'wrap',
+              }}
+            >
+              <Box
+                sx={{
+                  position: 'relative',
+                  height: { xs: 40, sm: 50 },
+                  width: { xs: 120, sm: 150 },
+                }}
+              >
+                <Image
+                  src={process.env.NEXT_PUBLIC_LOGO_URL}
+                  alt="BitFlow Logo"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                />
+              </Box>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+              >
+                {t('landing.softwareFactory')}
+              </Typography>
+            </Box>
+          </Box>
+        )}
       </Container>
     </Box>
     </>

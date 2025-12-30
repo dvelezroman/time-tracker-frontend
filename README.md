@@ -140,11 +140,12 @@ time-tracker-frontend/
 
 ## Environment Variables
 
-| Variable                  | Description         | Default                 |
-| ------------------------- | ------------------- | ----------------------- |
-| `NEXT_PUBLIC_API_URL`     | Backend API URL     | `http://localhost:3000` |
-| `NEXT_PUBLIC_APP_NAME`    | Application name    | `Time Tracker`          |
-| `NEXT_PUBLIC_APP_VERSION` | Application version | `1.0.0`                 |
+| Variable                  | Description                    | Default                 |
+| ------------------------- | ------------------------------ | ----------------------- |
+| `NEXT_PUBLIC_API_URL`     | Backend API URL                 | `http://localhost:3000` |
+| `NEXT_PUBLIC_APP_NAME`    | Application name               | `Time Tracker`          |
+| `NEXT_PUBLIC_APP_VERSION` | Application version            | `1.0.0`                 |
+| `NEXT_PUBLIC_LOGO_URL`    | BitFlow logo URL (optional)    | -                       |
 
 ## Development
 

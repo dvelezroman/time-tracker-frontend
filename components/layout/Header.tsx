@@ -74,7 +74,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         )}
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexGrow: 1 }}>
-          {process.env.NEXT_PUBLIC_BITFLOW_LOGO_URL && (
+          {process.env.NEXT_PUBLIC_LOGO_URL && (
             <Box
               sx={{
                 display: 'flex',
@@ -85,8 +85,8 @@ export function Header({ onMenuClick }: HeaderProps) {
               }}
             >
               <Image
-                src={process.env.NEXT_PUBLIC_BITFLOW_LOGO_URL}
-                alt="Bitflow Logo"
+                src={process.env.NEXT_PUBLIC_LOGO_URL}
+                alt="BitFlow Logo"
                 fill
                 style={{ objectFit: 'contain' }}
                 priority

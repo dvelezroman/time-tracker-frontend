@@ -25,7 +25,7 @@ export const useUIStore = create<UIState>()(
         })),
       isLoading: false,
       setLoading: (loading) => set({ isLoading: loading }),
-      locale: 'en',
+      locale: 'es',
       setLocale: (locale) => set({ locale }),
     }),
     {

@@ -2,8 +2,10 @@
 
 import { Box, Container, Typography, Link } from '@mui/material';
 import Image from 'next/image';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export function Footer() {
+  const { t } = useTranslation();
   return (
     <Box
       component="footer"
@@ -17,7 +19,7 @@ export function Footer() {
     >
       <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-          {process.env.NEXT_PUBLIC_BITFLOW_LOGO_URL && (
+          {process.env.NEXT_PUBLIC_LOGO_URL && (
             <Box
               sx={{
                 display: 'flex',
@@ -25,11 +27,12 @@ export function Footer() {
                 height: 30,
                 position: 'relative',
                 width: 100,
+                mb: 1,
               }}
             >
               <Image
-                src={process.env.NEXT_PUBLIC_BITFLOW_LOGO_URL}
-                alt="Bitflow Logo"
+                src={process.env.NEXT_PUBLIC_LOGO_URL}
+                alt="BitFlow Logo"
                 fill
                 style={{ objectFit: 'contain' }}
               />
@@ -39,7 +42,7 @@ export function Footer() {
             variant="body2" 
             color="text.secondary" 
             align="center"
-            sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+            sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, mb: 1 }}
           >
             {'© '}
             <Link color="inherit" href="/">
@@ -47,6 +50,23 @@ export function Footer() {
             </Link>{' '}
             {new Date().getFullYear()}
             {'. All rights reserved.'}
+          </Typography>
+          <Typography 
+            variant="caption" 
+            color="text.secondary" 
+            align="center"
+            sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}
+          >
+            {t('landing.developedBy')}{' '}
+            <Link 
+              href="https://bitflow.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              sx={{ fontWeight: 500 }}
+            >
+              BitFlow
+            </Link>
+            {' - '}{t('landing.softwareFactory')}
           </Typography>
         </Box>
       </Container>
