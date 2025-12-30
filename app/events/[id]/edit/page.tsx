@@ -296,7 +296,7 @@ export default function EditEventPage() {
 
   if (loading) {
     return (
-      <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
+      <ProtectedRoute roles={['ADMIN']}>
         <MainLayout>
           <Container maxWidth="md">
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -310,7 +310,7 @@ export default function EditEventPage() {
 
   if (error && !event) {
     return (
-      <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
+      <ProtectedRoute roles={['ADMIN']}>
         <MainLayout>
           <Container maxWidth="md">
             <Alert severity="error">{error}</Alert>
@@ -322,7 +322,7 @@ export default function EditEventPage() {
 
   if (!event) {
     return (
-      <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
+      <ProtectedRoute roles={['ADMIN']}>
         <MainLayout>
           <Container maxWidth="md">
             <Alert severity="info">Event not found</Alert>
@@ -335,7 +335,7 @@ export default function EditEventPage() {
   // Prevent editing ONGOING or COMPLETED events
   if (event.status === 'ONGOING' || event.status === 'COMPLETED') {
     return (
-      <ProtectedRoute roles={['ADMIN', 'OPERATOR']}>
+      <ProtectedRoute roles={['ADMIN']}>
         <MainLayout>
           <Container maxWidth="md">
             <Alert severity="warning" sx={{ mb: 2 }}>

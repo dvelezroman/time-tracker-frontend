@@ -61,12 +61,14 @@ import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
 import { useTranslation } from '@/lib/i18n/useTranslation';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function EventDetailPage() {
   const router = useRouter();
   const params = useParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { user } = useAuthStore();
   const { t } = useTranslation();
   const eventId = Number(params.id);
 
@@ -697,14 +699,16 @@ export default function EventDetailPage() {
               <Box display="flex" gap={2} flexWrap="wrap" mt={4}>
                 {(event.status === 'DRAFT' || event.status === 'PUBLISHED') && (
                   <>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => router.push(ROUTES.EVENTS_EDIT(event.id))}
-                      size={isMobile ? 'medium' : 'large'}
-                    >
-                      {t('common.edit')}
-                    </Button>
+                    {user?.role === 'ADMIN' && (
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => router.push(ROUTES.EVENTS_EDIT(event.id))}
+                        size={isMobile ? 'medium' : 'large'}
+                      >
+                        {t('common.edit')}
+                      </Button>
+                    )}
                     <Button
                       variant="contained"
                       color="primary"

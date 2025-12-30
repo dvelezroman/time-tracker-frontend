@@ -10,10 +10,9 @@ import {
   Card,
   CardContent,
   useTheme,
-  useMediaQuery,
   Paper,
   Stack,
-  Divider,
+  Link,
 } from '@mui/material';
 import {
   Timer as TimerIcon,
@@ -25,8 +24,8 @@ import {
   Security as SecurityIcon,
   Speed as SpeedIcon,
   CheckCircle as CheckCircleIcon,
-  ArrowForward as ArrowForwardIcon,
-  PlayArrow as PlayArrowIcon,
+  Email as EmailIcon,
+  Phone as PhoneIcon,
 } from '@mui/icons-material';
 import { useAuthStore } from '@/store/useAuthStore';
 import { ROUTES } from '@/lib/constants';
@@ -37,8 +36,6 @@ import { PublicHeader } from '@/components/layout/PublicHeader';
 export default function Home() {
   const router = useRouter();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const { isAuthenticated } = useAuthStore();
   const { t } = useTranslation();
 
@@ -196,23 +193,6 @@ export default function Home() {
             justifyContent="center"
             sx={{ mb: 6 }}
           >
-            <Button
-              variant="contained"
-              size="large"
-              onClick={() => router.push(ROUTES.REGISTER)}
-              endIcon={<ArrowForwardIcon />}
-              sx={{
-                px: 4,
-                py: 1.5,
-                fontSize: '1.1rem',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #5568d3 0%, #653a91 100%)',
-                },
-              }}
-            >
-              {t('landing.getStartedFree')}
-            </Button>
             <Button
               variant="outlined"
               size="large"
@@ -589,7 +569,7 @@ export default function Home() {
           </Box>
         </Box>
 
-        {/* CTA Section */}
+        {/* Contact Information Section */}
         <Box
           sx={{
             textAlign: 'center',
@@ -605,58 +585,93 @@ export default function Home() {
             variant="h2"
             component="h2"
             sx={{
-              fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
               fontWeight: 700,
               mb: 2,
             }}
           >
-            {t('landing.readyToGetStarted')}
+            {t('landing.contactInfo')}
           </Typography>
           <Typography
             variant="h6"
             color="text.secondary"
-            sx={{ mb: 4, maxWidth: '600px', mx: 'auto' }}
+            sx={{ mb: 4, maxWidth: '700px', mx: 'auto', fontSize: { xs: '1rem', sm: '1.125rem', md: '1.25rem' } }}
           >
-            {t('landing.readySubtitle')}
+            {t('landing.contactDescription')}
           </Typography>
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
+            spacing={3}
             justifyContent="center"
+            alignItems="center"
+            sx={{ mt: 4 }}
           >
-            <Button
-              variant="contained"
-              size="large"
-              onClick={() => router.push(ROUTES.REGISTER)}
-              endIcon={<ArrowForwardIcon />}
+            <Box
               sx={{
-                px: 5,
-                py: 1.5,
-                fontSize: '1.1rem',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #5568d3 0%, #653a91 100%)',
-                },
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 1,
+                p: 3,
+                borderRadius: 2,
+                background: theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.05)'
+                  : 'rgba(255, 255, 255, 0.5)',
+                minWidth: { xs: '100%', sm: 280 },
               }}
             >
-              {t('landing.createFreeAccount')}
-            </Button>
-            <Button
-              variant="outlined"
-              size="large"
-              onClick={() => router.push(ROUTES.LOGIN)}
+              <EmailIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '0.9375rem' } }}>
+                {t('landing.email')}
+              </Typography>
+              <Link
+                href="mailto:time-tracker@bitflow.bid"
+                sx={{
+                  color: 'primary.main',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  fontSize: { xs: '1rem', sm: '1.125rem' },
+                  '&:hover': {
+                    textDecoration: 'underline',
+                  },
+                }}
+              >
+                time-tracker@bitflow.bid
+              </Link>
+            </Box>
+            <Box
               sx={{
-                px: 5,
-                py: 1.5,
-                fontSize: '1.1rem',
-                borderWidth: 2,
-                '&:hover': {
-                  borderWidth: 2,
-                },
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 1,
+                p: 3,
+                borderRadius: 2,
+                background: theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.05)'
+                  : 'rgba(255, 255, 255, 0.5)',
+                minWidth: { xs: '100%', sm: 280 },
               }}
             >
-              {t('landing.signInToExisting')}
-            </Button>
+              <PhoneIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '0.9375rem' } }}>
+                {t('landing.phone')}
+              </Typography>
+              <Link
+                href="tel:+593988541665"
+                sx={{
+                  color: 'primary.main',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  fontSize: { xs: '1rem', sm: '1.125rem' },
+                  '&:hover': {
+                    textDecoration: 'underline',
+                  },
+                }}
+              >
+                +593 988 541 665
+              </Link>
+            </Box>
           </Stack>
         </Box>
 

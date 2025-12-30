@@ -288,14 +288,16 @@ export default function EventsPage() {
               >
                 {t('eventsList.title')}
               </Typography>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleCreate}
-                size={isMobile ? 'medium' : 'large'}
-              >
-                {t('eventsList.createEvent')}
-              </Button>
+              {user?.role === 'ADMIN' && (
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={handleCreate}
+                  size={isMobile ? 'medium' : 'large'}
+                >
+                  {t('eventsList.createEvent')}
+                </Button>
+              )}
             </Box>
 
             {error && (
@@ -487,14 +489,16 @@ export default function EventsPage() {
                                 </IconButton>
                                 {(event.status === 'DRAFT' || event.status === 'PUBLISHED') && (
                                   <>
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => handleEdit(event)}
-                                      color="primary"
-                                      title={t('eventsList.edit')}
-                                    >
-                                      <EditIcon fontSize="small" />
-                                    </IconButton>
+                                    {user?.role === 'ADMIN' && (
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleEdit(event)}
+                                        color="primary"
+                                        title={t('eventsList.edit')}
+                                      >
+                                        <EditIcon fontSize="small" />
+                                      </IconButton>
+                                    )}
                                     <IconButton
                                       size="small"
                                       onClick={() => handleStartClick(event)}
