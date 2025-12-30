@@ -38,10 +38,12 @@ import { eventService, Event } from '@/lib/api/services/event.service';
 import { categoryService, Category } from '@/lib/api/services/category.service';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function CompetitorsPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { t } = useTranslation();
 
   const [competitors, setCompetitors] = useState<EventCompetitor[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
@@ -131,7 +133,7 @@ export default function CompetitorsPage() {
       setTotalPages(response.totalPages);
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to load competitors. Please try again.';
+        err.response?.data?.message || err.message || t('competitorsList.failedToLoad');
       setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
@@ -166,17 +168,17 @@ export default function CompetitorsPage() {
 
   const handleDownloadPDF = async () => {
     if (!eventFilter) {
-      showToast('Please select an event first', 'warning');
+      showToast(t('competitorsList.selectEventFirst'), 'warning');
       return;
     }
 
     try {
       setDownloading(true);
       await eventCompetitorService.downloadQRCodesPDF(Number(eventFilter));
-      showToast('PDF downloaded successfully', 'success');
+      showToast(t('competitorsList.pdfDownloaded'), 'success');
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to download PDF. Please try again.';
+        err.response?.data?.message || err.message || t('competitorsList.failedToDownloadPDF');
       setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
@@ -198,7 +200,7 @@ export default function CompetitorsPage() {
                 mb: 3,
               }}
             >
-              Competitors
+              {t('competitorsList.title')}
             </Typography>
 
             {error && (
@@ -216,7 +218,7 @@ export default function CompetitorsPage() {
                   disabled={downloading}
                   size={isMobile ? 'medium' : 'large'}
                 >
-                  {downloading ? 'Downloading...' : 'Download QR Codes PDF'}
+                  {downloading ? t('competitorsList.downloading') : t('competitorsList.downloadQRCodesPDF')}
                 </Button>
               </Box>
             )}
@@ -233,7 +235,7 @@ export default function CompetitorsPage() {
                   }}
                 >
                   <TextField
-                    placeholder="Search by name, email, or phone..."
+                    placeholder={t('competitorsList.search')}
                     value={search}
                     onChange={handleSearchChange}
                     InputProps={{
@@ -246,9 +248,9 @@ export default function CompetitorsPage() {
                     sx={{ flex: isMobile ? '1 1 100%' : '1 1 250px', minWidth: 200 }}
                     size={isMobile ? 'medium' : 'small'}
                   >
-                    <InputLabel>Filter by Event</InputLabel>
-                    <Select value={eventFilter} onChange={handleEventFilterChange} label="Filter by Event">
-                      <MenuItem value="">All Events</MenuItem>
+                    <InputLabel>{t('competitorsList.filterByEvent')}</InputLabel>
+                    <Select value={eventFilter} onChange={handleEventFilterChange} label={t('competitorsList.filterByEvent')}>
+                      <MenuItem value="">{t('competitorsList.allEvents')}</MenuItem>
                       {events.map((event) => (
                         <MenuItem key={event.id} value={event.id}>
                           {event.name}
@@ -261,13 +263,13 @@ export default function CompetitorsPage() {
                     size={isMobile ? 'medium' : 'small'}
                     disabled={!eventFilter}
                   >
-                    <InputLabel>Filter by Category</InputLabel>
+                    <InputLabel>{t('competitorsList.filterByCategory')}</InputLabel>
                     <Select
                       value={categoryFilter}
                       onChange={handleCategoryFilterChange}
-                      label="Filter by Category"
+                      label={t('competitorsList.filterByCategory')}
                     >
-                      <MenuItem value="">All Categories</MenuItem>
+                      <MenuItem value="">{t('competitorsList.allCategories')}</MenuItem>
                       {categories.map((category) => (
                         <MenuItem key={category.id} value={category.id}>
                           {category.name}
@@ -284,7 +286,7 @@ export default function CompetitorsPage() {
                 ) : competitors.length === 0 ? (
                   <Box textAlign="center" py={4}>
                     <Typography variant="body1" color="text.secondary">
-                      No competitors found
+                      {t('competitorsList.noCompetitors')}
                     </Typography>
                   </Box>
                 ) : (
@@ -302,22 +304,22 @@ export default function CompetitorsPage() {
                       <Table size={isMobile ? 'small' : 'medium'}>
                         <TableHead>
                           <TableRow>
-                            <TableCell>Competitor Name</TableCell>
-                            <TableCell>Sequential #</TableCell>
+                            <TableCell>{t('competitorsList.competitorName')}</TableCell>
+                            <TableCell>{t('competitorsList.sequentialNumber')}</TableCell>
                             <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
-                              Email
+                              {t('competitorsList.email')}
                             </TableCell>
                             <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                              Phone
+                              {t('competitorsList.phone')}
                             </TableCell>
-                            <TableCell>Event</TableCell>
+                            <TableCell>{t('competitorsList.event')}</TableCell>
                             <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
-                              Category
+                              {t('competitorsList.category')}
                             </TableCell>
                             <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                              Registered At
+                              {t('competitorsList.registeredAt')}
                             </TableCell>
-                            <TableCell>QR Code</TableCell>
+                            <TableCell>{t('competitorsList.qrCode')}</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>

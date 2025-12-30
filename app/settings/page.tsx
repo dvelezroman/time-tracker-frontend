@@ -22,10 +22,12 @@ import { showToast } from '@/components/common/Toast';
 import { offlineStorage } from '@/lib/storage/offline-storage';
 import { syncManager } from '@/lib/sync/sync-manager';
 import { useNetworkStatus } from '@/lib/utils/network';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function SettingsPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { t } = useTranslation();
 
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -76,12 +78,12 @@ export default function SettingsPage() {
       setOfflineMode(enabled);
       showToast(
         enabled
-          ? 'Offline mode enabled. All operations will be stored locally.'
-          : 'Offline mode disabled. Operations will sync with server.',
+          ? t('settings.offlineModeEnabled')
+          : t('settings.offlineModeDisabled'),
         'success',
       );
     } catch (err: any) {
-      showToast('Failed to update offline mode setting', 'error');
+      showToast(t('settings.failedToUpdateOfflineMode'), 'error');
     } finally {
       setSaving(false);
     }
@@ -89,7 +91,7 @@ export default function SettingsPage() {
 
   const handleSync = async () => {
     if (!isOnline) {
-      showToast('Cannot sync while offline. Please check your internet connection.', 'error');
+      showToast(t('settings.cannotSyncOffline'), 'error');
       return;
     }
 
@@ -101,15 +103,19 @@ export default function SettingsPage() {
       await loadSyncStatus();
       
       if (result.failed === 0 && result.conflicts === 0) {
-        showToast(`Successfully synced ${result.successful} operation(s)!`, 'success');
+        showToast(t('settings.syncSuccessful', { count: result.successful }), 'success');
       } else {
         showToast(
-          `Sync completed: ${result.successful} successful, ${result.failed} failed, ${result.conflicts} conflicts`,
+          t('settings.syncCompleted', { 
+            successful: result.successful, 
+            failed: result.failed, 
+            conflicts: result.conflicts 
+          }),
           result.failed > 0 ? 'warning' : 'info',
         );
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to sync data. Please try again.';
+      const errorMessage = err.message || t('settings.failedToSync');
       showToast(errorMessage, 'error');
     } finally {
       setSyncing(false);
@@ -124,7 +130,7 @@ export default function SettingsPage() {
       setSettings(data);
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to load settings. Please try again.';
+        err.response?.data?.message || err.message || t('settings.failedToLoadSettings');
       setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
@@ -142,10 +148,10 @@ export default function SettingsPage() {
         emailNotificationsEnabled: enabled,
       });
       setSettings(updated);
-      showToast('Email notification settings updated successfully', 'success');
+      showToast(t('settings.emailSettingsUpdated'), 'success');
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to update settings. Please try again.';
+        err.response?.data?.message || err.message || t('settings.failedToUpdateSettings');
       setError(errorMessage);
       showToast(errorMessage, 'error');
       // Revert the toggle on error
@@ -165,10 +171,10 @@ export default function SettingsPage() {
         whatsAppNotificationsEnabled: enabled,
       });
       setSettings(updated);
-      showToast('WhatsApp notification settings updated successfully', 'success');
+      showToast(t('settings.whatsAppSettingsUpdated'), 'success');
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to update settings. Please try again.';
+        err.response?.data?.message || err.message || t('settings.failedToUpdateSettings');
       setError(errorMessage);
       showToast(errorMessage, 'error');
       // Revert the toggle on error
@@ -206,7 +212,7 @@ export default function SettingsPage() {
                 mb: { xs: 2, sm: 3 },
               }}
             >
-              Settings
+              {t('settings.title')}
             </Typography>
 
             {error && (
@@ -218,7 +224,7 @@ export default function SettingsPage() {
             <Card>
               <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                 <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
-                  Notification Settings
+                  {t('settings.notificationSettings')}
                 </Typography>
 
                 {settings && (
@@ -234,10 +240,10 @@ export default function SettingsPage() {
                     >
                       <Box sx={{ flex: 1, minWidth: 200 }}>
                         <Typography variant="subtitle1" gutterBottom>
-                          Email Notifications
+                          {t('settings.emailNotifications')}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Enable or disable email notifications when events finish
+                          {t('settings.emailNotificationsDescription')}
                         </Typography>
                       </Box>
                       <FormControlLabel
@@ -249,7 +255,7 @@ export default function SettingsPage() {
                             color="primary"
                           />
                         }
-                        label={settings.emailNotificationsEnabled ? 'Enabled' : 'Disabled'}
+                        label={settings.emailNotificationsEnabled ? t('settings.enabled') : t('settings.disabled')}
                         labelPlacement="end"
                       />
                     </Box>
@@ -265,10 +271,10 @@ export default function SettingsPage() {
                     >
                       <Box sx={{ flex: 1, minWidth: 200 }}>
                         <Typography variant="subtitle1" gutterBottom>
-                          WhatsApp Notifications
+                          {t('settings.whatsappNotifications')}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Enable or disable WhatsApp notifications when sending competitor times
+                          {t('settings.whatsAppNotificationsDescription')}
                         </Typography>
                       </Box>
                       <FormControlLabel
@@ -280,7 +286,7 @@ export default function SettingsPage() {
                             color="primary"
                           />
                         }
-                        label={settings.whatsAppNotificationsEnabled ? 'Enabled' : 'Disabled'}
+                        label={settings.whatsAppNotificationsEnabled ? t('settings.enabled') : t('settings.disabled')}
                         labelPlacement="end"
                       />
                     </Box>
@@ -293,7 +299,7 @@ export default function SettingsPage() {
             <Card sx={{ mt: 3 }}>
               <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                 <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
-                  Offline Mode
+                  {t('settings.offlineMode')}
                 </Typography>
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -308,10 +314,10 @@ export default function SettingsPage() {
                   >
                     <Box sx={{ flex: 1, minWidth: 200 }}>
                       <Typography variant="subtitle1" gutterBottom>
-                        Enable Offline Mode
+                        {t('settings.enableOfflineMode')}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        When enabled, all operations are stored locally and can be synced when internet connection is available.
+                        {t('settings.offlineModeDescription')}
                       </Typography>
                     </Box>
                     <FormControlLabel
@@ -323,7 +329,7 @@ export default function SettingsPage() {
                           color="primary"
                         />
                       }
-                      label={offlineMode ? 'Enabled' : 'Disabled'}
+                      label={offlineMode ? t('settings.enabled') : t('settings.disabled')}
                       labelPlacement="end"
                     />
                   </Box>
@@ -338,12 +344,12 @@ export default function SettingsPage() {
                     }}
                   >
                     <Typography variant="subtitle1" gutterBottom>
-                      Data Sync
+                      {t('settings.dataSync')}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                       {pendingSyncCount > 0
-                        ? `You have ${pendingSyncCount} pending operation(s) waiting to sync.`
-                        : 'All data is synced.'}
+                        ? t('settings.pendingOperations', { count: pendingSyncCount })
+                        : t('settings.allDataSynced')}
                     </Typography>
                     <Button
                       variant="contained"
@@ -352,35 +358,35 @@ export default function SettingsPage() {
                       disabled={!isOnline || syncing || pendingSyncCount === 0}
                       startIcon={syncing ? <CircularProgress size={20} /> : null}
                     >
-                      {syncing ? 'Syncing...' : 'Sync Now'}
+                      {syncing ? t('settings.syncing') : t('settings.syncNow')}
                     </Button>
                     {!isOnline && (
                       <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
-                        You are currently offline. Please connect to the internet to sync data.
+                        {t('settings.currentlyOffline')}
                       </Typography>
                     )}
                     {syncResult && (
                       <Box sx={{ mt: 2 }}>
                         <Typography variant="body2" gutterBottom>
-                          <strong>Last Sync Results:</strong>
+                          <strong>{t('settings.lastSyncResults')}:</strong>
                         </Typography>
                         <Typography variant="body2" color="success.main">
-                          Successful: {syncResult.successful}
+                          {t('settings.successful')}: {syncResult.successful}
                         </Typography>
                         {syncResult.failed > 0 && (
                           <Typography variant="body2" color="error">
-                            Failed: {syncResult.failed}
+                            {t('settings.failed')}: {syncResult.failed}
                           </Typography>
                         )}
                         {syncResult.conflicts > 0 && (
                           <Typography variant="body2" color="warning.main">
-                            Conflicts: {syncResult.conflicts}
+                            {t('settings.conflicts')}: {syncResult.conflicts}
                           </Typography>
                         )}
                         {syncResult.errors.length > 0 && (
                           <Box sx={{ mt: 1 }}>
                             <Typography variant="caption" color="error">
-                              Errors:
+                              {t('settings.errors')}:
                             </Typography>
                             {syncResult.errors.slice(0, 3).map((err: string, idx: number) => (
                               <Typography key={idx} variant="caption" color="error" display="block">

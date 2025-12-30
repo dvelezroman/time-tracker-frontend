@@ -56,12 +56,14 @@ import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function EventsPage() {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { user } = useAuthStore();
+  const { t } = useTranslation();
 
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,7 +128,7 @@ export default function EventsPage() {
       setTotalPages(response.totalPages);
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to load events. Please try again.';
+        err.response?.data?.message || err.message || t('eventsList.failedToLoad');
       setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
@@ -184,12 +186,12 @@ export default function EventsPage() {
       setActionLoading(eventToStart.id);
       setTimerTypeDialogOpen(false);
       await eventService.start(eventToStart.id, { timezone, timerType: selectedTimerType });
-      showToast('Event started successfully!', 'success');
+      showToast(t('eventsList.eventStarted'), 'success');
       setEventToStart(null);
       loadEvents();
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to start event. Please try again.';
+        err.response?.data?.message || err.message || t('eventsList.failedToStart');
       showToast(errorMessage, 'error');
     } finally {
       setActionLoading(null);
@@ -200,11 +202,11 @@ export default function EventsPage() {
     try {
       setActionLoading(event.id);
       await eventService.stop(event.id, { timezone });
-      showToast('Event stopped successfully!', 'success');
+      showToast(t('eventsList.eventStopped'), 'success');
       loadEvents();
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to stop event. Please try again.';
+        err.response?.data?.message || err.message || t('eventsList.failedToStop');
       showToast(errorMessage, 'error');
     } finally {
       setActionLoading(null);
@@ -222,13 +224,13 @@ export default function EventsPage() {
     try {
       setDeleting(true);
       await eventService.delete(eventToDelete.id);
-      showToast('Event deleted successfully!', 'success');
+      showToast(t('eventsList.eventDeleted'), 'success');
       setDeleteDialogOpen(false);
       setEventToDelete(null);
       loadEvents();
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to delete event. Please try again.';
+        err.response?.data?.message || err.message || t('eventsList.failedToDelete');
       showToast(errorMessage, 'error');
     } finally {
       setDeleting(false);
@@ -284,7 +286,7 @@ export default function EventsPage() {
                   color: theme.palette.mode === 'dark' ? '#e6edf3' : '#1a1a1a',
                 }}
               >
-                Events
+                {t('eventsList.title')}
               </Typography>
               <Button
                 variant="contained"
@@ -292,7 +294,7 @@ export default function EventsPage() {
                 onClick={handleCreate}
                 size={isMobile ? 'medium' : 'large'}
               >
-                Create Event
+                {t('eventsList.createEvent')}
               </Button>
             </Box>
 
@@ -314,7 +316,7 @@ export default function EventsPage() {
                   }}
                 >
                   <TextField
-                    placeholder="Search by name..."
+                    placeholder={t('eventsList.search')}
                     value={search}
                     onChange={handleSearchChange}
                     InputProps={{
@@ -327,18 +329,18 @@ export default function EventsPage() {
                     sx={{ flex: isMobile ? '1 1 100%' : '1 1 200px', minWidth: 180 }}
                     size={isMobile ? 'medium' : 'small'}
                   >
-                    <InputLabel>Status</InputLabel>
-                    <Select value={statusFilter} onChange={handleStatusFilterChange} label="Status">
-                      <MenuItem value="">All Statuses</MenuItem>
-                      <MenuItem value="DRAFT">Draft</MenuItem>
-                      <MenuItem value="PUBLISHED">Published</MenuItem>
-                      <MenuItem value="ONGOING">Ongoing</MenuItem>
-                      <MenuItem value="COMPLETED">Completed</MenuItem>
-                      <MenuItem value="CANCELLED">Cancelled</MenuItem>
+                    <InputLabel>{t('eventsList.filterByStatus')}</InputLabel>
+                    <Select value={statusFilter} onChange={handleStatusFilterChange} label={t('eventsList.filterByStatus')}>
+                      <MenuItem value="">{t('eventsList.allStatuses')}</MenuItem>
+                      <MenuItem value="DRAFT">{t('eventsList.draft')}</MenuItem>
+                      <MenuItem value="PUBLISHED">{t('eventsList.published')}</MenuItem>
+                      <MenuItem value="ONGOING">{t('eventsList.ongoing')}</MenuItem>
+                      <MenuItem value="COMPLETED">{t('eventsList.completed')}</MenuItem>
+                      <MenuItem value="CANCELLED">{t('eventsList.cancelled')}</MenuItem>
                     </Select>
                   </FormControl>
                   <TextField
-                    label="Start Date From"
+                    label={t('eventsList.startDateFrom')}
                     type="date"
                     value={startDateFrom}
                     onChange={handleStartDateFromChange}
@@ -347,7 +349,7 @@ export default function EventsPage() {
                     size={isMobile ? 'medium' : 'small'}
                   />
                   <TextField
-                    label="Start Date To"
+                    label={t('eventsList.startDateTo')}
                     type="date"
                     value={startDateTo}
                     onChange={handleStartDateToChange}
@@ -364,7 +366,7 @@ export default function EventsPage() {
                 ) : events.length === 0 ? (
                   <Box textAlign="center" py={4}>
                     <Typography variant="body1" color="text.secondary">
-                      No events found
+                      {t('eventsList.noEvents')}
                     </Typography>
                   </Box>
                 ) : (
@@ -382,24 +384,24 @@ export default function EventsPage() {
                       <Table size={isMobile ? 'small' : 'medium'}>
                         <TableHead>
                           <TableRow>
-                            <TableCell>Name</TableCell>
+                            <TableCell>{t('eventsList.name')}</TableCell>
                             <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
-                              Description
+                              {t('eventsList.description')}
                             </TableCell>
                             <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                              Location
+                              {t('eventsList.location')}
                             </TableCell>
                             <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
-                              Start Date
+                              {t('eventsList.startDate')}
                             </TableCell>
                             <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                              End Date
+                              {t('eventsList.endDate')}
                             </TableCell>
-                            <TableCell>Status</TableCell>
+                            <TableCell>{t('eventsList.status')}</TableCell>
                             <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
-                              Created At
+                              {t('eventsList.createdAt')}
                             </TableCell>
-                            <TableCell align="right">Actions</TableCell>
+                            <TableCell align="right">{t('eventsList.actions')}</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
@@ -479,7 +481,7 @@ export default function EventsPage() {
                                   size="small"
                                   onClick={() => handleView(event)}
                                   color="primary"
-                                  title="View"
+                                  title={t('eventsList.view')}
                                 >
                                   <VisibilityIcon fontSize="small" />
                                 </IconButton>
@@ -489,7 +491,7 @@ export default function EventsPage() {
                                       size="small"
                                       onClick={() => handleEdit(event)}
                                       color="primary"
-                                      title="Edit"
+                                      title={t('eventsList.edit')}
                                     >
                                       <EditIcon fontSize="small" />
                                     </IconButton>
@@ -498,7 +500,7 @@ export default function EventsPage() {
                                       onClick={() => handleStartClick(event)}
                                       color="success"
                                       disabled={actionLoading === event.id}
-                                      title="Start Event"
+                                      title={t('eventsList.start')}
                                     >
                                       {actionLoading === event.id ? (
                                         <CircularProgress size={16} />
@@ -514,7 +516,7 @@ export default function EventsPage() {
                                     onClick={() => handleStop(event)}
                                     color="warning"
                                     disabled={actionLoading === event.id}
-                                    title="Stop Event"
+                                    title={t('eventsList.stop')}
                                   >
                                     {actionLoading === event.id ? (
                                       <CircularProgress size={16} />
@@ -529,7 +531,7 @@ export default function EventsPage() {
                                       size="small"
                                       onClick={() => handleDeleteClick(event)}
                                       color="error"
-                                      title="Delete"
+                                      title={t('eventsList.delete')}
                                     >
                                       <DeleteIcon fontSize="small" />
                                     </IconButton>
@@ -570,19 +572,18 @@ export default function EventsPage() {
         </Container>
 
         <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-          <DialogTitle>Delete Event</DialogTitle>
+          <DialogTitle>{t('eventsList.deleteEvent')}</DialogTitle>
           <DialogContent>
             <Typography>
-              Are you sure you want to delete the event &quot;{eventToDelete?.name}&quot;? This
-              action cannot be undone.
+              {t('eventsList.deleteEventConfirm')}
             </Typography>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleDeleteConfirm} color="error" disabled={deleting}>
-              {deleting ? <CircularProgress size={24} /> : 'Delete'}
+              {deleting ? <CircularProgress size={24} /> : t('eventsList.delete')}
             </Button>
           </DialogActions>
         </Dialog>
@@ -594,10 +595,10 @@ export default function EventsPage() {
           maxWidth="sm"
           fullWidth
         >
-          <DialogTitle>Select Timer Type</DialogTitle>
+          <DialogTitle>{t('eventDetail.selectTimerType')}</DialogTitle>
           <DialogContent>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Choose how competitors will be timed for this event:
+              {t('eventDetail.chooseTimerType')}
             </Typography>
             <FormControl component="fieldset" fullWidth>
               <RadioGroup
@@ -610,10 +611,10 @@ export default function EventsPage() {
                   label={
                     <Box>
                       <Typography variant="body1" fontWeight="medium">
-                        Collective Timer
+                        {t('eventDetail.collectiveTimer')}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        All competitors start at the same time when the event begins. Use the traditional full-screen timer view.
+                        {t('eventDetail.collectiveTimerDescription')}
                       </Typography>
                     </Box>
                   }
@@ -625,10 +626,10 @@ export default function EventsPage() {
                   label={
                     <Box>
                       <Typography variant="body1" fontWeight="medium">
-                        Individual Timer
+                        {t('eventDetail.individualTimer')}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Each competitor starts individually. Enter competitor numbers to start and finish timers separately.
+                        {t('eventDetail.individualTimerDescription')}
                       </Typography>
                     </Box>
                   }
@@ -642,7 +643,7 @@ export default function EventsPage() {
               onClick={() => setTimerTypeDialogOpen(false)}
               disabled={actionLoading !== null}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleStartEvent}
@@ -650,7 +651,7 @@ export default function EventsPage() {
               disabled={actionLoading !== null}
               startIcon={actionLoading !== null ? <CircularProgress size={20} /> : null}
             >
-              {actionLoading !== null ? 'Starting...' : 'Start Event'}
+              {actionLoading !== null ? t('eventDetail.starting') : t('eventsList.start')}
             </Button>
           </DialogActions>
         </Dialog>

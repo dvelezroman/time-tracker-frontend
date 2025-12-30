@@ -60,12 +60,14 @@ import { categoryService, Category } from '@/lib/api/services/category.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function EventDetailPage() {
   const router = useRouter();
   const params = useParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { t } = useTranslation();
   const eventId = Number(params.id);
 
   const [event, setEvent] = useState<Event | null>(null);
@@ -177,20 +179,20 @@ export default function EventDetailPage() {
   const handleDeleteSelected = async () => {
     if (selectedCompetitors.length === 0) return;
 
-    if (!confirm(`Are you sure you want to delete ${selectedCompetitors.length} competitor(s) from this event?`)) {
+    if (!confirm(t('eventDetail.deleteSelectedConfirm', { count: selectedCompetitors.length }))) {
       return;
     }
 
     try {
       setDeleting(true);
       await Promise.all(selectedCompetitors.map((id) => eventCompetitorService.delete(id)));
-      showToast(`Successfully deleted ${selectedCompetitors.length} competitor(s)`, 'success');
+      showToast(t('eventDetail.selectedDeleted', { count: selectedCompetitors.length }), 'success');
       setSelectedCompetitors([]);
       await loadCompetitors();
       await loadEvent(); // Refresh event to update competitor count
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to delete competitors. Please try again.';
+        err.response?.data?.message || err.message || t('eventDetail.failedToDeleteSelected');
       showToast(errorMessage, 'error');
     } finally {
       setDeleting(false);
@@ -258,7 +260,7 @@ export default function EventDetailPage() {
         throw new Error('Failed to create and register competitor: No registration ID returned');
       }
       
-      showToast('Competitor created and registered successfully!', 'success');
+      showToast(t('eventDetail.competitorRegistered'), 'success');
       setRegisterDialogOpen(false);
       setCompetitorFormData({
         firstName: '',
@@ -273,7 +275,7 @@ export default function EventDetailPage() {
     } catch (err: any) {
       console.error('Error registering competitor:', err);
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to register competitor. Please try again.';
+        err.response?.data?.message || err.message || t('eventDetail.failedToRegister');
       showToast(errorMessage, 'error');
     } finally {
       setRegistering(false);
@@ -376,7 +378,7 @@ export default function EventDetailPage() {
         if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
           // Popup was blocked - show a message with a link
           showToast(
-            'Popup blocked. Use the "Individual Timer" button to open it, or allow popups for this site.',
+            t('eventDetail.popupBlocked'),
             'warning',
           );
         }
@@ -389,7 +391,7 @@ export default function EventDetailPage() {
         if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
           // Popup was blocked - show a message with a link
           showToast(
-            'Popup blocked. Use the "Full Screen Timer" button to open it, or allow popups for this site.',
+            t('eventDetail.popupBlocked'),
             'warning',
           );
         }
@@ -402,7 +404,7 @@ export default function EventDetailPage() {
       loadEvent();
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to start event. Please try again.';
+        err.response?.data?.message || err.message || t('eventDetail.failedToStart');
       setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
@@ -613,7 +615,7 @@ export default function EventDetailPage() {
               sx={{ mb: 2 }}
               size={isMobile ? 'medium' : 'large'}
             >
-              Back to Events
+              {t('eventDetail.backToEvents')}
             </Button>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography variant={isMobile ? 'h5' : 'h4'} component="h1">
@@ -632,14 +634,14 @@ export default function EventDetailPage() {
           {event.status === 'ONGOING' && (
             <Alert severity="info" sx={{ mb: 3 }}>
               <Typography variant="body2" fontWeight="bold" gutterBottom>
-                How to Record Competitor Finish Times:
+                {t('eventDetail.howToRecord')}
               </Typography>
               <Typography variant="body2" component="div">
                 <ul style={{ margin: 0, paddingLeft: 20 }}>
-                  <li>Click &quot;Scan QR Code&quot; button to open the QR scanner</li>
-                  <li>Use your device camera to scan each competitor&apos;s QR code when they finish</li>
-                  <li>Or use &quot;Manual Entry&quot; to enter the QR code data manually</li>
-                  <li>Finish times are automatically recorded and appear on the leaderboard</li>
+                  <li>{t('eventDetail.howToRecordStep1')}</li>
+                  <li>{t('eventDetail.howToRecordStep2')}</li>
+                  <li>{t('eventDetail.howToRecordStep3')}</li>
+                  <li>{t('eventDetail.howToRecordStep4')}</li>
                 </ul>
               </Typography>
             </Alert>
@@ -650,7 +652,7 @@ export default function EventDetailPage() {
               {event.description && (
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Description
+                    {t('eventDetail.description')}
                   </Typography>
                   <Typography variant="body1">{event.description}</Typography>
                 </Box>
@@ -658,7 +660,7 @@ export default function EventDetailPage() {
 
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Start Date
+                  {t('eventDetail.startDate')}
                 </Typography>
                 <Typography variant="body1">
                   {formatDate(event.startDate, event.startDateLocal)}
@@ -667,7 +669,7 @@ export default function EventDetailPage() {
 
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  End Date
+                  {t('eventDetail.endDate')}
                 </Typography>
                 <Typography variant="body1">
                   {formatDate(event.endDate, event.endDateLocal)}
@@ -677,7 +679,7 @@ export default function EventDetailPage() {
               {event.location && (
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Location
+                    {t('eventDetail.location')}
                   </Typography>
                   <Typography variant="body1">{event.location}</Typography>
                 </Box>
@@ -686,7 +688,7 @@ export default function EventDetailPage() {
               {event.assignee && (
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Assigned Operator
+                    {t('eventDetail.assignedOperator')}
                   </Typography>
                   <Typography variant="body1">{event.assignee.email}</Typography>
                 </Box>
@@ -701,7 +703,7 @@ export default function EventDetailPage() {
                       onClick={() => router.push(ROUTES.EVENTS_EDIT(event.id))}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      Edit
+                      {t('common.edit')}
                     </Button>
                     <Button
                       variant="contained"
@@ -710,7 +712,7 @@ export default function EventDetailPage() {
                       disabled={starting}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      {starting ? <CircularProgress size={24} /> : 'Start Event'}
+                      {starting ? <CircularProgress size={24} /> : t('eventDetail.startEvent')}
                     </Button>
                   </>
                 )}
@@ -723,7 +725,7 @@ export default function EventDetailPage() {
                       onClick={handleViewTimer}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      View Timer
+                      {t('eventDetail.viewTimer')}
                     </Button>
                     <Button
                       variant="contained"
@@ -731,7 +733,7 @@ export default function EventDetailPage() {
                       onClick={() => window.open(ROUTES.EVENTS_TIMER_FULLSCREEN(event.id), '_blank')}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      Full Screen Timer
+                      {t('eventDetail.fullScreenTimer')}
                     </Button>
                     <Button
                       variant="contained"
@@ -739,7 +741,7 @@ export default function EventDetailPage() {
                       onClick={() => window.open(ROUTES.EVENTS_INDIVIDUAL_TIMER(event.id), '_blank')}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      Individual Timer
+                      {t('events.individualTimer')}
                     </Button>
                     <Button
                       variant="contained"
@@ -747,7 +749,7 @@ export default function EventDetailPage() {
                       onClick={() => router.push(ROUTES.EVENTS_SCAN(event.id))}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      Scan QR Code
+                      {t('eventDetail.scanQRCode')}
                     </Button>
                     <Button
                       variant="outlined"
@@ -755,7 +757,7 @@ export default function EventDetailPage() {
                       onClick={() => router.push(ROUTES.EVENTS_LEADERBOARD(event.id))}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      Leaderboard
+                      {t('eventDetail.leaderboard')}
                     </Button>
                     <Button
                       variant="contained"
@@ -765,7 +767,7 @@ export default function EventDetailPage() {
                       disabled={stopping}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      {stopping ? 'Stopping...' : 'Stop Event'}
+                      {stopping ? t('common.loading') : t('events.stopEvent')}
                     </Button>
                   </>
                 )}
@@ -778,14 +780,14 @@ export default function EventDetailPage() {
                       onClick={() => router.push(ROUTES.EVENTS_LEADERBOARD(event.id))}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      Leaderboard
+                      {t('eventDetail.leaderboard')}
                     </Button>
                     <Button
                       variant="outlined"
                       onClick={() => router.push(ROUTES.EVENTS_QR_CODES(event.id))}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      QR Codes
+                      {t('eventDetail.qrCodes')}
                     </Button>
                   </>
                 )}
@@ -798,7 +800,7 @@ export default function EventDetailPage() {
                       onClick={() => router.push(ROUTES.EVENTS_LEADERBOARD(event.id))}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      View Leaderboard
+                      {t('eventDetail.viewLeaderboard')}
                     </Button>
                     <Button
                       variant="contained"
@@ -808,7 +810,7 @@ export default function EventDetailPage() {
                       disabled={sendingWhatsApp}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      {sendingWhatsApp ? 'Sending...' : 'Send Times via WhatsApp'}
+                      {sendingWhatsApp ? t('notifications.sending') : t('events.sendTimesWhatsApp')}
                     </Button>
                     <Button
                       variant="outlined"
@@ -1146,7 +1148,7 @@ export default function EventDetailPage() {
             <CardContent>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} flexWrap="wrap" gap={2}>
                 <Typography variant="h6">
-                  Registered Competitors ({competitors.length})
+                  {t('eventDetail.registeredCompetitors')} ({competitors.length})
                 </Typography>
                 <Box display="flex" gap={1} flexWrap="wrap" alignItems="center">
                   <Button
@@ -1160,7 +1162,7 @@ export default function EventDetailPage() {
                       order: { xs: 1, sm: 0 }
                     }}
                   >
-                    Register Competitor
+                    {t('eventDetail.registerNewCompetitor')}
                   </Button>
                   <Button
                     variant="outlined"
@@ -1169,9 +1171,9 @@ export default function EventDetailPage() {
                     onClick={handleExportToExcel}
                     disabled={exportingExcel || loadingCompetitors || competitors.length === 0}
                     size={isMobile ? 'medium' : 'small'}
-                    title={competitors.length === 0 ? 'No competitors to export' : 'Download competitors list as Excel'}
+                    title={competitors.length === 0 ? t('eventDetail.noCompetitors') : t('eventDetail.downloadExcel')}
                   >
-                    {exportingExcel ? 'Exporting...' : 'Download Excel'}
+                    {exportingExcel ? t('common.loading') : t('eventDetail.downloadExcel')}
                   </Button>
                   {selectedCompetitors.length > 0 && (
                     <Button
@@ -1182,7 +1184,7 @@ export default function EventDetailPage() {
                       disabled={deleting}
                       size={isMobile ? 'medium' : 'small'}
                     >
-                      {deleting ? 'Deleting...' : `Delete Selected (${selectedCompetitors.length})`}
+                      {deleting ? t('common.loading') : `${t('common.delete')} (${selectedCompetitors.length})`}
                     </Button>
                   )}
                 </Box>
@@ -1192,34 +1194,34 @@ export default function EventDetailPage() {
               {competitors.length > 0 && (
                 <Box display="flex" gap={2} mb={3} flexWrap="wrap" alignItems="center">
                   <TextField
-                    label="Search by Name"
+                    label={t('eventDetail.filterByName')}
                     variant="outlined"
                     size="small"
                     value={filterName}
                     onChange={(e) => setFilterName(e.target.value)}
                     sx={{ minWidth: 200 }}
-                    placeholder="First or last name"
+                    placeholder={t('eventDetail.filterByName')}
                   />
                   <TextField
-                    label="Search by Sequential #"
+                    label={t('eventDetail.filterBySequential')}
                     variant="outlined"
                     size="small"
                     type="number"
                     value={filterSequentialNumber}
                     onChange={(e) => setFilterSequentialNumber(e.target.value)}
                     sx={{ minWidth: 180 }}
-                    placeholder="Sequential number"
+                    placeholder={t('eventDetail.sequentialNumber')}
                     inputProps={{ min: 1 }}
                   />
                   {categories.length > 0 && (
                     <FormControl sx={{ minWidth: 200 }} size="small">
-                      <InputLabel>Filter by Category</InputLabel>
+                      <InputLabel>{t('eventDetail.filterByCategory')}</InputLabel>
                       <Select
                         value={filterCategory}
                         onChange={(e) => setFilterCategory(e.target.value as number | '')}
-                        label="Filter by Category"
+                        label={t('eventDetail.filterByCategory')}
                       >
-                        <MenuItem value="">All Categories</MenuItem>
+                        <MenuItem value="">{t('eventDetail.allCategories')}</MenuItem>
                         {categories.map((category) => (
                           <MenuItem key={category.id} value={category.id}>
                             {category.name}
@@ -1238,10 +1240,10 @@ export default function EventDetailPage() {
               ) : competitors.length === 0 ? (
                 <Box textAlign="center" py={4}>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    No competitors registered for this event yet.
+                    {t('eventDetail.noCompetitors')}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Use "Register Competitor" button above to add competitors, or import from Excel.
+                    {t('eventDetail.useRegisterButton')}
                   </Typography>
                 </Box>
               ) : (() => {
@@ -1281,7 +1283,7 @@ export default function EventDetailPage() {
                 return filtered.length === 0 ? (
                   <Box textAlign="center" py={4}>
                     <Typography variant="body2" color="text.secondary">
-                      No competitors found matching the filters.
+                      {t('eventDetail.noCompetitorsMatchingFilters')}
                     </Typography>
                   </Box>
                 ) : (
@@ -1303,11 +1305,11 @@ export default function EventDetailPage() {
                           />
                         </TableCell>
                         <TableCell>#</TableCell>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Email</TableCell>
-                        <TableCell>Phone</TableCell>
-                        <TableCell>Category</TableCell>
-                        <TableCell>Actions</TableCell>
+                        <TableCell>{t('eventDetail.name')}</TableCell>
+                        <TableCell>{t('auth.email')}</TableCell>
+                        <TableCell>{t('eventDetail.phone')}</TableCell>
+                        <TableCell>{t('eventDetail.category')}</TableCell>
+                        <TableCell>{t('eventDetail.actions')}</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -1356,7 +1358,7 @@ export default function EventDetailPage() {
                                   minWidth: '40px',
                                   textAlign: 'center',
                                 }}
-                                title="Click to edit sequential number"
+                                title={t('eventDetail.clickToEdit')}
                               >
                                 {competitor.sequentialNumber || '-'}
                               </Box>
@@ -1389,15 +1391,15 @@ export default function EventDetailPage() {
                               size="small"
                               color="error"
                               onClick={async () => {
-                                if (confirm(`Are you sure you want to delete ${competitor.competitor.firstName} ${competitor.competitor.lastName} from this event?`)) {
+                                if (confirm(t('eventDetail.deleteCompetitorConfirm'))) {
                                   try {
                                     await eventCompetitorService.delete(competitor.id);
-                                    showToast('Competitor deleted successfully', 'success');
+                                    showToast(t('eventDetail.competitorDeleted'), 'success');
                                     await loadCompetitors();
                                     await loadEvent();
                                   } catch (err: any) {
                                     const errorMessage =
-                                      err.response?.data?.message || err.message || 'Failed to delete competitor.';
+                                      err.response?.data?.message || err.message || t('eventDetail.failedToDelete');
                                     showToast(errorMessage, 'error');
                                   }
                                 }
@@ -1423,10 +1425,10 @@ export default function EventDetailPage() {
             maxWidth="sm"
             fullWidth
           >
-            <DialogTitle>Select Timer Type</DialogTitle>
+            <DialogTitle>{t('eventDetail.selectTimerType')}</DialogTitle>
             <DialogContent>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Choose how competitors will be timed for this event:
+                {t('eventDetail.chooseTimerType')}
               </Typography>
               <FormControl component="fieldset" fullWidth>
                 <RadioGroup
@@ -1439,10 +1441,10 @@ export default function EventDetailPage() {
                     label={
                       <Box>
                         <Typography variant="body1" fontWeight="medium">
-                          Collective Timer
+                          {t('eventDetail.collectiveTimer')}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          All competitors start at the same time when the event begins. Use the traditional full-screen timer view.
+                          {t('eventDetail.collectiveTimerDescription')}
                         </Typography>
                       </Box>
                     }
@@ -1454,10 +1456,10 @@ export default function EventDetailPage() {
                     label={
                       <Box>
                         <Typography variant="body1" fontWeight="medium">
-                          Individual Timer
+                          {t('eventDetail.individualTimer')}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Each competitor starts individually. Enter competitor numbers to start and finish timers separately.
+                          {t('eventDetail.individualTimerDescription')}
                         </Typography>
                       </Box>
                     }
@@ -1471,7 +1473,7 @@ export default function EventDetailPage() {
                 onClick={() => setTimerTypeDialogOpen(false)}
                 disabled={starting}
               >
-                Cancel
+                {t('eventDetail.cancel')}
               </Button>
               <Button
                 onClick={handleStartEvent}
@@ -1479,7 +1481,7 @@ export default function EventDetailPage() {
                 disabled={starting}
                 startIcon={starting ? <CircularProgress size={20} /> : null}
               >
-                {starting ? 'Starting...' : 'Start Event'}
+                {starting ? t('eventDetail.starting') : t('eventDetail.startEvent')}
               </Button>
             </DialogActions>
           </Dialog>
@@ -1493,12 +1495,12 @@ export default function EventDetailPage() {
             disableEnforceFocus={false}
             disableAutoFocus={false}
           >
-            <DialogTitle>Register New Competitor</DialogTitle>
+            <DialogTitle>{t('eventDetail.registerNewCompetitor')}</DialogTitle>
             <DialogContent>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
                 <TextField
                   fullWidth
-                  label="First Name"
+                  label={t('eventDetail.firstName')}
                   value={competitorFormData.firstName}
                   onChange={(e) =>
                     setCompetitorFormData({ ...competitorFormData, firstName: e.target.value })
@@ -1509,7 +1511,7 @@ export default function EventDetailPage() {
                 />
                 <TextField
                   fullWidth
-                  label="Last Name"
+                  label={t('eventDetail.lastName')}
                   value={competitorFormData.lastName}
                   onChange={(e) =>
                     setCompetitorFormData({ ...competitorFormData, lastName: e.target.value })
@@ -1519,7 +1521,7 @@ export default function EventDetailPage() {
                 />
                 <TextField
                   fullWidth
-                  label="Email"
+                  label={t('eventDetail.email')}
                   type="email"
                   value={competitorFormData.email}
                   onChange={(e) =>
@@ -1529,7 +1531,7 @@ export default function EventDetailPage() {
                 />
                 <TextField
                   fullWidth
-                  label="Phone"
+                  label={t('eventDetail.phone')}
                   value={competitorFormData.phone}
                   onChange={(e) =>
                     setCompetitorFormData({ ...competitorFormData, phone: e.target.value })
@@ -1538,7 +1540,7 @@ export default function EventDetailPage() {
                   disabled={registering}
                 />
                 <FormControl fullWidth required disabled={registering || loadingCategories}>
-                  <InputLabel>Category</InputLabel>
+                  <InputLabel>{t('eventDetail.category')}</InputLabel>
                   <Select
                     value={competitorFormData.categoryId || ''}
                     onChange={(e) =>
@@ -1547,7 +1549,7 @@ export default function EventDetailPage() {
                         categoryId: e.target.value ? Number(e.target.value) : undefined,
                       })
                     }
-                    label="Category"
+                    label={t('eventDetail.category')}
                   >
                     {categories.map((category) => (
                       <MenuItem key={category.id} value={category.id}>
@@ -1558,7 +1560,7 @@ export default function EventDetailPage() {
                 </FormControl>
                 <TextField
                   fullWidth
-                  label="Sequential Number"
+                  label={t('eventDetail.sequentialNumber')}
                   type="number"
                   value={competitorFormData.sequentialNumber || ''}
                   onChange={(e) =>
@@ -1569,13 +1571,13 @@ export default function EventDetailPage() {
                   }
                   disabled={registering}
                   inputProps={{ min: 1 }}
-                  helperText="Optional: Leave empty to auto-assign the next available number"
+                  helperText={t('eventDetail.optionalAutoAssign')}
                 />
               </Box>
             </DialogContent>
             <DialogActions>
               <Button onClick={handleCloseRegisterDialog} disabled={registering}>
-                Cancel
+                {t('eventDetail.cancel')}
               </Button>
               <Button
                 onClick={handleRegisterCompetitor}
@@ -1583,7 +1585,7 @@ export default function EventDetailPage() {
                 disabled={registering || !competitorFormData.firstName.trim() || !competitorFormData.lastName.trim() || !competitorFormData.phone?.trim() || !competitorFormData.categoryId}
                 startIcon={registering ? <CircularProgress size={20} /> : null}
               >
-                {registering ? 'Registering...' : 'Register Competitor'}
+                {registering ? t('eventDetail.registering') : t('eventDetail.registerCompetitor')}
               </Button>
             </DialogActions>
           </Dialog>

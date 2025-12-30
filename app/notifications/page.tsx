@@ -36,6 +36,7 @@ import {
 import { eventService, Event } from '@/lib/api/services/event.service';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -52,6 +53,7 @@ function NotificationsPageContent() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
 
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<number | ''>('');
@@ -112,11 +114,11 @@ function NotificationsPageContent() {
       console.log('Filtered events:', filteredEvents);
       setEvents(filteredEvents);
       if (filteredEvents.length === 0) {
-        setError('No COMPLETED or ONGOING events found. Please create or start an event first.');
+        setError(t('notifications.noCOMPLETEDorONGOING'));
       }
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to load events. Please try again.';
+        err.response?.data?.message || err.message || t('notifications.failedToLoadEvents');
       setError(errorMessage);
       showToast(errorMessage, 'error');
       console.error('Error loading events:', err);
@@ -145,7 +147,7 @@ function NotificationsPageContent() {
       setSelectedCompetitorIds(data.map((c) => c.id));
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to load competitors. Please try again.';
+        err.response?.data?.message || err.message || t('notifications.failedToLoadCompetitors');
       setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
@@ -200,17 +202,17 @@ function NotificationsPageContent() {
 
   const handleSend = async () => {
     if (!selectedEventId) {
-      setError('Please select an event');
+      setError(t('notifications.selectEventError'));
       return;
     }
 
     if (!selectedTemplate && !customMessage) {
-      setError('Please select a template or enter a custom message');
+      setError(t('notifications.selectTemplateOrMessage'));
       return;
     }
 
     if (selectedCompetitorIds.length === 0) {
-      setError('Please select at least one competitor');
+      setError(t('notifications.selectAtLeastOneCompetitor'));
       return;
     }
 
@@ -228,7 +230,7 @@ function NotificationsPageContent() {
 
       const result = await notificationsService.sendNotifications(request);
       showToast(
-        `Notifications queued successfully! ${result.queued} sent, ${result.skipped} skipped.`,
+        t('notifications.notificationsQueued', { queued: result.queued, skipped: result.skipped }),
         'success',
       );
 
@@ -239,7 +241,7 @@ function NotificationsPageContent() {
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
-        'Failed to send notifications. Please try again.';
+        t('notifications.failedToSend');
       setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
@@ -274,7 +276,7 @@ function NotificationsPageContent() {
                 mb: { xs: 2, sm: 3 },
               }}
             >
-              Send Notifications
+              {t('notifications.title')}
             </Typography>
 
             {error && (
@@ -288,21 +290,21 @@ function NotificationsPageContent() {
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                   {/* Event Selection */}
                   <FormControl fullWidth>
-                    <InputLabel>Select Event</InputLabel>
+                    <InputLabel>{t('notifications.selectEvent')}</InputLabel>
                     <Select
                       value={selectedEventId}
                       onChange={(e) => setSelectedEventId(e.target.value as number | '')}
-                      label="Select Event"
+                      label={t('notifications.selectEvent')}
                       disabled={loading}
                       displayEmpty
                     >
                       {loading ? (
                         <MenuItem disabled>
                           <CircularProgress size={16} sx={{ mr: 1 }} />
-                          Loading events...
+                          {t('notifications.loadingEvents')}
                         </MenuItem>
                       ) : events.length === 0 ? (
-                        <MenuItem disabled>No events available</MenuItem>
+                        <MenuItem disabled>{t('notifications.noEventsAvailable')}</MenuItem>
                       ) : (
                         events.map((event) => (
                           <MenuItem key={event.id} value={event.id}>
@@ -313,21 +315,21 @@ function NotificationsPageContent() {
                     </Select>
                     {!loading && events.length === 0 && (
                       <FormHelperText>
-                        No COMPLETED or ONGOING events found. Please create or start an event first.
+                        {t('notifications.noCOMPLETEDorONGOING')}
                       </FormHelperText>
                     )}
                   </FormControl>
 
                   {/* Notification Type */}
                   <FormControl fullWidth>
-                    <InputLabel>Notification Type</InputLabel>
+                    <InputLabel>{t('notifications.notificationType')}</InputLabel>
                     <Select
                       value={notificationType}
                       onChange={(e) => setNotificationType(e.target.value as 'EMAIL' | 'WHATSAPP')}
-                      label="Notification Type"
+                      label={t('notifications.notificationType')}
                     >
-                      <MenuItem value="EMAIL">Email</MenuItem>
-                      <MenuItem value="WHATSAPP">WhatsApp</MenuItem>
+                      <MenuItem value="EMAIL">{t('notifications.email')}</MenuItem>
+                      <MenuItem value="WHATSAPP">{t('notifications.whatsapp')}</MenuItem>
                     </Select>
                   </FormControl>
 
@@ -340,18 +342,18 @@ function NotificationsPageContent() {
                         </Box>
                       ) : (
                         <FormControl fullWidth>
-                          <InputLabel>Select Competitors</InputLabel>
+                          <InputLabel>{t('notifications.selectCompetitors')}</InputLabel>
                           <Select
                             multiple
                             value={selectedCompetitorIds}
                             onChange={(e) =>
                               setSelectedCompetitorIds(e.target.value as number[])
                             }
-                            input={<OutlinedInput label="Select Competitors" />}
+                            input={<OutlinedInput label={t('notifications.selectCompetitors')} />}
                             renderValue={(selected) => {
-                              if (selected.length === 0) return 'None selected';
-                              if (selected.length === competitors.length) return 'All competitors';
-                              return `${selected.length} competitor(s) selected`;
+                              if (selected.length === 0) return t('notifications.noneSelected');
+                              if (selected.length === competitors.length) return t('notifications.allCompetitors');
+                              return t('notifications.competitorsSelected', { count: selected.length });
                             }}
                             MenuProps={MenuProps}
                           >
@@ -363,7 +365,7 @@ function NotificationsPageContent() {
                                   selectedCompetitorIds.length < competitors.length
                                 }
                               />
-                              <ListItemText primary="Select All" />
+                              <ListItemText primary={t('notifications.selectAll')} />
                             </MenuItem>
                             <Divider />
                             {competitors.map((competitor) => {
@@ -381,7 +383,7 @@ function NotificationsPageContent() {
                                     primary={`${competitor.firstName} ${competitor.lastName}`}
                                     secondary={
                                       !hasContact
-                                        ? `No ${notificationType === 'EMAIL' ? 'email' : 'phone'}`
+                                        ? t('notifications.noContact', { type: notificationType === 'EMAIL' ? 'email' : 'phone' })
                                         : competitor.sequentialNumber
                                           ? `#${competitor.sequentialNumber}`
                                           : undefined
@@ -392,8 +394,10 @@ function NotificationsPageContent() {
                             })}
                           </Select>
                           <FormHelperText>
-                            {availableCompetitors.length} competitor(s) with{' '}
-                            {notificationType === 'EMAIL' ? 'email' : 'phone'} available
+                            {t('notifications.competitorsWithContact', { 
+                              count: availableCompetitors.length,
+                              type: notificationType === 'EMAIL' ? 'email' : 'phone'
+                            })}
                           </FormHelperText>
                         </FormControl>
                       )}
@@ -404,16 +408,16 @@ function NotificationsPageContent() {
 
                   {/* Template Selection */}
                   <FormControl fullWidth>
-                    <InputLabel>Template (Optional)</InputLabel>
+                    <InputLabel>{t('notifications.template')}</InputLabel>
                     <Select
                       value={selectedTemplate}
                       onChange={(e) => {
                         setSelectedTemplate(e.target.value);
                         setCustomMessage('');
                       }}
-                      label="Template (Optional)"
+                      label={t('notifications.template')}
                     >
-                      <MenuItem value="">None (Use Custom Message)</MenuItem>
+                      <MenuItem value="">{t('notifications.noneUseCustomMessage')}</MenuItem>
                       {templates.map((template) => (
                         <MenuItem key={template.id} value={template.id}>
                           {template.name} - {template.description}
@@ -422,17 +426,18 @@ function NotificationsPageContent() {
                     </Select>
                     {selectedTemplate && (
                       <FormHelperText>
-                        Available variables:{' '}
-                        {templates
-                          .find((t) => t.id === selectedTemplate)
-                          ?.variables.join(', ')}
+                        {t('notifications.availableVariables', {
+                          variables: templates
+                            .find((t) => t.id === selectedTemplate)
+                            ?.variables.join(', ')
+                        })}
                       </FormHelperText>
                     )}
                   </FormControl>
 
                   {/* Custom Message */}
                   <TextField
-                    label="Custom Message (Optional)"
+                    label={t('notifications.customMessage')}
                     multiline
                     rows={4}
                     value={customMessage}
@@ -440,8 +445,8 @@ function NotificationsPageContent() {
                       setCustomMessage(e.target.value);
                       setSelectedTemplate('');
                     }}
-                    placeholder="Enter custom message. Use variables: {competitorName}, {eventName}, {sequentialNumber}, {category}, {time}, {eventDate}, {eventLocation}"
-                    helperText="Leave empty to use selected template, or enter custom message with variables"
+                    placeholder={t('notifications.customMessagePlaceholder')}
+                    helperText={t('notifications.leaveEmptyForTemplate')}
                     disabled={!!selectedTemplate}
                   />
 
@@ -450,7 +455,7 @@ function NotificationsPageContent() {
                     <Card variant="outlined" sx={{ bgcolor: 'grey.50' }}>
                       <CardContent>
                         <Typography variant="subtitle2" gutterBottom>
-                          Preview:
+                          {t('notifications.preview')}:
                         </Typography>
                         <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
                           {previewMessage}
@@ -469,7 +474,7 @@ function NotificationsPageContent() {
                     startIcon={sending ? <CircularProgress size={20} /> : null}
                     fullWidth={isMobile}
                   >
-                    {sending ? 'Sending...' : 'Send Notifications'}
+                    {sending ? t('notifications.sending') : t('notifications.sendNotifications')}
                   </Button>
                 </Box>
               </CardContent>

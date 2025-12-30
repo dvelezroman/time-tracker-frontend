@@ -49,11 +49,13 @@ import { eventService, Event } from '@/lib/api/services/event.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function CategoriesPage() {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { t } = useTranslation();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
@@ -109,7 +111,7 @@ export default function CategoriesPage() {
       setTotalPages(response.totalPages);
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to load categories. Please try again.';
+        err.response?.data?.message || err.message || t('categoriesList.failedToLoad');
       setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
@@ -151,13 +153,13 @@ export default function CategoriesPage() {
     try {
       setDeleting(true);
       await categoryService.delete(categoryToDelete.id);
-      showToast('Category deleted successfully!', 'success');
+      showToast(t('categoriesList.categoryDeleted'), 'success');
       setDeleteDialogOpen(false);
       setCategoryToDelete(null);
       loadCategories();
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to delete category. Please try again.';
+        err.response?.data?.message || err.message || t('categoriesList.failedToDelete');
       showToast(errorMessage, 'error');
     } finally {
       setDeleting(false);
@@ -189,7 +191,7 @@ export default function CategoriesPage() {
                   color: theme.palette.mode === 'dark' ? '#e6edf3' : '#1a1a1a',
                 }}
               >
-                Categories
+                {t('categoriesList.title')}
               </Typography>
               <Button
                 variant="contained"
@@ -197,7 +199,7 @@ export default function CategoriesPage() {
                 onClick={handleCreate}
                 size={isMobile ? 'medium' : 'large'}
               >
-                Create Category
+                {t('categoriesList.createCategory')}
               </Button>
             </Box>
 
@@ -219,7 +221,7 @@ export default function CategoriesPage() {
                   }}
                 >
                   <TextField
-                    placeholder="Search by name..."
+                    placeholder={t('categoriesList.searchByName')}
                     value={search}
                     onChange={handleSearchChange}
                     InputProps={{
@@ -232,13 +234,13 @@ export default function CategoriesPage() {
                     sx={{ flex: isMobile ? '1 1 100%' : '1 1 250px', minWidth: 200 }}
                     size={isMobile ? 'medium' : 'small'}
                   >
-                    <InputLabel>Filter by Event</InputLabel>
+                    <InputLabel>{t('categoriesList.filterByEvent')}</InputLabel>
                     <Select
                       value={eventIdFilter}
                       onChange={handleEventFilterChange}
-                      label="Filter by Event"
+                      label={t('categoriesList.filterByEvent')}
                     >
-                      <MenuItem value="">All Events</MenuItem>
+                      <MenuItem value="">{t('categoriesList.allEvents')}</MenuItem>
                       {events.map((event) => (
                         <MenuItem key={event.id} value={event.id}>
                           {event.name}
@@ -255,7 +257,7 @@ export default function CategoriesPage() {
                 ) : categories.length === 0 ? (
                   <Box textAlign="center" py={4}>
                     <Typography variant="body1" color="text.secondary">
-                      No categories found
+                      {t('categoriesList.noCategories')}
                     </Typography>
                   </Box>
                 ) : (
@@ -273,15 +275,15 @@ export default function CategoriesPage() {
                       <Table size={isMobile ? 'small' : 'medium'}>
                         <TableHead>
                           <TableRow>
-                            <TableCell>Name</TableCell>
+                            <TableCell>{t('categoriesList.name')}</TableCell>
                             <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                              Description
+                              {t('categoriesList.description')}
                             </TableCell>
-                            <TableCell>Event</TableCell>
+                            <TableCell>{t('categoriesList.event')}</TableCell>
                             <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
-                              Created At
+                              {t('categoriesList.createdAt')}
                             </TableCell>
-                            <TableCell align="right">Actions</TableCell>
+                            <TableCell align="right">{t('categoriesList.actions')}</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
@@ -383,19 +385,18 @@ export default function CategoriesPage() {
         </Container>
 
         <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-          <DialogTitle>Delete Category</DialogTitle>
+          <DialogTitle>{t('categoriesList.deleteCategory')}</DialogTitle>
           <DialogContent>
             <Typography>
-              Are you sure you want to delete the category &quot;{categoryToDelete?.name}&quot;?
-              This action cannot be undone.
+              {t('categoriesList.deleteCategoryConfirm')}
             </Typography>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleDeleteConfirm} color="error" disabled={deleting}>
-              {deleting ? <CircularProgress size={24} /> : 'Delete'}
+              {deleting ? <CircularProgress size={24} /> : t('categoriesList.delete')}
             </Button>
           </DialogActions>
         </Dialog>
