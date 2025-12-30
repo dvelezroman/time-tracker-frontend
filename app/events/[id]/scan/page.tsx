@@ -42,7 +42,6 @@ export default function QRScannerPage() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
-  const [sequentialNumber, setSequentialNumber] = useState('');
   const [recording, setRecording] = useState(false);
   const [lastRecorded, setLastRecorded] = useState<RecordFinishResponse | null>(null);
   const [error, setError] = useState('');
@@ -174,7 +173,6 @@ export default function QRScannerPage() {
       );
 
       // Clear input and refocus
-      setSequentialNumber('');
       setTimeout(() => {
         setRecording(false);
         inputRef.current?.focus();
