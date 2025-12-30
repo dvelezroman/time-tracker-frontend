@@ -7,7 +7,10 @@ import {
   Box,
   useTheme,
   useMediaQuery,
+  IconButton,
 } from '@mui/material';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import { useUIStore } from '@/store/useUIStore';
 import Image from 'next/image';
@@ -53,6 +56,9 @@ export function PublicHeader() {
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LanguageSwitcher />
+          <IconButton color="inherit" onClick={toggleTheme} aria-label="toggle theme">
+            {themeMode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+          </IconButton>
         </Box>
       </Toolbar>
     </AppBar>
