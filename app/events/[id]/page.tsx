@@ -741,7 +741,7 @@ export default function EventDetailPage() {
                       onClick={() => window.open(ROUTES.EVENTS_INDIVIDUAL_TIMER(event.id), '_blank')}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      {t('events.individualTimer')}
+                      {t('eventDetail.individualTimer')}
                     </Button>
                     <Button
                       variant="contained"
@@ -767,7 +767,7 @@ export default function EventDetailPage() {
                       disabled={stopping}
                       size={isMobile ? 'medium' : 'large'}
                     >
-                      {stopping ? t('common.loading') : t('events.stopEvent')}
+                      {stopping ? t('common.loading') : t('eventDetail.stopEvent')}
                     </Button>
                   </>
                 )}
@@ -1275,8 +1275,8 @@ export default function EventDetailPage() {
                 // Sort by sequential number (nulls last)
                 filtered.sort((a, b) => {
                   if (a.sequentialNumber === null && b.sequentialNumber === null) return 0;
-                  if (a.sequentialNumber === null) return 1;
-                  if (b.sequentialNumber === null) return -1;
+                  if (a.sequentialNumber === null || a.sequentialNumber === undefined) return 1;
+                  if (b.sequentialNumber === null || b.sequentialNumber === undefined) return -1;
                   return a.sequentialNumber - b.sequentialNumber;
                 });
 

@@ -341,7 +341,9 @@
     "optionalAutoAssign": "Opcional: Dejar vacío para asignar automáticamente el siguiente número disponible",
     "firstNameRequired": "El nombre y apellido son requeridos",
     "phoneRequired": "El teléfono es requerido",
-    "categoryRequired": "La categoría es requerida"
+    "categoryRequired": "La categoría es requerida",
+    "stopEvent": "Detener Evento",
+    "sendTimesWhatsApp": "Enviar Tiempos por WhatsApp"
   },
   "eventsList": {
     "title": "Eventos",

@@ -50,7 +50,7 @@ interface TimeEntryResult {
   sequentialNumber: number | null;
   status: 'FINISHED' | 'IN_PROGRESS' | 'NOT_STARTED';
   rank: number | null;
-  categoryRank: number | null;
+  categoryRank?: number | null;
   startDate: string | null;
   startDateLocal?: string;
   endDate: string | null;

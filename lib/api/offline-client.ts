@@ -58,7 +58,7 @@ class OfflineApiClient {
       // Queue operation for sync
       const operationId = await offlineStorage.addToSyncQueue({
         type: 'CREATE',
-        resource: this.getResourceFromUrl(url),
+        resource: this.getResourceFromUrl(url) as 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor',
         endpoint: url,
         payload: data,
       });
@@ -82,7 +82,7 @@ class OfflineApiClient {
         // Network error - queue for sync
         const operationId = await offlineStorage.addToSyncQueue({
           type: 'CREATE',
-          resource: this.getResourceFromUrl(url),
+          resource: this.getResourceFromUrl(url) as 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor',
           endpoint: url,
           payload: data,
         });
@@ -104,7 +104,7 @@ class OfflineApiClient {
     if (offlineMode || !online) {
       const operationId = await offlineStorage.addToSyncQueue({
         type: 'UPDATE',
-        resource: this.getResourceFromUrl(url),
+        resource: this.getResourceFromUrl(url) as 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor',
         endpoint: url,
         payload: data,
       });
@@ -123,7 +123,7 @@ class OfflineApiClient {
       if (!error.response && !online) {
         const operationId = await offlineStorage.addToSyncQueue({
           type: 'UPDATE',
-          resource: this.getResourceFromUrl(url),
+          resource: this.getResourceFromUrl(url) as 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor',
           endpoint: url,
           payload: data,
         });
@@ -145,7 +145,7 @@ class OfflineApiClient {
     if (offlineMode || !online) {
       const operationId = await offlineStorage.addToSyncQueue({
         type: 'DELETE',
-        resource: this.getResourceFromUrl(url),
+        resource: this.getResourceFromUrl(url) as 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor',
         endpoint: url,
         payload: null,
       });
@@ -157,12 +157,12 @@ class OfflineApiClient {
 
     try {
       const response = await apiClient.delete<T>(url, config);
-      return response.data || response;
+      return (response.data || response) as T;
     } catch (error: any) {
       if (!error.response && !online) {
         const operationId = await offlineStorage.addToSyncQueue({
           type: 'DELETE',
-          resource: this.getResourceFromUrl(url),
+          resource: this.getResourceFromUrl(url) as 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor',
           endpoint: url,
           payload: null,
         });

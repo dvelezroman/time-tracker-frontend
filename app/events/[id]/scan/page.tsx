@@ -15,6 +15,10 @@ import {
   useTheme,
   useMediaQuery,
   InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import { Html5Qrcode } from 'html5-qrcode';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -42,6 +46,8 @@ export default function QRScannerPage() {
   const [recording, setRecording] = useState(false);
   const [lastRecorded, setLastRecorded] = useState<RecordFinishResponse | null>(null);
   const [error, setError] = useState('');
+  const [showManualInput, setShowManualInput] = useState(false);
+  const [manualQR, setManualQR] = useState('');
 
   useEffect(() => {
     if (eventId) {
@@ -212,6 +218,15 @@ export default function QRScannerPage() {
     }
 
     await handleSequentialNumberSubmit(seqNumber.toString());
+  };
+
+  const handleManualSubmit = async () => {
+    if (!manualQR.trim()) {
+      return;
+    }
+    await handleQRCodeScanned(manualQR.trim());
+    setManualQR('');
+    setShowManualInput(false);
   };
 
   if (loading) {

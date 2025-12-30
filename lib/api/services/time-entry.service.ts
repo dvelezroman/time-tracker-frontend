@@ -232,7 +232,20 @@ export const timeEntryService = {
     if (timezone) {
       params.timezone = timezone;
     }
-    const response = await publicApiClient.get('/time-entries/public/lookup', { params });
+    const response = await publicApiClient.get<{
+      competitor: { firstName: string; lastName: string };
+      category: { id: number; name: string } | null;
+      sequentialNumber: number | null;
+      status: 'FINISHED' | 'IN_PROGRESS' | 'NOT_STARTED';
+      rank: number | null;
+      categoryRank?: number | null;
+      startDate: string | null;
+      startDateLocal?: string;
+      endDate: string | null;
+      endDateLocal?: string;
+      duration: number | null;
+      timezone?: string;
+    }>('/time-entries/public/lookup', { params });
     return response.data;
   },
 

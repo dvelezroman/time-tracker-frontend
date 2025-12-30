@@ -118,7 +118,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               onClick={() => handleNavigation(item.path)}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={t(item.labelKey)} />
+              <ListItemText primary={t(item.labelKey as any)} />
             </ListItemButton>
           </ListItem>
         ))}

@@ -429,7 +429,7 @@ function NotificationsPageContent() {
                         {t('notifications.availableVariables', {
                           variables: templates
                             .find((t) => t.id === selectedTemplate)
-                            ?.variables.join(', ')
+                            ?.variables.join(', ') || ''
                         })}
                       </FormHelperText>
                     )}

@@ -172,7 +172,7 @@ export const eventCompetitorService = {
       `/event-competitors/${id}/sequential-number`,
       { sequentialNumber },
     );
-    return response.data;
+    return response;
   },
 };
 

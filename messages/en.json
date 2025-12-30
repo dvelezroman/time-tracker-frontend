@@ -383,7 +383,9 @@
     "optionalAutoAssign": "Optional: Leave empty to auto-assign the next available number",
     "firstNameRequired": "First name and last name are required",
     "phoneRequired": "Phone is required",
-    "categoryRequired": "Category is required"
+    "categoryRequired": "Category is required",
+    "stopEvent": "Stop Event",
+    "sendTimesWhatsApp": "Send Times via WhatsApp"
   },
   "eventsList": {
     "title": "Events",

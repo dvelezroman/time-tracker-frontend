@@ -59,7 +59,7 @@ export const competitorService = {
 
   update: async (id: number, data: UpdateCompetitorRequest): Promise<Competitor> => {
     const response = await offlineApiClient.patch<Competitor>(`/competitors/${id}`, data);
-    return response.data;
+    return response;
   },
 
   delete: async (id: number): Promise<void> => {

@@ -175,7 +175,7 @@ export const offlineStorage = {
   // Sync Queue
   async addToSyncQueue(operation: {
     type: 'CREATE' | 'UPDATE' | 'DELETE';
-    resource: string;
+    resource: 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor';
     endpoint: string;
     payload: any;
   }): Promise<string> {

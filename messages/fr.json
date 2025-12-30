@@ -383,7 +383,9 @@
     "optionalAutoAssign": "Optionnel : Laisser vide pour attribuer automatiquement le prochain numéro disponible",
     "firstNameRequired": "Le prénom et le nom sont requis",
     "phoneRequired": "Le téléphone est requis",
-    "categoryRequired": "La catégorie est requise"
+    "categoryRequired": "La catégorie est requise",
+    "stopEvent": "Arrêter l'Événement",
+    "sendTimesWhatsApp": "Envoyer les Temps via WhatsApp"
   },
   "eventsList": {
     "title": "Événements",

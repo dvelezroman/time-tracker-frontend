@@ -133,7 +133,19 @@ export const eventService = {
     if (timezone) {
       params.timezone = timezone;
     }
-    const response = await publicApiClient.get('/events/public', { params });
+    const response = await publicApiClient.get<
+      Array<{
+        id: number;
+        name: string;
+        status: string;
+        startDate: string;
+        endDate: string | null;
+        location: string | null;
+        startDateLocal?: string;
+        endDateLocal?: string | null;
+        timezone?: string;
+      }>
+    >('/events/public', { params });
     return response.data;
   },
 };
