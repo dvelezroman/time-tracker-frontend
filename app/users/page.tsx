@@ -525,29 +525,57 @@ export default function UsersPage() {
               />
             </Box>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleEditClose} disabled={editing}>
+          <DialogActions sx={{ flexDirection: isMobile ? 'column-reverse' : 'row', gap: 1, px: isMobile ? 2 : 3, pb: isMobile ? 2 : 2 }}>
+            <Button 
+              onClick={handleEditClose} 
+              disabled={editing}
+              fullWidth={isMobile}
+              size={isMobile ? 'large' : 'medium'}
+            >
               {t('common.cancel')}
             </Button>
-            <Button onClick={handleEditSubmit} variant="contained" disabled={editing}>
+            <Button 
+              onClick={handleEditSubmit} 
+              variant="contained" 
+              disabled={editing}
+              fullWidth={isMobile}
+              size={isMobile ? 'large' : 'medium'}
+            >
               {editing ? <CircularProgress size={24} /> : t('common.save')}
             </Button>
           </DialogActions>
         </Dialog>
 
         {/* Delete User Dialog */}
-        <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <Dialog 
+          open={deleteDialogOpen} 
+          onClose={() => setDeleteDialogOpen(false)}
+          fullWidth
+          maxWidth="sm"
+          fullScreen={isMobile}
+        >
           <DialogTitle>{t('users.deleteUser')}</DialogTitle>
-          <DialogContent>
+          <DialogContent sx={{ pt: isMobile ? 2 : 3 }}>
             <Typography>
               {t('users.deleteConfirm', { email: userToDelete?.email || '' })}
             </Typography>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>
+          <DialogActions sx={{ flexDirection: isMobile ? 'column-reverse' : 'row', gap: 1, px: isMobile ? 2 : 3, pb: isMobile ? 2 : 2 }}>
+            <Button 
+              onClick={() => setDeleteDialogOpen(false)} 
+              disabled={deleting}
+              fullWidth={isMobile}
+              size={isMobile ? 'large' : 'medium'}
+            >
               {t('common.cancel')}
             </Button>
-            <Button onClick={handleDeleteConfirm} color="error" disabled={deleting}>
+            <Button 
+              onClick={handleDeleteConfirm} 
+              color="error" 
+              disabled={deleting}
+              fullWidth={isMobile}
+              size={isMobile ? 'large' : 'medium'}
+            >
               {deleting ? <CircularProgress size={24} /> : t('common.delete')}
             </Button>
           </DialogActions>

@@ -63,6 +63,7 @@ export function MainLayout({ children }: MainLayoutProps) {
               duration: theme.transitions.duration.enteringScreen,
             }),
             overflowX: 'hidden',
+            minHeight: { xs: 'calc(100vh - 120px)', sm: 'calc(100vh - 140px)' },
           }}
         >
           {children}

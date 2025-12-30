@@ -1424,9 +1424,10 @@ export default function EventDetailPage() {
             onClose={() => !starting && setTimerTypeDialogOpen(false)}
             maxWidth="sm"
             fullWidth
+            fullScreen={isMobile}
           >
             <DialogTitle>{t('eventDetail.selectTimerType')}</DialogTitle>
-            <DialogContent>
+            <DialogContent sx={{ pt: isMobile ? 2 : 3 }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 {t('eventDetail.chooseTimerType')}
               </Typography>
@@ -1468,10 +1469,12 @@ export default function EventDetailPage() {
                 </RadioGroup>
               </FormControl>
             </DialogContent>
-            <DialogActions>
+            <DialogActions sx={{ flexDirection: isMobile ? 'column-reverse' : 'row', gap: 1, px: isMobile ? 2 : 3, pb: isMobile ? 2 : 2 }}>
               <Button
                 onClick={() => setTimerTypeDialogOpen(false)}
                 disabled={starting}
+                fullWidth={isMobile}
+                size={isMobile ? 'large' : 'medium'}
               >
                 {t('eventDetail.cancel')}
               </Button>
@@ -1480,6 +1483,8 @@ export default function EventDetailPage() {
                 variant="contained"
                 disabled={starting}
                 startIcon={starting ? <CircularProgress size={20} /> : null}
+                fullWidth={isMobile}
+                size={isMobile ? 'large' : 'medium'}
               >
                 {starting ? t('eventDetail.starting') : t('eventDetail.startEvent')}
               </Button>
@@ -1492,11 +1497,12 @@ export default function EventDetailPage() {
             onClose={handleCloseRegisterDialog}
             maxWidth="sm"
             fullWidth
+            fullScreen={isMobile}
             disableEnforceFocus={false}
             disableAutoFocus={false}
           >
             <DialogTitle>{t('eventDetail.registerNewCompetitor')}</DialogTitle>
-            <DialogContent>
+            <DialogContent sx={{ pt: isMobile ? 2 : 3 }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
                 <TextField
                   fullWidth
@@ -1575,8 +1581,13 @@ export default function EventDetailPage() {
                 />
               </Box>
             </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseRegisterDialog} disabled={registering}>
+            <DialogActions sx={{ flexDirection: isMobile ? 'column-reverse' : 'row', gap: 1, px: isMobile ? 2 : 3, pb: isMobile ? 2 : 2 }}>
+              <Button 
+                onClick={handleCloseRegisterDialog} 
+                disabled={registering}
+                fullWidth={isMobile}
+                size={isMobile ? 'large' : 'medium'}
+              >
                 {t('eventDetail.cancel')}
               </Button>
               <Button
@@ -1584,6 +1595,8 @@ export default function EventDetailPage() {
                 variant="contained"
                 disabled={registering || !competitorFormData.firstName.trim() || !competitorFormData.lastName.trim() || !competitorFormData.phone?.trim() || !competitorFormData.categoryId}
                 startIcon={registering ? <CircularProgress size={20} /> : null}
+                fullWidth={isMobile}
+                size={isMobile ? 'large' : 'medium'}
               >
                 {registering ? t('eventDetail.registering') : t('eventDetail.registerCompetitor')}
               </Button>

@@ -410,9 +410,15 @@ export default function QRScannerPage() {
           </Card>
         </Container>
 
-        <Dialog open={showManualInput} onClose={() => setShowManualInput(false)}>
+        <Dialog 
+          open={showManualInput} 
+          onClose={() => setShowManualInput(false)}
+          fullWidth
+          maxWidth="sm"
+          fullScreen={isMobile}
+        >
           <DialogTitle>Manual QR Code Entry</DialogTitle>
-          <DialogContent>
+          <DialogContent sx={{ pt: isMobile ? 2 : 3 }}>
             <TextField
               autoFocus
               margin="dense"

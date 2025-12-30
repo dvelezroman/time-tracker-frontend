@@ -664,9 +664,15 @@ export default function CreateEventPage() {
           </Box>
         </Container>
 
-        <Dialog open={categoryDialogOpen} onClose={handleCloseCategoryDialog} maxWidth="sm" fullWidth>
+        <Dialog 
+          open={categoryDialogOpen} 
+          onClose={handleCloseCategoryDialog} 
+          maxWidth="sm" 
+          fullWidth
+          fullScreen={isMobile}
+        >
           <DialogTitle>{editingCategory ? 'Edit Category' : 'Add Category'}</DialogTitle>
-          <DialogContent>
+          <DialogContent sx={{ pt: isMobile ? 2 : 3 }}>
             <TextField
               fullWidth
               label="Category Name"
@@ -700,14 +706,21 @@ export default function CreateEventPage() {
               }}
             />
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseCategoryDialog} disabled={categoryLoading}>
+          <DialogActions sx={{ flexDirection: isMobile ? 'column-reverse' : 'row', gap: 1, px: isMobile ? 2 : 3, pb: isMobile ? 2 : 2 }}>
+            <Button 
+              onClick={handleCloseCategoryDialog} 
+              disabled={categoryLoading}
+              fullWidth={isMobile}
+              size={isMobile ? 'large' : 'medium'}
+            >
               Cancel
             </Button>
             <Button
               onClick={handleCategorySubmit}
               variant="contained"
               disabled={categoryLoading || !categoryFormData.name.trim()}
+              fullWidth={isMobile}
+              size={isMobile ? 'large' : 'medium'}
             >
               {categoryLoading ? <CircularProgress size={24} /> : editingCategory ? 'Update' : 'Create'}
             </Button>

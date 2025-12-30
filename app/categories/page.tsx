@@ -384,18 +384,35 @@ export default function CategoriesPage() {
           </Box>
         </Container>
 
-        <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <Dialog 
+          open={deleteDialogOpen} 
+          onClose={() => setDeleteDialogOpen(false)}
+          fullWidth
+          maxWidth="sm"
+          fullScreen={isMobile}
+        >
           <DialogTitle>{t('categoriesList.deleteCategory')}</DialogTitle>
-          <DialogContent>
+          <DialogContent sx={{ pt: isMobile ? 2 : 3 }}>
             <Typography>
               {t('categoriesList.deleteCategoryConfirm')}
             </Typography>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>
+          <DialogActions sx={{ flexDirection: isMobile ? 'column-reverse' : 'row', gap: 1, px: isMobile ? 2 : 3, pb: isMobile ? 2 : 2 }}>
+            <Button 
+              onClick={() => setDeleteDialogOpen(false)} 
+              disabled={deleting}
+              fullWidth={isMobile}
+              size={isMobile ? 'large' : 'medium'}
+            >
               {t('common.cancel')}
             </Button>
-            <Button onClick={handleDeleteConfirm} color="error" disabled={deleting}>
+            <Button 
+              onClick={handleDeleteConfirm} 
+              color="error" 
+              disabled={deleting}
+              fullWidth={isMobile}
+              size={isMobile ? 'large' : 'medium'}
+            >
               {deleting ? <CircularProgress size={24} /> : t('categoriesList.delete')}
             </Button>
           </DialogActions>

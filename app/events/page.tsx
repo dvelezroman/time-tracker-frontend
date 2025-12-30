@@ -571,18 +571,35 @@ export default function EventsPage() {
           </Box>
         </Container>
 
-        <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <Dialog 
+          open={deleteDialogOpen} 
+          onClose={() => setDeleteDialogOpen(false)}
+          fullWidth
+          maxWidth="sm"
+          fullScreen={isMobile}
+        >
           <DialogTitle>{t('eventsList.deleteEvent')}</DialogTitle>
-          <DialogContent>
+          <DialogContent sx={{ pt: isMobile ? 2 : 3 }}>
             <Typography>
               {t('eventsList.deleteEventConfirm')}
             </Typography>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>
+          <DialogActions sx={{ flexDirection: isMobile ? 'column-reverse' : 'row', gap: 1, px: isMobile ? 2 : 3, pb: isMobile ? 2 : 2 }}>
+            <Button 
+              onClick={() => setDeleteDialogOpen(false)} 
+              disabled={deleting}
+              fullWidth={isMobile}
+              size={isMobile ? 'large' : 'medium'}
+            >
               {t('common.cancel')}
             </Button>
-            <Button onClick={handleDeleteConfirm} color="error" disabled={deleting}>
+            <Button 
+              onClick={handleDeleteConfirm} 
+              color="error" 
+              disabled={deleting}
+              fullWidth={isMobile}
+              size={isMobile ? 'large' : 'medium'}
+            >
               {deleting ? <CircularProgress size={24} /> : t('eventsList.delete')}
             </Button>
           </DialogActions>
@@ -594,9 +611,10 @@ export default function EventsPage() {
           onClose={() => !actionLoading && setTimerTypeDialogOpen(false)}
           maxWidth="sm"
           fullWidth
+          fullScreen={isMobile}
         >
           <DialogTitle>{t('eventDetail.selectTimerType')}</DialogTitle>
-          <DialogContent>
+          <DialogContent sx={{ pt: isMobile ? 2 : 3 }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               {t('eventDetail.chooseTimerType')}
             </Typography>
@@ -638,10 +656,12 @@ export default function EventsPage() {
               </RadioGroup>
             </FormControl>
           </DialogContent>
-          <DialogActions>
+          <DialogActions sx={{ flexDirection: isMobile ? 'column-reverse' : 'row', gap: 1, px: isMobile ? 2 : 3, pb: isMobile ? 2 : 2 }}>
             <Button
               onClick={() => setTimerTypeDialogOpen(false)}
               disabled={actionLoading !== null}
+              fullWidth={isMobile}
+              size={isMobile ? 'large' : 'medium'}
             >
               {t('common.cancel')}
             </Button>
@@ -650,6 +670,8 @@ export default function EventsPage() {
               variant="contained"
               disabled={actionLoading !== null}
               startIcon={actionLoading !== null ? <CircularProgress size={20} /> : null}
+              fullWidth={isMobile}
+              size={isMobile ? 'large' : 'medium'}
             >
               {actionLoading !== null ? t('eventDetail.starting') : t('eventsList.start')}
             </Button>
