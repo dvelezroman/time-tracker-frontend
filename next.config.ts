@@ -2,6 +2,16 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
+  // Image configuration for external domains
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'bitflow-public.s3.us-east-1.amazonaws.com',
+        pathname: '/**',
+      },
+    ],
+  },
   // Optimize for development hot reload
   ...(process.env.NODE_ENV === 'development' && {
     // Improved cache settings to prevent chunk loading errors
