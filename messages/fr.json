@@ -17,7 +17,9 @@
     "submit": "Soumettre",
     "yes": "Oui",
     "no": "Non",
-    "menu": "Menu"
+    "menu": "Menu",
+    "collapse": "Réduire",
+    "expand": "Développer"
   },
   "nav": {
     "dashboard": "Tableau de bord",

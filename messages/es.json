@@ -17,7 +17,9 @@
     "submit": "Enviar",
     "yes": "Sí",
     "no": "No",
-    "menu": "Menú"
+    "menu": "Menú",
+    "collapse": "Contraer",
+    "expand": "Expandir"
   },
   "nav": {
     "dashboard": "Panel de Control",

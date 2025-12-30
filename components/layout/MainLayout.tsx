@@ -15,17 +15,40 @@ export function MainLayout({ children }: MainLayoutProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Load collapsed state from localStorage
+  useEffect(() => {
+    const savedCollapsed = localStorage.getItem('sidebarCollapsed');
+    if (savedCollapsed !== null) {
+      setSidebarCollapsed(JSON.parse(savedCollapsed));
+    }
+  }, []);
 
   const handleSidebarToggle = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
+  const handleCollapseToggle = () => {
+    const newCollapsed = !sidebarCollapsed;
+    setSidebarCollapsed(newCollapsed);
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(newCollapsed));
+  };
+
+  const sidebarWidth = sidebarCollapsed && !isMobile ? 64 : 240;
+  const effectiveWidth = sidebarOpen ? sidebarWidth : 0;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header onMenuClick={handleSidebarToggle} />
       <OfflineIndicator />
       <Box sx={{ display: 'flex', flex: 1 }}>
-        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <Sidebar
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          collapsed={sidebarCollapsed}
+          onCollapseToggle={handleCollapseToggle}
+        />
         <Box
           component="main"
           sx={{
@@ -33,11 +56,11 @@ export function MainLayout({ children }: MainLayoutProps) {
             p: { xs: 1, sm: 2, md: 3 },
             width: { 
               xs: '100%',
-              sm: `calc(100% - ${sidebarOpen ? 240 : 0}px)` 
+              sm: `calc(100% - ${effectiveWidth}px)` 
             },
             transition: theme.transitions.create(['width', 'margin'], {
               easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.leavingScreen,
+              duration: theme.transitions.duration.enteringScreen,
             }),
             overflowX: 'hidden',
           }}

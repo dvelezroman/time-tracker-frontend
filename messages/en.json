@@ -17,7 +17,9 @@
     "submit": "Submit",
     "yes": "Yes",
     "no": "No",
-    "menu": "Menu"
+    "menu": "Menu",
+    "collapse": "Collapse",
+    "expand": "Expand"
   },
   "nav": {
     "dashboard": "Dashboard",

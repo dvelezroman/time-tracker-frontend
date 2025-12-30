@@ -12,6 +12,8 @@ import {
   Typography,
   useTheme,
   useMediaQuery,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
@@ -20,16 +22,21 @@ import EventIcon from '@mui/icons-material/Event';
 import CategoryIcon from '@mui/icons-material/Category';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useRouter, usePathname } from 'next/navigation';
 import { ROUTES } from '@/lib/constants';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const drawerWidth = 240;
+const collapsedDrawerWidth = 64;
 
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
+  collapsed?: boolean;
+  onCollapseToggle?: () => void;
 }
 
 interface NavItem {
@@ -82,7 +89,7 @@ const navItems: NavItem[] = [
   },
 ];
 
-export function Sidebar({ open, onClose }: SidebarProps) {
+export function Sidebar({ open, onClose, collapsed = false, onCollapseToggle }: SidebarProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const router = useRouter();
@@ -103,28 +110,70 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   });
 
   const drawerContent = (
-    <Box>
-      <Box sx={{ p: 2 }}>
-        <Typography variant="h6" noWrap component="div">
-          {t('common.menu') || 'Menu'}
-        </Typography>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Box
+        sx={{
+          p: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: collapsed ? 'center' : 'space-between',
+        }}
+      >
+        {!collapsed && (
+          <Typography variant="h6" noWrap component="div">
+            {t('common.menu') || 'Menu'}
+          </Typography>
+        )}
+        {!isMobile && onCollapseToggle && (
+          <Tooltip title={collapsed ? t('common.expand') || 'Expand' : t('common.collapse') || 'Collapse'}>
+            <IconButton onClick={onCollapseToggle} size="small">
+              {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            </IconButton>
+          </Tooltip>
+        )}
       </Box>
       <Divider />
-      <List>
-        {filteredNavItems.map((item) => (
-          <ListItem key={item.path} disablePadding>
-            <ListItemButton
-              selected={pathname === item.path || pathname?.startsWith(item.path + '/')}
-              onClick={() => handleNavigation(item.path)}
+      <List sx={{ flexGrow: 1 }}>
+        {filteredNavItems.map((item) => {
+          const isSelected = pathname === item.path || pathname?.startsWith(item.path + '/');
+          return (
+            <Tooltip
+              key={item.path}
+              title={collapsed ? (t(item.labelKey as Parameters<typeof t>[0]) || '') : ''}
+              placement="right"
+              disableHoverListener={!collapsed}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={t(item.labelKey as any)} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+              <ListItem disablePadding>
+                <ListItemButton
+                  selected={isSelected}
+                  onClick={() => handleNavigation(item.path)}
+                  sx={{
+                    minHeight: 48,
+                    justifyContent: collapsed ? 'center' : 'flex-start',
+                    px: collapsed ? 1.5 : 2,
+                  }}
+                >
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 0,
+                      mr: collapsed ? 0 : 3,
+                      justifyContent: 'center',
+                      color: isSelected ? 'primary.main' : 'inherit',
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  {!collapsed && <ListItemText primary={t(item.labelKey as Parameters<typeof t>[0])} />}
+                </ListItemButton>
+              </ListItem>
+            </Tooltip>
+          );
+        })}
       </List>
     </Box>
   );
+
+  const currentWidth = collapsed && !isMobile ? collapsedDrawerWidth : drawerWidth;
 
   return (
     <Drawer
@@ -132,11 +181,21 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       open={open}
       onClose={onClose}
       sx={{
-        width: drawerWidth,
+        width: currentWidth,
         flexShrink: 0,
+        whiteSpace: 'nowrap',
+        transition: theme.transitions.create('width', {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.enteringScreen,
+        }),
         '& .MuiDrawer-paper': {
-          width: drawerWidth,
+          width: currentWidth,
           boxSizing: 'border-box',
+          transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+          overflowX: 'hidden',
         },
       }}
     >
