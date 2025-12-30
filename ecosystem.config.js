@@ -1,9 +1,8 @@
 module.exports = {
   apps: [
     {
-      name: 'time-tracker-app',
-      script: 'npm',
-      args: 'run start',
+      name: 'time-tracker-frontend',
+      script: './start.sh',
       instances: 1,
       exec_mode: 'fork',
       watch: false,
