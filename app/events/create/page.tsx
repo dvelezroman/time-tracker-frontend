@@ -30,6 +30,9 @@ import {
   DialogActions,
   CircularProgress,
   Divider,
+  FormControlLabel,
+  Switch,
+  FormHelperText,
 } from '@mui/material';
 import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -52,7 +55,9 @@ export default function CreateEventPage() {
     startDate: '',
     endDate: '',
     location: '',
+    numberOfStages: undefined,
   });
+  const [hasStages, setHasStages] = useState<boolean>(false);
   const [timezone, setTimezone] = useState<string>('UTC');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -216,6 +221,11 @@ export default function CreateEventPage() {
       return;
     }
 
+    if (hasStages && (!formData.numberOfStages || formData.numberOfStages < 1)) {
+      setError('Please enter the number of stages (must be at least 1)');
+      return;
+    }
+
     const startDateUTC = convertLocalToUTC(formData.startDate, timezone);
     const endDateUTC = convertLocalToUTC(formData.endDate, timezone);
 
@@ -233,6 +243,7 @@ export default function CreateEventPage() {
           startDate: startDateUTC,
           endDate: endDateUTC,
           assignedTo: assignedTo,
+          numberOfStages: hasStages ? formData.numberOfStages : undefined,
         },
         timezone
       );
@@ -475,6 +486,68 @@ export default function CreateEventPage() {
                         ))}
                       </Select>
                     </FormControl>
+                  )}
+
+                  <Box sx={{ mt: 2, mb: 1 }}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={hasStages}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setHasStages(checked);
+                            if (!checked) {
+                              setFormData({
+                                ...formData,
+                                numberOfStages: undefined,
+                              });
+                            }
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label={
+                        <Typography variant="body1" fontWeight="medium">
+                          This event has multiple stages
+                        </Typography>
+                      }
+                    />
+                    <FormHelperText sx={{ ml: 0, mt: 0.5 }}>
+                      {hasStages
+                        ? 'Enable this if competitors will pass through multiple checkpoints/stages'
+                        : 'Regular events have 1 stage (start to finish). Enable this to add multiple stages/checkpoints.'}
+                    </FormHelperText>
+                  </Box>
+
+                  {hasStages && (
+                    <TextField
+                      fullWidth
+                      label="Number of Stages"
+                      type="number"
+                      value={formData.numberOfStages || ''}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFormData({
+                          ...formData,
+                          numberOfStages: value === '' ? undefined : parseInt(value, 10),
+                        });
+                        setError('');
+                      }}
+                      required
+                      margin="normal"
+                      inputProps={{ min: 1, max: 20 }}
+                      error={hasStages && (!formData.numberOfStages || formData.numberOfStages < 1)}
+                      helperText={
+                        hasStages && (!formData.numberOfStages || formData.numberOfStages < 1)
+                          ? 'Please enter a valid number of stages (1-20)'
+                          : 'Enter the number of stages/checkpoints in this event (e.g., 3 for a 3-stage race)'
+                      }
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                        },
+                      }}
+                    />
                   )}
 
                   <FormControl fullWidth margin="normal">

@@ -26,6 +26,8 @@ import {
   MenuItem,
   TextField,
   IconButton,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
@@ -37,6 +39,7 @@ import {
   timeEntryService,
   LeaderboardResponse,
   LeaderboardEntry,
+  StageLeaderboard,
 } from '@/lib/api/services/time-entry.service';
 import { categoryService, Category } from '@/lib/api/services/category.service';
 import { ROUTES } from '@/lib/constants';
@@ -63,6 +66,7 @@ export default function LeaderboardPage() {
   const [editingManualTime, setEditingManualTime] = useState<number | null>(null);
   const [manualTimeValue, setManualTimeValue] = useState<string>('');
   const [savingManualTime, setSavingManualTime] = useState<number | null>(null);
+  const [selectedTab, setSelectedTab] = useState<string>('general');
 
   useEffect(() => {
     if (eventId) {
@@ -345,7 +349,118 @@ export default function LeaderboardPage() {
               </Alert>
             )}
 
+            {/* Tabs for stage leaderboards (only show if more than 1 stage) */}
+            {(event.numberOfStages ?? 1) > 1 && leaderboard.stageLeaderboards && (
+              <Card sx={{ mb: 3 }}>
+                <Tabs
+                  value={selectedTab}
+                  onChange={(e, newValue) => setSelectedTab(newValue)}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  sx={{
+                    borderBottom: 1,
+                    borderColor: 'divider',
+                  }}
+                >
+                  <Tab label="General" value="general" />
+                  {Array.from({ length: event.numberOfStages ?? 1 }, (_, i) => i + 1).map((stageNum) => (
+                    <Tab
+                      key={stageNum}
+                      label={`Stage ${stageNum}`}
+                      value={`stage${stageNum}`}
+                    />
+                  ))}
+                </Tabs>
+              </Card>
+            )}
+
             {(() => {
+              // If viewing a stage leaderboard, show stage data (only for events with >1 stage)
+              if (
+                (event.numberOfStages ?? 1) > 1 &&
+                leaderboard.stageLeaderboards &&
+                selectedTab !== 'general' &&
+                leaderboard.stageLeaderboards[selectedTab]
+              ) {
+                const stageLeaderboard = leaderboard.stageLeaderboards[selectedTab];
+                const stageEntries = stageLeaderboard.entries;
+
+                return (
+                  <Card>
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+                        Stage {stageLeaderboard.stageNumber} Leaderboard
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        {stageLeaderboard.total} competitors completed Stage {stageLeaderboard.stageNumber}
+                      </Typography>
+                      {stageEntries.length === 0 ? (
+                        <Box textAlign="center" py={4}>
+                          <Typography variant="body1" color="text.secondary">
+                            No competitors have completed Stage {stageLeaderboard.stageNumber} yet.
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <TableContainer>
+                          <Table>
+                            <TableHead>
+                              <TableRow>
+                                <TableCell><strong>Rank</strong></TableCell>
+                                <TableCell><strong>Sequential #</strong></TableCell>
+                                <TableCell><strong>Competitor</strong></TableCell>
+                                <TableCell><strong>Category</strong></TableCell>
+                                <TableCell><strong>Time to Stage</strong></TableCell>
+                                <TableCell><strong>Recorded At</strong></TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {stageEntries.map((entry) => (
+                                <TableRow key={entry.timeEntryId} hover>
+                                  <TableCell>
+                                    <Chip
+                                      label={`#${entry.rank}`}
+                                      color="primary"
+                                      size="small"
+                                      sx={{ fontWeight: 'bold' }}
+                                    />
+                                  </TableCell>
+                                  <TableCell>
+                                    <Typography variant="body2" fontWeight="bold" color="primary">
+                                      {entry.sequentialNumber || '-'}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Typography variant="body2" fontWeight="medium">
+                                      {entry.competitor.firstName} {entry.competitor.lastName}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Typography variant="body2" color="text.secondary">
+                                      {entry.category?.name || '-'}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Typography variant="body2" fontWeight="bold" color="primary" sx={{ fontSize: '1rem' }}>
+                                      {formatDuration(entry.duration)}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Typography variant="body2" color="text.secondary">
+                                      {formatTime(entry.startDate, entry.startDateLocal)}
+                                    </Typography>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              }
+
+              // General leaderboard (default)
               const filteredFinished = leaderboard.finished.filter((entry) => {
                 if (selectedCategoryId === '') return true;
                 return entry.category?.id === selectedCategoryId;

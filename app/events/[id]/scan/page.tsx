@@ -24,7 +24,7 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { eventService, Event } from '@/lib/api/services/event.service';
-import { timeEntryService, RecordFinishResponse } from '@/lib/api/services/time-entry.service';
+import { timeEntryService, RecordFinishResponse, StageTimeEntry } from '@/lib/api/services/time-entry.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
@@ -44,9 +44,11 @@ export default function QRScannerPage() {
   const [scanning, setScanning] = useState(false);
   const [recording, setRecording] = useState(false);
   const [lastRecorded, setLastRecorded] = useState<RecordFinishResponse | null>(null);
+  const [lastStageRecorded, setLastStageRecorded] = useState<StageTimeEntry | null>(null);
   const [error, setError] = useState('');
   const [showManualInput, setShowManualInput] = useState(false);
   const [manualQR, setManualQR] = useState('');
+  const [selectedStage, setSelectedStage] = useState<number | null>(null);
 
   useEffect(() => {
     if (eventId) {
@@ -145,7 +147,7 @@ export default function QRScannerPage() {
     setScanning(false);
   };
 
-  const handleSequentialNumberSubmit = async (seqNum: string) => {
+  const handleSequentialNumberSubmit = async (seqNum: string, stageNumber?: number) => {
     if (recording) return; // Prevent duplicate submissions
 
     const trimmedSeqNum = seqNum.trim();
@@ -164,13 +166,32 @@ export default function QRScannerPage() {
       setRecording(true);
       setError('');
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const result = await timeEntryService.recordFinishBySequentialNumber(eventId, seqNumber, timezone);
 
-      setLastRecorded(result);
-      showToast(
-        `Finish time recorded for ${result.competitor.firstName} ${result.competitor.lastName} (#${seqNumber})!`,
-        'success',
-      );
+      // Determine effective number of stages (null/undefined means 1 stage)
+      const effectiveStages = event?.numberOfStages ?? 1;
+      
+      // If event has multiple stages (>1) and stageNumber is provided, record stage
+      if (effectiveStages > 1 && stageNumber) {
+        const result = await timeEntryService.recordStageBySequentialNumber(
+          eventId,
+          seqNumber,
+          stageNumber,
+          timezone,
+        );
+        setLastStageRecorded(result);
+        showToast(
+          `Stage ${stageNumber} recorded for ${result.competitor.firstName} ${result.competitor.lastName} (#${seqNumber})!`,
+          'success',
+        );
+      } else {
+        // Regular finish time (for events with 1 stage or no stages configured)
+        const result = await timeEntryService.recordFinishBySequentialNumber(eventId, seqNumber, timezone);
+        setLastRecorded(result);
+        showToast(
+          `Finish time recorded for ${result.competitor.firstName} ${result.competitor.lastName} (#${seqNumber})!`,
+          'success',
+        );
+      }
 
       // Clear input and refocus
       setTimeout(() => {
@@ -180,7 +201,7 @@ export default function QRScannerPage() {
     } catch (err: any) {
       setRecording(false);
       const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to record finish time.';
+        err.response?.data?.message || err.message || 'Failed to record time.';
       setError(errorMessage);
       showToast(errorMessage, 'error');
       // Keep input focused for next entry
@@ -215,7 +236,12 @@ export default function QRScannerPage() {
       return;
     }
 
-    await handleSequentialNumberSubmit(seqNumber.toString());
+    // If event has multiple stages (>1) and a stage is selected, use it; otherwise record finish
+    if ((event?.numberOfStages ?? 1) > 1 && selectedStage) {
+      await handleSequentialNumberSubmit(seqNumber.toString(), selectedStage);
+    } else {
+      await handleSequentialNumberSubmit(seqNumber.toString());
+    }
   };
 
   const handleManualSubmit = async () => {
@@ -326,6 +352,31 @@ export default function QRScannerPage() {
             </Alert>
           )}
 
+          {lastStageRecorded && (
+            <Alert severity="success" sx={{ mb: 3 }}>
+              <Typography variant="body2" fontWeight="bold">
+                {lastStageRecorded.competitor.firstName} {lastStageRecorded.competitor.lastName}
+              </Typography>
+              <Typography variant="body2">
+                Stage {lastStageRecorded.stageNumber} Recorded:{' '}
+                {lastStageRecorded.recordedAtLocal
+                  ? format(new Date(lastStageRecorded.recordedAtLocal), 'HH:mm:ss')
+                  : format(new Date(lastStageRecorded.recordedAt), 'HH:mm:ss')}
+              </Typography>
+              {lastStageRecorded.duration !== null && (
+                <Typography variant="body2">
+                  Time from Start: {(() => {
+                    const totalSeconds = Math.floor(lastStageRecorded.duration / 1000);
+                    const ms = lastStageRecorded.duration % 1000;
+                    const mins = Math.floor(totalSeconds / 60);
+                    const secs = totalSeconds % 60;
+                    return `${mins}:${String(secs).padStart(2, '0')}.${String(ms).padStart(3, '0')}`;
+                  })()}
+                </Typography>
+              )}
+            </Alert>
+          )}
+
           <Card>
             <CardContent>
               <Box
@@ -401,10 +452,114 @@ export default function QRScannerPage() {
                   <Box sx={{ mt: 2, textAlign: 'center' }}>
                     <CircularProgress size={24} />
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                      Recording finish time...
+                      Recording {(event.numberOfStages ?? 1) > 1 && selectedStage ? `stage ${selectedStage}` : 'finish time'}...
                     </Typography>
                   </Box>
                 )}
+
+                {/* Stage selection for multi-stage events (only show if more than 1 stage) */}
+                {(event.numberOfStages ?? 1) > 1 && (
+                  <Box sx={{ mt: 3, width: '100%' }}>
+                    <Typography variant="subtitle1" gutterBottom align="center" fontWeight="bold">
+                      Select Stage to Record
+                    </Typography>
+                    <Box
+                      display="flex"
+                      gap={1}
+                      flexWrap="wrap"
+                      justifyContent="center"
+                      sx={{ mt: 2 }}
+                    >
+                      {Array.from({ length: event.numberOfStages ?? 1 }, (_, i) => i + 1).map((stageNum) => (
+                        <Button
+                          key={stageNum}
+                          variant={selectedStage === stageNum ? 'contained' : 'outlined'}
+                          color={selectedStage === stageNum ? 'primary' : 'inherit'}
+                          onClick={() => setSelectedStage(stageNum)}
+                          disabled={recording}
+                          size={isMobile ? 'medium' : 'large'}
+                          sx={{
+                            minWidth: { xs: '80px', sm: '100px' },
+                            minHeight: 44,
+                          }}
+                        >
+                          Stage {stageNum}
+                        </Button>
+                      ))}
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" align="center" sx={{ mt: 1, display: 'block' }}>
+                      {selectedStage
+                        ? `Recording Stage ${selectedStage}. Scan QR code or enter competitor number.`
+                        : 'Select a stage above, then scan QR code or enter competitor number.'}
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* For single-stage events (numberOfStages is null/undefined or 1), show simple message */}
+                {(event.numberOfStages ?? 1) === 1 && (
+                  <Box sx={{ mt: 3, width: '100%' }}>
+                    <Typography variant="caption" color="text.secondary" align="center" sx={{ display: 'block' }}>
+                      This event has a single stage. Scan QR code or enter competitor number to record finish time.
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* Input for sequential number (always visible for quick entry) */}
+                <Box sx={{ mt: 3, width: '100%', maxWidth: 400 }}>
+                  <TextField
+                    inputRef={inputRef}
+                    fullWidth
+                    label={
+                      (event.numberOfStages ?? 1) > 1 && selectedStage
+                        ? `Competitor Number (Stage ${selectedStage})`
+                        : 'Competitor Number'
+                    }
+                    type="number"
+                    variant="outlined"
+                    disabled={recording || ((event.numberOfStages ?? 1) > 1 && !selectedStage)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !recording) {
+                        const input = e.target as HTMLInputElement;
+                        if ((event.numberOfStages ?? 1) > 1 && selectedStage) {
+                          handleSequentialNumberSubmit(input.value, selectedStage);
+                        } else {
+                          handleSequentialNumberSubmit(input.value);
+                        }
+                        input.value = '';
+                      }
+                    }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Button
+                            variant="contained"
+                            size="small"
+                            disabled={recording || ((event.numberOfStages ?? 1) > 1 && !selectedStage)}
+                            onClick={(e) => {
+                              const input = e.currentTarget.parentElement?.parentElement?.querySelector('input') as HTMLInputElement;
+                              if (input?.value) {
+                                if ((event.numberOfStages ?? 1) > 1 && selectedStage) {
+                                  handleSequentialNumberSubmit(input.value, selectedStage);
+                                } else {
+                                  handleSequentialNumberSubmit(input.value);
+                                }
+                                input.value = '';
+                              }
+                            }}
+                            sx={{ minHeight: 36 }}
+                          >
+                            Record
+                          </Button>
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                      },
+                    }}
+                  />
+                </Box>
               </Box>
             </CardContent>
           </Card>

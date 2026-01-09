@@ -27,6 +27,7 @@ export interface Event {
     id: number;
     email: string;
   } | null;
+  numberOfStages?: number | null;
 }
 
 export interface CreateEventRequest {
@@ -36,6 +37,7 @@ export interface CreateEventRequest {
   endDate: string; // ISO 8601 UTC
   location?: string;
   assignedTo?: number; // Operator ID (Admin only)
+  numberOfStages?: number; // Number of stages (null for regular events)
 }
 
 export interface UpdateEventRequest {
@@ -46,6 +48,7 @@ export interface UpdateEventRequest {
   location?: string;
   status?: EventStatus;
   assignedTo?: number | null; // Operator ID or null to unassign (Admin only)
+  numberOfStages?: number | null; // Number of stages (can only be changed when event is DRAFT)
 }
 
 export interface FilterEventParams {

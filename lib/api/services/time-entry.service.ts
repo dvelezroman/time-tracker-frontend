@@ -59,16 +59,40 @@ export interface LeaderboardEntry {
   timezone?: string;
 }
 
+export interface StageTimeEntry {
+  id: number;
+  timeEntryId: number;
+  eventCompetitorId: number;
+  stageNumber: number;
+  recordedAt: string;
+  recordedAtLocal?: string;
+  duration: number | null;
+  notes?: string | null;
+  competitor: Competitor;
+  category: Category | null;
+  timezone?: string;
+}
+
+export interface StageLeaderboard {
+  stageNumber: number;
+  entries: LeaderboardEntry[];
+  total: number;
+}
+
 export interface LeaderboardResponse {
   event: {
     id: number;
     name: string;
     status: string;
+    numberOfStages?: number | null;
   };
   finished: LeaderboardEntry[];
   inProgress: LeaderboardEntry[];
   total: number;
   finishedCount: number;
+  stageLeaderboards?: {
+    [key: string]: StageLeaderboard; // e.g., "stage1", "stage2", etc.
+  };
 }
 
 export const timeEntryService = {
@@ -262,6 +286,32 @@ export const timeEntryService = {
       { params },
     );
     return response.data;
+  },
+
+  recordStageBySequentialNumber: async (
+    eventId: number,
+    sequentialNumber: number,
+    stageNumber: number,
+    timezone?: string,
+    notes?: string,
+  ): Promise<StageTimeEntry> => {
+    const params: any = { eventId, sequentialNumber };
+    if (timezone) {
+      params.timezone = timezone;
+    }
+    const localId = `offline-stage-${Date.now()}-${Math.random()}`;
+    const response = await offlineApiClient.post<StageTimeEntry>(
+      '/time-entries/record-stage-by-sequential',
+      {
+        stageNumber,
+        notes,
+        localId,
+        operationType: 'STAGE',
+        recordedAt: new Date().toISOString(),
+      },
+      { params },
+    );
+    return response as StageTimeEntry;
   },
 };
 
