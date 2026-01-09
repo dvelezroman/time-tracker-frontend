@@ -1,6 +1,10 @@
 import apiClient from '../client';
 import { offlineApiClient } from '../offline-client';
 import { publicApiClient } from '../public-client';
+import { offlineStorage } from '../../storage/offline-storage';
+import { eventCompetitorService } from './event-competitor.service';
+import { categoryService } from './category.service';
+import { isOnline } from '../../utils/network';
 
 export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'ONGOING' | 'COMPLETED' | 'CANCELLED';
 
@@ -79,14 +83,56 @@ export const eventService = {
   },
 
   getAll: async (params?: FilterEventParams): Promise<EventListResponse> => {
-    const response = await apiClient.get<EventListResponse>('/events', { params });
-    return response.data;
+    const response = await offlineApiClient.get<EventListResponse>('/events', { params });
+    // Handle both direct response and response.data
+    if ('data' in response && Array.isArray(response.data)) {
+      return response as EventListResponse;
+    }
+    return response as EventListResponse;
   },
 
   getById: async (id: number, timezone?: string): Promise<Event> => {
     const params = timezone ? { timezone } : {};
-    const response = await apiClient.get<Event>(`/events/${id}`, { params });
-    return response.data;
+    const response = await offlineApiClient.get<Event>(`/events/${id}`, { params });
+    const event = response as Event;
+    
+    // Automatically preload event data if online
+    if (isOnline()) {
+      // Preload in background without blocking
+      eventService.preloadEventData(id, event).catch(err => {
+        console.warn('Failed to preload event data:', err);
+      });
+    }
+    
+    return event;
+  },
+
+  // Preload event data (competitors, categories) for offline use
+  preloadEventData: async (eventId: number, event?: Event): Promise<void> => {
+    try {
+      // Get event if not provided
+      let eventData = event;
+      if (!eventData) {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        eventData = await offlineApiClient.get<Event>(`/events/${eventId}`, { 
+          params: { timezone } 
+        }) as Event;
+      }
+
+      // Preload competitors and categories in parallel
+      const [competitors, categories] = await Promise.all([
+        eventCompetitorService.getByEvent(eventId).catch(() => []),
+        categoryService.getAll({ eventId }).then(res => res.data || []).catch(() => []),
+      ]);
+
+      // Save to offline storage
+      await offlineStorage.preloadEvent(eventId, eventData, competitors, categories);
+      
+      console.log(`[EventService] Preloaded event ${eventId}: ${competitors.length} competitors, ${categories.length} categories`);
+    } catch (error) {
+      console.error(`[EventService] Failed to preload event ${eventId}:`, error);
+      throw error;
+    }
   },
 
   update: async (id: number, data: UpdateEventRequest, timezone?: string): Promise<Event> => {

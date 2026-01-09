@@ -21,6 +21,11 @@ interface OfflineStorageDB extends DBSchema {
     value: any;
     indexes: { 'by-event-id': number };
   };
+  eventCompetitors: {
+    key: number;
+    value: any;
+    indexes: { 'by-event-id': number; 'by-competitor-id': number };
+  };
   syncQueue: {
     key: string;
     value: {
@@ -73,6 +78,13 @@ export const initOfflineStorage = async (): Promise<IDBPDatabase<OfflineStorageD
       if (!db.objectStoreNames.contains('categories')) {
         const categoryStore = db.createObjectStore('categories', { keyPath: 'id' });
         categoryStore.createIndex('by-event-id', 'eventId');
+      }
+
+      // Event Competitors store
+      if (!db.objectStoreNames.contains('eventCompetitors')) {
+        const eventCompetitorStore = db.createObjectStore('eventCompetitors', { keyPath: 'id' });
+        eventCompetitorStore.createIndex('by-event-id', 'eventId');
+        eventCompetitorStore.createIndex('by-competitor-id', 'competitorId');
       }
 
       // Sync queue store
@@ -170,6 +182,66 @@ export const offlineStorage = {
   async getAllCategories(): Promise<any[]> {
     const db = await initOfflineStorage();
     return db.getAll('categories');
+  },
+
+  // Event Competitors
+  async saveEventCompetitor(eventCompetitor: any): Promise<void> {
+    const db = await initOfflineStorage();
+    await db.put('eventCompetitors', eventCompetitor);
+  },
+
+  async getEventCompetitor(id: number): Promise<any | undefined> {
+    const db = await initOfflineStorage();
+    return db.get('eventCompetitors', id);
+  },
+
+  async getEventCompetitors(eventId: number): Promise<any[]> {
+    const db = await initOfflineStorage();
+    const index = db.transaction('eventCompetitors').store.index('by-event-id');
+    return index.getAll(eventId);
+  },
+
+  async getAllEventCompetitors(): Promise<any[]> {
+    const db = await initOfflineStorage();
+    return db.getAll('eventCompetitors');
+  },
+
+  // Preload Event - precarga evento completo con todos sus datos relacionados
+  async preloadEvent(eventId: number, eventData: any, competitors: any[], categories: any[]): Promise<void> {
+    const db = await initOfflineStorage();
+    const tx = db.transaction(['events', 'eventCompetitors', 'categories', 'competitors'], 'readwrite');
+    
+    // Save event
+    await tx.store.events.put(eventData);
+    
+    // Save event competitors and their competitor data
+    for (const eventCompetitor of competitors) {
+      await tx.store.eventCompetitors.put(eventCompetitor);
+      // Also save the competitor data if present
+      if (eventCompetitor.competitor) {
+        await tx.store.competitors.put(eventCompetitor.competitor);
+      }
+    }
+    
+    // Save categories
+    for (const category of categories) {
+      await tx.store.categories.put(category);
+    }
+    
+    await tx.done;
+  },
+
+  // Check if event is preloaded
+  async isEventPreloaded(eventId: number): Promise<boolean> {
+    const db = await initOfflineStorage();
+    const event = await db.get('events', eventId);
+    if (!event) return false;
+    
+    // Check if we have competitors for this event
+    const index = db.transaction('eventCompetitors').store.index('by-event-id');
+    const competitors = await index.getAll(eventId);
+    
+    return competitors.length > 0;
   },
 
   // Sync Queue

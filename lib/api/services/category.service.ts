@@ -1,4 +1,5 @@
 import apiClient from '../client';
+import { offlineApiClient } from '../offline-client';
 import { publicApiClient } from '../public-client';
 
 export interface Category {
@@ -43,13 +44,17 @@ export interface CategoryListResponse {
 
 export const categoryService = {
   create: async (data: CreateCategoryRequest): Promise<Category> => {
-    const response = await apiClient.post<Category>('/categories', data);
-    return response.data;
+    const response = await offlineApiClient.post<Category>('/categories', data);
+    return response as Category;
   },
 
   getAll: async (params?: FilterCategoryParams): Promise<CategoryListResponse> => {
-    const response = await apiClient.get<CategoryListResponse>('/categories', { params });
-    return response.data;
+    const response = await offlineApiClient.get<CategoryListResponse>('/categories', { params });
+    // Handle both direct response and response.data
+    if ('data' in response && Array.isArray(response.data)) {
+      return response as CategoryListResponse;
+    }
+    return response as CategoryListResponse;
   },
 
   getPublicAll: async (params?: FilterCategoryParams): Promise<CategoryListResponse> => {
@@ -58,17 +63,17 @@ export const categoryService = {
   },
 
   getById: async (id: number): Promise<Category> => {
-    const response = await apiClient.get<Category>(`/categories/${id}`);
-    return response.data;
+    const response = await offlineApiClient.get<Category>(`/categories/${id}`);
+    return response as Category;
   },
 
   update: async (id: number, data: UpdateCategoryRequest): Promise<Category> => {
-    const response = await apiClient.patch<Category>(`/categories/${id}`, data);
-    return response.data;
+    const response = await offlineApiClient.patch<Category>(`/categories/${id}`, data);
+    return response as Category;
   },
 
   delete: async (id: number): Promise<void> => {
-    await apiClient.delete(`/categories/${id}`);
+    await offlineApiClient.delete(`/categories/${id}`);
   },
 };
 

@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
       pagesBufferLength: 5,
     },
   }),
+  // PWA optimizations for production
+  ...(process.env.NODE_ENV === 'production' && {
+    // Generate static pages for better offline support
+    output: 'standalone',
+  }),
 };
 
 export default nextConfig;

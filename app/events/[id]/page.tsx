@@ -62,6 +62,7 @@ import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { OfflinePreloadIndicator } from '@/components/common/OfflinePreloadIndicator';
 
 export default function EventDetailPage() {
   const router = useRouter();
@@ -624,6 +625,7 @@ export default function EventDetailPage() {
                 {event.name}
               </Typography>
               <Chip label={event.status} color={getStatusColor(event.status)} />
+              <OfflinePreloadIndicator eventId={eventId} compact />
             </Box>
           </Box>
 

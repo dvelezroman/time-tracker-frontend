@@ -73,17 +73,25 @@ export const eventCompetitorService = {
   },
 
   getAll: async (params?: FilterEventCompetitorParams): Promise<EventCompetitorListResponse> => {
-    const response = await apiClient.get<EventCompetitorListResponse>('/event-competitors', {
+    const response = await offlineApiClient.get<EventCompetitorListResponse>('/event-competitors', {
       params,
     });
-    return response.data;
+    // Handle both direct response and response.data
+    if ('data' in response && Array.isArray(response.data)) {
+      return response as EventCompetitorListResponse;
+    }
+    return response as EventCompetitorListResponse;
   },
 
   getByEvent: async (eventId: number): Promise<EventCompetitor[]> => {
-    const response = await apiClient.get<EventCompetitor[]>(
+    const response = await offlineApiClient.get<EventCompetitor[]>(
       `/event-competitors/event/${eventId}`,
     );
-    return response.data;
+    // Handle both array response and response.data
+    if (Array.isArray(response)) {
+      return response;
+    }
+    return (response as any).data || response;
   },
 
   generateQRCode: async (eventCompetitorId: number): Promise<EventCompetitor> => {

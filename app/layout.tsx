@@ -7,13 +7,28 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Time Tracker',
-  description: 'Time Tracker Application',
+  description: 'Time Tracker Application for Race Management',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Time Tracker',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: '/icon-192.png',
+    apple: '/icon-192.png',
+  },
+  themeColor: '#1976d2',
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
+  themeColor: '#1976d2',
 };
 
 export default function RootLayout({
@@ -23,6 +38,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Time Tracker" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+      </head>
       <body>
         <ThemeProvider>
           <AuthProvider>
