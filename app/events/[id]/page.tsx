@@ -63,6 +63,8 @@ import { format } from 'date-fns';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { OfflinePreloadIndicator } from '@/components/common/OfflinePreloadIndicator';
+import { useEventUpdates } from '@/lib/realtime/useEventUpdates';
+import { useWebSocket } from '@/lib/realtime/useWebSocket';
 
 export default function EventDetailPage() {
   const router = useRouter();
@@ -113,6 +115,21 @@ export default function EventDetailPage() {
   const [editingSequentialNumber, setEditingSequentialNumber] = useState<number | null>(null);
   const [sequentialNumberValue, setSequentialNumberValue] = useState<string>('');
   const [updatingSequentialNumber, setUpdatingSequentialNumber] = useState<number | null>(null);
+
+  const { connected: wsConnected } = useWebSocket();
+
+  // Listen for real-time event updates
+  useEventUpdates({
+    eventId,
+    onEventUpdated: (updatedEvent) => {
+      setEvent(updatedEvent);
+      // Reload competitors if event status changed
+      if (event && event.status !== updatedEvent.status) {
+        loadCompetitors();
+      }
+    },
+    enabled: wsConnected && !!eventId,
+  });
 
   useEffect(() => {
     if (eventId) {
@@ -620,12 +637,30 @@ export default function EventDetailPage() {
             >
               {t('eventDetail.backToEvents')}
             </Button>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant={isMobile ? 'h5' : 'h4'} component="h1">
+            <Box 
+              display="flex" 
+              justifyContent="space-between" 
+              alignItems="center" 
+              mb={2}
+              flexDirection={{ xs: 'column', sm: 'row' }}
+              gap={{ xs: 1, sm: 2 }}
+              sx={{ width: '100%' }}
+            >
+              <Typography 
+                variant={isMobile ? 'h5' : 'h4'} 
+                component="h1"
+                sx={{ 
+                  flex: 1,
+                  wordBreak: 'break-word',
+                  textAlign: { xs: 'center', sm: 'left' },
+                }}
+              >
                 {event.name}
               </Typography>
-              <Chip label={event.status} color={getStatusColor(event.status)} />
-              <OfflinePreloadIndicator eventId={eventId} compact />
+              <Box display="flex" gap={1} alignItems="center" flexWrap="wrap" justifyContent={{ xs: 'center', sm: 'flex-end' }}>
+                <Chip label={event.status} color={getStatusColor(event.status)} />
+                <OfflinePreloadIndicator eventId={eventId} compact />
+              </Box>
             </Box>
           </Box>
 
@@ -698,7 +733,13 @@ export default function EventDetailPage() {
                 </Box>
               )}
 
-              <Box display="flex" gap={2} flexWrap="wrap" mt={4}>
+              <Box 
+                display="flex" 
+                gap={{ xs: 1, sm: 2 }} 
+                flexWrap="wrap" 
+                mt={4}
+                justifyContent={{ xs: 'center', sm: 'flex-start' }}
+              >
                 {(event.status === 'DRAFT' || event.status === 'PUBLISHED') && (
                   <>
                     {user?.role === 'ADMIN' && (
@@ -881,8 +922,16 @@ export default function EventDetailPage() {
                       Your Excel file must follow this exact column structure. The first row is treated as a header and will be skipped.
                     </Typography>
 
-                    <TableContainer component={Paper} variant="outlined" sx={{ mb: 3 }}>
-                      <Table size="small">
+                    <TableContainer 
+                      component={Paper} 
+                      variant="outlined" 
+                      sx={{ 
+                        mb: 3,
+                        overflowX: 'auto',
+                        maxWidth: '100%',
+                      }}
+                    >
+                      <Table size="small" sx={{ minWidth: { xs: 600, sm: 'auto' } }}>
                         <TableHead>
                           <TableRow>
                             <TableCell><strong>Column</strong></TableCell>
@@ -951,8 +1000,16 @@ export default function EventDetailPage() {
                     <Typography variant="h6" gutterBottom>
                       Example Excel File
                     </Typography>
-                    <TableContainer component={Paper} variant="outlined" sx={{ mb: 3 }}>
-                      <Table size="small">
+                    <TableContainer 
+                      component={Paper} 
+                      variant="outlined" 
+                      sx={{ 
+                        mb: 3,
+                        overflowX: 'auto',
+                        maxWidth: '100%',
+                      }}
+                    >
+                      <Table size="small" sx={{ minWidth: { xs: 600, sm: 'auto' } }}>
                         <TableHead>
                           <TableRow>
                             <TableCell><strong>First Name</strong></TableCell>
@@ -1198,15 +1255,26 @@ export default function EventDetailPage() {
 
               {/* Filters */}
               {competitors.length > 0 && (
-                <Box display="flex" gap={2} mb={3} flexWrap="wrap" alignItems="center">
+                <Box 
+                  display="flex" 
+                  gap={{ xs: 1, sm: 2 }} 
+                  mb={3} 
+                  flexWrap="wrap" 
+                  alignItems="center"
+                  flexDirection={{ xs: 'column', sm: 'row' }}
+                >
                   <TextField
                     label={t('eventDetail.filterByName')}
                     variant="outlined"
                     size="small"
                     value={filterName}
                     onChange={(e) => setFilterName(e.target.value)}
-                    sx={{ minWidth: 200 }}
+                    sx={{ 
+                      minWidth: { xs: '100%', sm: 200 },
+                      width: { xs: '100%', sm: 'auto' },
+                    }}
                     placeholder={t('eventDetail.filterByName')}
+                    fullWidth={isMobile}
                   />
                   <TextField
                     label={t('eventDetail.filterBySequential')}
@@ -1215,12 +1283,23 @@ export default function EventDetailPage() {
                     type="number"
                     value={filterSequentialNumber}
                     onChange={(e) => setFilterSequentialNumber(e.target.value)}
-                    sx={{ minWidth: 180 }}
+                    sx={{ 
+                      minWidth: { xs: '100%', sm: 180 },
+                      width: { xs: '100%', sm: 'auto' },
+                    }}
                     placeholder={t('eventDetail.sequentialNumber')}
                     inputProps={{ min: 1 }}
+                    fullWidth={isMobile}
                   />
                   {categories.length > 0 && (
-                    <FormControl sx={{ minWidth: 200 }} size="small">
+                    <FormControl 
+                      sx={{ 
+                        minWidth: { xs: '100%', sm: 200 },
+                        width: { xs: '100%', sm: 'auto' },
+                      }} 
+                      size="small"
+                      fullWidth={isMobile}
+                    >
                       <InputLabel>{t('eventDetail.filterByCategory')}</InputLabel>
                       <Select
                         value={filterCategory}
@@ -1293,8 +1372,13 @@ export default function EventDetailPage() {
                     </Typography>
                   </Box>
                 ) : (
-                <TableContainer>
-                  <Table>
+                <TableContainer
+                  sx={{
+                    overflowX: 'auto',
+                    maxWidth: '100%',
+                  }}
+                >
+                  <Table sx={{ minWidth: { xs: 800, sm: 'auto' } }}>
                     <TableHead>
                       <TableRow>
                         <TableCell padding="checkbox">

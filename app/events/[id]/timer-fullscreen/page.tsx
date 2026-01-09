@@ -28,6 +28,9 @@ import { ROUTES } from '@/lib/constants';
 import { FullScreenTimer } from '@/components/common/FullScreenTimer';
 import { format } from 'date-fns';
 import { showToast } from '@/components/common/Toast';
+import { useEventUpdates } from '@/lib/realtime/useEventUpdates';
+import { useTimeEntryUpdates } from '@/lib/realtime/useTimeEntryUpdates';
+import { useWebSocket } from '@/lib/realtime/useWebSocket';
 
 export default function FullScreenTimerPage() {
   const router = useRouter();
@@ -82,6 +85,39 @@ export default function FullScreenTimerPage() {
     }
   }, [eventId, event]);
 
+  const { connected: wsConnected } = useWebSocket();
+
+  // Listen for real-time event updates
+  useEventUpdates({
+    eventId,
+    onEventUpdated: (updatedEvent) => {
+      setEvent(updatedEvent);
+      // If event is no longer ONGOING, redirect
+      if (updatedEvent.status !== 'ONGOING') {
+        router.push(ROUTES.EVENTS_DETAIL(eventId));
+      }
+    },
+    enabled: wsConnected && !!eventId,
+  });
+
+  // Listen for real-time time entry updates
+  useTimeEntryUpdates({
+    eventId,
+    onTimeEntryCreated: () => {
+      // Reload leaderboard when new time entry is created
+      loadLeaderboard();
+    },
+    onTimeEntryUpdated: () => {
+      // Reload leaderboard when time entry is updated
+      loadLeaderboard();
+    },
+    onTimeEntrySynced: () => {
+      // Reload leaderboard when time entries are synced
+      loadLeaderboard();
+    },
+    enabled: wsConnected && !!eventId && event?.status === 'ONGOING',
+  });
+
   useEffect(() => {
     if (isNaN(eventId)) {
       router.push(ROUTES.EVENTS);
@@ -90,19 +126,15 @@ export default function FullScreenTimerPage() {
 
     loadEvent();
 
-    // Refresh event data every 30 seconds
-    const eventInterval = setInterval(loadEvent, 30000);
-
     // Update current time every second
     const timeInterval = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
 
     return () => {
-      clearInterval(eventInterval);
       clearInterval(timeInterval);
     };
-  }, [eventId, loadEvent, router]);
+  }, [eventId, router]);
 
   // Load leaderboard when event is loaded and ONGOING
   useEffect(() => {
@@ -111,18 +143,7 @@ export default function FullScreenTimerPage() {
     }
   }, [event, loadLeaderboard]);
 
-  // Auto-refresh leaderboard every 3 seconds when event is ONGOING
-  useEffect(() => {
-    if (!event || event.status !== 'ONGOING') return;
-
-    const leaderboardInterval = setInterval(() => {
-      loadLeaderboard();
-    }, 3000); // Refresh every 3 seconds
-
-    return () => {
-      clearInterval(leaderboardInterval);
-    };
-  }, [event, loadLeaderboard]);
+  // Leaderboard is now updated in real-time via WebSocket (useTimeEntryUpdates hook)
 
   // Handle ESC key to exit full-screen
   useEffect(() => {

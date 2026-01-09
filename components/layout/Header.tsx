@@ -67,7 +67,11 @@ export function Header({ onMenuClick }: HeaderProps) {
             color="inherit"
             aria-label="menu"
             onClick={onMenuClick}
-            sx={{ mr: 2 }}
+            sx={{ 
+              mr: 2,
+              minWidth: 44,
+              minHeight: 44,
+            }}
           >
             <MenuIcon />
           </IconButton>
@@ -106,7 +110,14 @@ export function Header({ onMenuClick }: HeaderProps) {
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LanguageSwitcher />
-          <IconButton color="inherit" onClick={toggleTheme}>
+          <IconButton 
+            color="inherit" 
+            onClick={toggleTheme}
+            sx={{
+              minWidth: { xs: 44, sm: 40 },
+              minHeight: { xs: 44, sm: 40 },
+            }}
+          >
             {themeMode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
           </IconButton>
 
@@ -120,8 +131,17 @@ export function Header({ onMenuClick }: HeaderProps) {
                 aria-haspopup="true"
                 onClick={handleMenuOpen}
                 color="inherit"
+                sx={{
+                  minWidth: { xs: 44, sm: 40 },
+                  minHeight: { xs: 44, sm: 40 },
+                }}
               >
-                <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
+                <Avatar sx={{ 
+                  width: { xs: 36, sm: 32 }, 
+                  height: { xs: 36, sm: 32 }, 
+                  bgcolor: 'secondary.main',
+                  fontSize: { xs: '1rem', sm: '0.875rem' },
+                }}>
                   {user.email.charAt(0).toUpperCase()}
                 </Avatar>
               </IconButton>

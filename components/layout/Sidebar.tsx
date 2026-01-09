@@ -148,9 +148,12 @@ export function Sidebar({ open, onClose, collapsed = false, onCollapseToggle }: 
                   selected={isSelected}
                   onClick={() => handleNavigation(item.path)}
                   sx={{
-                    minHeight: 48,
+                    minHeight: { xs: 52, sm: 48 },
                     justifyContent: collapsed ? 'center' : 'flex-start',
-                    px: collapsed ? 1.5 : 2,
+                    px: collapsed ? 1.5 : { xs: 2, sm: 2 },
+                    py: { xs: 1.5, sm: 1 },
+                    userSelect: 'none',
+                    WebkitTapHighlightColor: 'transparent',
                   }}
                 >
                   <ListItemIcon

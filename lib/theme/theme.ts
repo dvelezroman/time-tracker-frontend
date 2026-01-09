@@ -47,28 +47,44 @@ export const lightTheme = createTheme({
       'sans-serif',
     ].join(','),
     h1: {
-      fontSize: '2.5rem',
+      fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
       fontWeight: 600,
+      lineHeight: 1.2,
     },
     h2: {
-      fontSize: '2rem',
+      fontSize: 'clamp(1.5rem, 3.5vw, 2rem)',
       fontWeight: 600,
+      lineHeight: 1.3,
     },
     h3: {
-      fontSize: '1.75rem',
+      fontSize: 'clamp(1.25rem, 3vw, 1.75rem)',
       fontWeight: 600,
+      lineHeight: 1.3,
     },
     h4: {
-      fontSize: '1.5rem',
+      fontSize: 'clamp(1.125rem, 2.5vw, 1.5rem)',
       fontWeight: 600,
+      lineHeight: 1.4,
     },
     h5: {
-      fontSize: '1.25rem',
+      fontSize: 'clamp(1rem, 2vw, 1.25rem)',
       fontWeight: 600,
+      lineHeight: 1.4,
     },
     h6: {
-      fontSize: '1rem',
+      fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
       fontWeight: 600,
+      lineHeight: 1.5,
+    },
+    body1: {
+      fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
+    },
+    body2: {
+      fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+    },
+    button: {
+      fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
+      textTransform: 'none',
     },
   },
   breakpoints: {
@@ -86,6 +102,21 @@ export const lightTheme = createTheme({
         root: {
           textTransform: 'none',
           borderRadius: 8,
+          minHeight: 44, // Minimum touch target size for mobile
+          padding: '8px 16px',
+          '@media (max-width: 600px)': {
+            minHeight: 44,
+            padding: '10px 16px',
+          },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          minWidth: 44,
+          minHeight: 44,
+          padding: 12,
         },
       },
     },
@@ -94,6 +125,15 @@ export const lightTheme = createTheme({
         root: {
           borderRadius: 12,
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiInputBase-root': {
+            fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
+          },
         },
       },
     },
@@ -145,28 +185,44 @@ export const darkTheme = createTheme({
       'sans-serif',
     ].join(','),
     h1: {
-      fontSize: '2.5rem',
+      fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
       fontWeight: 600,
+      lineHeight: 1.2,
     },
     h2: {
-      fontSize: '2rem',
+      fontSize: 'clamp(1.5rem, 3.5vw, 2rem)',
       fontWeight: 600,
+      lineHeight: 1.3,
     },
     h3: {
-      fontSize: '1.75rem',
+      fontSize: 'clamp(1.25rem, 3vw, 1.75rem)',
       fontWeight: 600,
+      lineHeight: 1.3,
     },
     h4: {
-      fontSize: '1.5rem',
+      fontSize: 'clamp(1.125rem, 2.5vw, 1.5rem)',
       fontWeight: 600,
+      lineHeight: 1.4,
     },
     h5: {
-      fontSize: '1.25rem',
+      fontSize: 'clamp(1rem, 2vw, 1.25rem)',
       fontWeight: 600,
+      lineHeight: 1.4,
     },
     h6: {
-      fontSize: '1rem',
+      fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
       fontWeight: 600,
+      lineHeight: 1.5,
+    },
+    body1: {
+      fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
+    },
+    body2: {
+      fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+    },
+    button: {
+      fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
+      textTransform: 'none',
     },
   },
   breakpoints: {
@@ -184,6 +240,21 @@ export const darkTheme = createTheme({
         root: {
           textTransform: 'none',
           borderRadius: 8,
+          minHeight: 44, // Minimum touch target size for mobile
+          padding: '8px 16px',
+          '@media (max-width: 600px)': {
+            minHeight: 44,
+            padding: '10px 16px',
+          },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          minWidth: 44,
+          minHeight: 44,
+          padding: 12,
         },
       },
     },
@@ -192,6 +263,15 @@ export const darkTheme = createTheme({
         root: {
           borderRadius: 12,
           boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiInputBase-root': {
+            fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
+          },
         },
       },
     },

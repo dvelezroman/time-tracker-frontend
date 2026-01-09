@@ -58,12 +58,14 @@ export function MainLayout({ children }: MainLayoutProps) {
               xs: '100%',
               sm: `calc(100% - ${effectiveWidth}px)` 
             },
+            maxWidth: '100%',
             transition: theme.transitions.create(['width', 'margin'], {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
             overflowX: 'hidden',
             minHeight: { xs: 'calc(100vh - 120px)', sm: 'calc(100vh - 140px)' },
+            boxSizing: 'border-box',
           }}
         >
           {children}
