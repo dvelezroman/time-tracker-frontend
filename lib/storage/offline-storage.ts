@@ -209,30 +209,22 @@ export const offlineStorage = {
   // Preload Event - precarga evento completo con todos sus datos relacionados
   async preloadEvent(eventId: number, eventData: any, competitors: any[], categories: any[]): Promise<void> {
     const db = await initOfflineStorage();
-    const tx = db.transaction(['events', 'eventCompetitors', 'categories', 'competitors'], 'readwrite');
-    const eventsStore = tx.objectStore('events');
-    const eventCompetitorsStore = tx.objectStore('eventCompetitors');
-    const competitorsStore = tx.objectStore('competitors');
-    const categoriesStore = tx.objectStore('categories');
 
-    // Save event
-    await eventsStore.put(eventData);
+    // Save event (db.put creates its own transaction per operation)
+    await db.put('events', eventData);
 
     // Save event competitors and their competitor data
     for (const eventCompetitor of competitors) {
-      await eventCompetitorsStore.put(eventCompetitor);
-      // Also save the competitor data if present
+      await db.put('eventCompetitors', eventCompetitor);
       if (eventCompetitor.competitor) {
-        await competitorsStore.put(eventCompetitor.competitor);
+        await db.put('competitors', eventCompetitor.competitor);
       }
     }
 
     // Save categories
     for (const category of categories) {
-      await categoriesStore.put(category);
+      await db.put('categories', category);
     }
-
-    await tx.done;
   },
 
   // Check if event is preloaded
