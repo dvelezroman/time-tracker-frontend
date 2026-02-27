@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
 import { ThemeProvider } from '@/lib/theme/ThemeProvider';
 import { AuthProvider } from '@/components/common/AuthProvider';
 import { Toast } from '@/components/common/Toast';
@@ -47,15 +48,17 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body>
-        <ThemeProvider>
-          <AuthProvider>
-            <WebSocketProvider>
-              <ServiceWorkerRegistration />
-              {children}
-              <Toast />
-            </WebSocketProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <AppRouterCacheProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <WebSocketProvider>
+                <ServiceWorkerRegistration />
+                {children}
+                <Toast />
+              </WebSocketProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </AppRouterCacheProvider>
       </body>
     </html>
   );
