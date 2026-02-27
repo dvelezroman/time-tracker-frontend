@@ -34,6 +34,8 @@ import {
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
 import { format } from 'date-fns';
+import { useEventUpdates } from '@/lib/realtime/useEventUpdates';
+import { useWebSocket } from '@/lib/realtime/useWebSocket';
 
 export default function IndividualTimerPage() {
   const router = useRouter();
@@ -57,12 +59,35 @@ export default function IndividualTimerPage() {
   } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const { connected: wsConnected } = useWebSocket();
+
+  // Listen for real-time event updates - close/redirect when event finishes
+  useEventUpdates({
+    eventId,
+    onEventUpdated: (updatedEvent) => {
+      setEvent(updatedEvent);
+      if (updatedEvent.status !== 'ONGOING') {
+        window.close();
+        setTimeout(() => {
+          router.push(ROUTES.EVENTS_DETAIL(eventId));
+        }, 100);
+      }
+    },
+    enabled: wsConnected && !!eventId,
+  });
+
   const loadEvent = useCallback(async () => {
     try {
       setError(null);
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const eventData = await eventService.getById(eventId, timezone);
       setEvent(eventData);
+      if (eventData.status !== 'ONGOING') {
+        window.close();
+        setTimeout(() => {
+          router.push(ROUTES.EVENTS_DETAIL(eventId));
+        }, 100);
+      }
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.message || err.message || 'Failed to load event. Please try again.';
@@ -71,7 +96,7 @@ export default function IndividualTimerPage() {
     } finally {
       setLoading(false);
     }
-  }, [eventId]);
+  }, [eventId, router]);
 
   const loadLeaderboard = useCallback(async () => {
     if (!eventId) return;

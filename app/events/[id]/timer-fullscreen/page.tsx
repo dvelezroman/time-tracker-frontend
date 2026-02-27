@@ -56,9 +56,12 @@ export default function FullScreenTimerPage() {
       const eventData = await eventService.getById(eventId, timezone);
       setEvent(eventData);
 
-      // If event is not ONGOING, redirect to detail page
+      // If event has finished, close tab or redirect
       if (eventData.status !== 'ONGOING') {
-        router.push(ROUTES.EVENTS_DETAIL(eventId));
+        window.close();
+        setTimeout(() => {
+          router.push(ROUTES.EVENTS_DETAIL(eventId));
+        }, 100);
       }
     } catch (err: any) {
       const errorMessage =
@@ -92,9 +95,12 @@ export default function FullScreenTimerPage() {
     eventId,
     onEventUpdated: (updatedEvent) => {
       setEvent(updatedEvent);
-      // If event is no longer ONGOING, redirect
+      // If event has finished, close tab (if opened via window.open) or redirect
       if (updatedEvent.status !== 'ONGOING') {
-        router.push(ROUTES.EVENTS_DETAIL(eventId));
+        window.close();
+        setTimeout(() => {
+          router.push(ROUTES.EVENTS_DETAIL(eventId));
+        }, 100);
       }
     },
     enabled: wsConnected && !!eventId,
