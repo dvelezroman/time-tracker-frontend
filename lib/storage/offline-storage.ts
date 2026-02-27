@@ -210,24 +210,28 @@ export const offlineStorage = {
   async preloadEvent(eventId: number, eventData: any, competitors: any[], categories: any[]): Promise<void> {
     const db = await initOfflineStorage();
     const tx = db.transaction(['events', 'eventCompetitors', 'categories', 'competitors'], 'readwrite');
-    
+    const eventsStore = tx.objectStore('events');
+    const eventCompetitorsStore = tx.objectStore('eventCompetitors');
+    const competitorsStore = tx.objectStore('competitors');
+    const categoriesStore = tx.objectStore('categories');
+
     // Save event
-    await tx.store.events.put(eventData);
-    
+    await eventsStore.put(eventData);
+
     // Save event competitors and their competitor data
     for (const eventCompetitor of competitors) {
-      await tx.store.eventCompetitors.put(eventCompetitor);
+      await eventCompetitorsStore.put(eventCompetitor);
       // Also save the competitor data if present
       if (eventCompetitor.competitor) {
-        await tx.store.competitors.put(eventCompetitor.competitor);
+        await competitorsStore.put(eventCompetitor.competitor);
       }
     }
-    
+
     // Save categories
     for (const category of categories) {
-      await tx.store.categories.put(category);
+      await categoriesStore.put(category);
     }
-    
+
     await tx.done;
   },
 

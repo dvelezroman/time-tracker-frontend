@@ -23,7 +23,6 @@ export const metadata: Metadata = {
     icon: '/icon-192.png',
     apple: '/icon-192.png',
   },
-  themeColor: '#1976d2',
 };
 
 export const viewport: Viewport = {
