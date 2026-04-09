@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { websocketClient } from './websocket-client';
-import { TimeEntryResult } from '@/lib/api/services/time-entry.service';
+import type { TimeEntry } from '@/lib/api/services/time-entry.service';
 
 interface UseTimeEntryUpdatesOptions {
   eventId: number;
-  onTimeEntryCreated?: (timeEntry: TimeEntryResult) => void;
-  onTimeEntryUpdated?: (timeEntry: TimeEntryResult) => void;
-  onTimeEntrySynced?: (entries: TimeEntryResult[]) => void;
+  onTimeEntryCreated?: (timeEntry: TimeEntry) => void;
+  onTimeEntryUpdated?: (timeEntry: TimeEntry) => void;
+  onTimeEntrySynced?: (entries: TimeEntry[]) => void;
   enabled?: boolean;
 }
 
@@ -60,19 +60,19 @@ export function useTimeEntryUpdates({
 
     joinRoom();
 
-    const handleTimeEntryCreated = (timeEntry: TimeEntryResult) => {
+    const handleTimeEntryCreated = (timeEntry: TimeEntry) => {
       if (onTimeEntryCreatedRef.current) {
         onTimeEntryCreatedRef.current(timeEntry);
       }
     };
 
-    const handleTimeEntryUpdated = (timeEntry: TimeEntryResult) => {
+    const handleTimeEntryUpdated = (timeEntry: TimeEntry) => {
       if (onTimeEntryUpdatedRef.current) {
         onTimeEntryUpdatedRef.current(timeEntry);
       }
     };
 
-    const handleTimeEntrySynced = (data: { entries: TimeEntryResult[] }) => {
+    const handleTimeEntrySynced = (data: { entries: TimeEntry[] }) => {
       if (onTimeEntrySyncedRef.current) {
         onTimeEntrySyncedRef.current(data.entries);
       }

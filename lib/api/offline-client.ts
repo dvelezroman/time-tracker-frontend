@@ -45,10 +45,9 @@ class OfflineApiClient {
 
     if (offlineMode || !online) {
       // Queue operation for sync
-      const resourceInfo = this.getResourceFromUrl(url);
       const operationId = await offlineStorage.addToSyncQueue({
         type: 'CREATE',
-        resource: resourceInfo.resource as 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor',
+        resource: this.toSyncQueueResource(url),
         endpoint: url,
         payload: data,
       });
@@ -72,7 +71,7 @@ class OfflineApiClient {
         // Network error - queue for sync
         const operationId = await offlineStorage.addToSyncQueue({
           type: 'CREATE',
-          resource: this.getResourceFromUrl(url) as 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor',
+          resource: this.toSyncQueueResource(url),
           endpoint: url,
           payload: data,
         });
@@ -94,7 +93,7 @@ class OfflineApiClient {
     if (offlineMode || !online) {
       const operationId = await offlineStorage.addToSyncQueue({
         type: 'UPDATE',
-        resource: this.getResourceFromUrl(url) as 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor',
+        resource: this.toSyncQueueResource(url),
         endpoint: url,
         payload: data,
       });
@@ -111,10 +110,9 @@ class OfflineApiClient {
       return response.data;
     } catch (error: any) {
       if (!error.response && !online) {
-        const resourceInfo = this.getResourceFromUrl(url);
         const operationId = await offlineStorage.addToSyncQueue({
           type: 'UPDATE',
-          resource: resourceInfo.resource as 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor',
+          resource: this.toSyncQueueResource(url),
           endpoint: url,
           payload: data,
         });
@@ -136,7 +134,7 @@ class OfflineApiClient {
     if (offlineMode || !online) {
       const operationId = await offlineStorage.addToSyncQueue({
         type: 'DELETE',
-        resource: this.getResourceFromUrl(url) as 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor',
+        resource: this.toSyncQueueResource(url),
         endpoint: url,
         payload: null,
       });
@@ -151,10 +149,9 @@ class OfflineApiClient {
       return (response.data || response) as T;
     } catch (error: any) {
       if (!error.response && !online) {
-        const resourceInfo = this.getResourceFromUrl(url);
         const operationId = await offlineStorage.addToSyncQueue({
           type: 'DELETE',
-          resource: resourceInfo.resource as 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor',
+          resource: this.toSyncQueueResource(url),
           endpoint: url,
           payload: null,
         });
@@ -164,6 +161,30 @@ class OfflineApiClient {
         } as T;
       }
       throw error;
+    }
+  }
+
+  private toSyncQueueResource(
+    url: string
+  ): 'event' | 'competitor' | 'timeEntry' | 'category' | 'eventCompetitor' {
+    const { resource } = this.getResourceFromUrl(url);
+    switch (resource) {
+      case 'event':
+      case 'events':
+        return 'event';
+      case 'competitor':
+      case 'competitors':
+        return 'competitor';
+      case 'timeEntry':
+        return 'timeEntry';
+      case 'category':
+      case 'categories':
+        return 'category';
+      case 'eventCompetitor':
+      case 'eventCompetitors':
+        return 'eventCompetitor';
+      default:
+        return 'event';
     }
   }
 
