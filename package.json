@@ -5,8 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "dev:webpack": "next dev --webpack",
-    "build": "next build",
-    "start": "next start",
+    "build": "next build && npm run copy:standalone",
+    "copy:standalone": "cp -r public .next/standalone/ && mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/",
+    "start": "node .next/standalone/server.js",
     "start:prod": "npm run build && npm run start",
     "lint": "next lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
