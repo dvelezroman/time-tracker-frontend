@@ -171,12 +171,6 @@
     "errors": "Errors",
     "currentlyOffline": "You are currently offline. Please connect to the internet to sync data."
   },
-  "dashboard": {
-    "title": "Dashboard",
-    "totalTime": "Total Time",
-    "totalUsers": "Total Users",
-    "totalEvents": "Total Events"
-  },
   "lookup": {
     "title": "Check Your Time",
     "subtitle": "Enter your sequential number and select an event to view your finish time and results.",
@@ -204,10 +198,23 @@
     "failedToLoadEvents": "Failed to load events. Please try again.",
     "failedToLookup": "Failed to lookup time entry. Please try again.",
     "loadingEvents": "Loading events...",
-    "noEventsAvailable": "No events available"
+    "noEventsAvailable": "No events available",
+    "searchByName": "Search by name",
+    "nameSearchHelper": "Type to filter competitors from the leaderboard (after lookup or when event is selected)",
+    "nameSearchHint": "Select an event, then search by competitor name to find your bib number.",
+    "installApp": "Install app",
+    "installAppBody": "Add Time Tracker to your home screen for quick access to results.",
+    "installDismiss": "Not now",
+    "installedThanks": "You can install from the browser menu anytime.",
+    "shareResult": "Share result"
   },
   "leaderboard": {
     "title": "Leaderboard",
+    "liveUpdating": "Live · updates every 10s",
+    "podiumTitle": "Top 3",
+    "share": "Share",
+    "shareCopied": "Copied to clipboard",
+    "shareFailed": "Could not share or copy",
     "backToLookup": "Back to Lookup",
     "finishedCompetitors": "Finished Competitors",
     "inProgress": "In Progress",
@@ -283,7 +290,29 @@
       }
     },
     "developedBy": "Developed by",
-    "softwareFactory": "Software Factory"
+    "softwareFactory": "Software Factory",
+    "marketing": {
+      "card1Title": "Real-Time Tracking",
+      "card1Desc": "Track competitor times with millisecond precision. Monitor events in real-time with live updates.",
+      "card2Title": "QR Code Scanning",
+      "card2Desc": "Quick and accurate finish time recording using QR codes. Scan and record in seconds.",
+      "card3Title": "Live Leaderboards",
+      "card3Desc": "Automatically generated leaderboards with category rankings and real-time updates.",
+      "card4Title": "Bulk Import",
+      "card4Desc": "Import competitors from Excel files. Support for categories and custom competitor numbers.",
+      "card5Title": "Multi-Channel Notifications",
+      "card5Desc": "Send finish times via Email and WhatsApp. Automated notifications for competitors.",
+      "card6Title": "Comprehensive Analytics",
+      "card6Desc": "Detailed statistics, category rankings, and performance metrics for all events.",
+      "benefit1": "Millisecond precision timing",
+      "benefit2": "Automatic QR code generation",
+      "benefit3": "Category-based organization",
+      "benefit4": "Real-time leaderboard updates",
+      "benefit5": "Excel bulk import support",
+      "benefit6": "Email & WhatsApp notifications",
+      "benefit7": "Full-screen timer display",
+      "benefit8": "Mobile-responsive design"
+    }
   },
   "login": {
     "title": "Welcome Back",

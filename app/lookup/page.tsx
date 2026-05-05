@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Box,
@@ -20,17 +20,25 @@ import {
   useMediaQuery,
   Divider,
   Chip,
+  Skeleton,
+  List,
+  ListItemButton,
+  ListItemText,
+  Paper,
+  Stack,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import ShareIcon from '@mui/icons-material/Share';
+import GetAppIcon from '@mui/icons-material/GetApp';
 import { eventService } from '@/lib/api/services/event.service';
-import { timeEntryService } from '@/lib/api/services/time-entry.service';
+import { timeEntryService, LeaderboardResponse, LeaderboardEntry } from '@/lib/api/services/time-entry.service';
 import { ROUTES } from '@/lib/constants';
 import { showToast } from '@/components/common/Toast';
-import { format } from 'date-fns';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import { PublicHeader } from '@/components/layout/PublicHeader';
+import { shareOrCopy } from '@/lib/share/shareResult';
 
 interface PublicEvent {
   id: number;
@@ -59,6 +67,10 @@ interface TimeEntryResult {
   timezone?: string;
 }
 
+type BeforeInstallPromptEventLike = Event & {
+  prompt: () => Promise<void>;
+};
+
 export default function LookupPage() {
   const router = useRouter();
   const theme = useTheme();
@@ -68,13 +80,57 @@ export default function LookupPage() {
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [selectedEventId, setSelectedEventId] = useState<number | ''>('');
   const [sequentialNumber, setSequentialNumber] = useState<string>('');
+  const [nameQuery, setNameQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<TimeEntryResult | null>(null);
   const [error, setError] = useState('');
+  const [leaderboard, setLeaderboard] = useState<LeaderboardResponse | null>(null);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+  const [deferredInstall, setDeferredInstall] = useState<BeforeInstallPromptEventLike | null>(null);
+  const [installBannerDismissed, setInstallBannerDismissed] = useState(false);
+
+  useEffect(() => {
+    if (typeof sessionStorage !== 'undefined') {
+      setInstallBannerDismissed(sessionStorage.getItem('pwaInstallBannerDismissed') === '1');
+    }
+  }, []);
 
   useEffect(() => {
     loadEvents();
   }, []);
+
+  useEffect(() => {
+    const onBip = (e: Event) => {
+      e.preventDefault();
+      setDeferredInstall(e as BeforeInstallPromptEventLike);
+    };
+    window.addEventListener('beforeinstallprompt', onBip);
+    return () => window.removeEventListener('beforeinstallprompt', onBip);
+  }, []);
+
+  useEffect(() => {
+    if (!selectedEventId) {
+      setLeaderboard(null);
+      setNameQuery('');
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setLoadingLeaderboard(true);
+      try {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const data = await timeEntryService.getPublicLeaderboard(selectedEventId as number, timezone);
+        if (!cancelled) setLeaderboard(data);
+      } catch {
+        if (!cancelled) setLeaderboard(null);
+      } finally {
+        if (!cancelled) setLoadingLeaderboard(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedEventId]);
 
   const loadEvents = async () => {
     try {
@@ -82,14 +138,37 @@ export default function LookupPage() {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const eventsData = await eventService.getPublicEvents(timezone);
       setEvents(eventsData);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage =
-        err.response?.data?.message || err.message || t('lookup.failedToLoadEvents');
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        (err as Error)?.message ||
+        t('lookup.failedToLoadEvents');
       showToast(errorMessage, 'error');
     } finally {
       setLoadingEvents(false);
     }
   };
+
+  const nameMatches = useMemo(() => {
+    if (!leaderboard || !nameQuery.trim()) return [];
+    const q = nameQuery.trim().toLowerCase();
+    const parts = q.split(/\s+/).filter(Boolean);
+    const merged: LeaderboardEntry[] = [...leaderboard.finished, ...leaderboard.inProgress];
+    const seen = new Set<number | string>();
+    const out: LeaderboardEntry[] = [];
+    for (const e of merged) {
+      const bib = e.sequentialNumber;
+      const key = bib ?? `${e.competitor.firstName}-${e.competitor.lastName}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const name = `${e.competitor.firstName} ${e.competitor.lastName}`.toLowerCase();
+      if (parts.every((p) => name.includes(p))) {
+        out.push(e);
+      }
+      if (out.length >= 25) break;
+    }
+    return out;
+  }, [leaderboard, nameQuery]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,15 +188,13 @@ export default function LookupPage() {
       setError('');
       setResult(null);
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const timeEntryData = await timeEntryService.getPublicTimeEntry(
-        selectedEventId as number,
-        seqNum,
-        timezone,
-      );
+      const timeEntryData = await timeEntryService.getPublicTimeEntry(selectedEventId as number, seqNum, timezone);
       setResult(timeEntryData);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage =
-        err.response?.data?.message || err.message || t('lookup.failedToLookup');
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        (err as Error)?.message ||
+        t('lookup.failedToLookup');
       setError(errorMessage);
       setResult(null);
     } finally {
@@ -138,43 +215,65 @@ export default function LookupPage() {
     return `${mins}:${String(secs).padStart(2, '0')}.${String(ms).padStart(3, '0')}`;
   };
 
-  const formatTime = (dateString: string | null, localDateString?: string): string => {
-    if (!dateString) return '-';
-    if (localDateString) {
-      return format(new Date(localDateString), 'HH:mm:ss');
-    }
-    return format(new Date(dateString), 'HH:mm:ss');
-  };
-
-  const formatDate = (dateString: string | null, localDateString?: string): string => {
-    if (!dateString) return '-';
-    if (localDateString) {
-      return format(new Date(localDateString), 'PPp');
-    }
-    return format(new Date(dateString), 'PPp');
-  };
-
   const getStatusChip = () => {
     if (!result) return null;
     if (result.status === 'FINISHED') {
       return <Chip label={t('lookup.finished')} color="success" size="small" />;
-    } else if (result.status === 'IN_PROGRESS') {
+    }
+    if (result.status === 'IN_PROGRESS') {
       return <Chip label={t('lookup.inProgress')} color="warning" size="small" />;
-    } else {
-      return <Chip label={t('lookup.notStarted')} color="default" size="small" />;
+    }
+    return <Chip label={t('lookup.notStarted')} color="default" size="small" />;
+  };
+
+  const selectedEventName = events.find((ev) => ev.id === selectedEventId)?.name ?? '';
+
+  const shareResult = async () => {
+    if (!result || !selectedEventId) return;
+    const name = `${result.competitor.firstName} ${result.competitor.lastName}`;
+    const bib = result.sequentialNumber ?? '';
+    const rank = result.rank ?? '';
+    const dur = formatDuration(result.duration);
+    const text = `${selectedEventName} — ${name} (#${bib}) — ${t('lookup.overallRank')} ${rank} — ${dur}`;
+    const url =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}/leaderboard/${selectedEventId}`
+        : '';
+    try {
+      const mode = await shareOrCopy({ title: selectedEventName, text, url });
+      if (mode === 'shared') showToast(t('leaderboard.share'), 'success');
+      else if (mode === 'copied') showToast(t('leaderboard.shareCopied'), 'success');
+      else showToast(t('leaderboard.shareFailed'), 'error');
+    } catch {
+      showToast(t('leaderboard.shareFailed'), 'error');
     }
   };
+
+  const runInstall = async () => {
+    if (!deferredInstall) {
+      showToast(t('lookup.installedThanks'), 'info');
+      return;
+    }
+    try {
+      await deferredInstall.prompt();
+    } catch {
+      showToast(t('leaderboard.shareFailed'), 'error');
+    }
+  };
+
+  const dismissInstall = () => {
+    sessionStorage.setItem('pwaInstallBannerDismissed', '1');
+    setInstallBannerDismissed(true);
+  };
+
+  const installBannerVisible = !!deferredInstall && !installBannerDismissed;
 
   return (
     <>
       <PublicHeader />
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Box sx={{ mb: 4 }}>
-          <Button
-            startIcon={<ArrowBackIcon />}
-            onClick={() => router.push(ROUTES.HOME)}
-            sx={{ mb: 2 }}
-          >
+          <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.HOME)} sx={{ mb: 2 }}>
             {t('lookup.backToHome')}
           </Button>
           <Typography
@@ -193,161 +292,220 @@ export default function LookupPage() {
           </Typography>
         </Box>
 
-      <Card>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <FormControl fullWidth required>
-                <InputLabel>{t('lookup.selectEvent')}</InputLabel>
-                <Select
-                  value={selectedEventId}
-                  onChange={(e) => setSelectedEventId(e.target.value as number | '')}
-                  label={t('lookup.selectEvent')}
-                  disabled={loadingEvents || loading}
-                >
-                  {loadingEvents ? (
-                    <MenuItem disabled>
-                      <CircularProgress size={20} sx={{ mr: 1 }} />
-                      {t('lookup.loadingEvents')}
-                    </MenuItem>
-                  ) : events.length === 0 ? (
-                    <MenuItem disabled>{t('lookup.noEventsAvailable')}</MenuItem>
-                  ) : (
-                    events.map((event) => (
-                      <MenuItem key={event.id} value={event.id}>
-                        {event.name} ({event.status})
-                      </MenuItem>
-                    ))
-                  )}
-                </Select>
-              </FormControl>
+        {installBannerVisible && (
+          <Alert
+            severity="info"
+            sx={{ mb: 3 }}
+            icon={<GetAppIcon />}
+            action={
+              <Stack direction="row" spacing={1}>
+                <Button color="inherit" size="small" onClick={runInstall} disabled={!deferredInstall}>
+                  {t('lookup.installApp')}
+                </Button>
+                <Button color="inherit" size="small" onClick={dismissInstall}>
+                  {t('lookup.installDismiss')}
+                </Button>
+              </Stack>
+            }
+          >
+            <Typography variant="body2">{t('lookup.installAppBody')}</Typography>
+          </Alert>
+        )}
 
-              <TextField
-                label={t('lookup.sequentialNumber')}
-                type="number"
-                value={sequentialNumber}
-                onChange={(e) => setSequentialNumber(e.target.value)}
-                required
-                fullWidth
-                disabled={loading}
-                inputProps={{ min: 1 }}
-                helperText={t('lookup.sequentialNumberHelper')}
-              />
-
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SearchIcon />}
-                disabled={loading || loadingEvents || !selectedEventId || !sequentialNumber.trim()}
-                fullWidth
-              >
-                {loading ? t('lookup.lookingUp') : t('lookup.lookupTime')}
-              </Button>
-            </Box>
-          </form>
-        </CardContent>
-      </Card>
-
-      {error && (
-        <Alert severity="error" sx={{ mt: 3 }} onClose={() => setError('')}>
-          {error}
-        </Alert>
-      )}
-
-      {result && (
-        <Card sx={{ mt: 3 }}>
+        <Card>
           <CardContent>
-            <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-              {t('lookup.yourResults')}
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  {t('lookup.competitor')}
-                </Typography>
-                <Typography variant="body1" fontWeight="medium">
-                  {result.competitor.firstName} {result.competitor.lastName}
-                </Typography>
-              </Box>
+            {loadingEvents ? (
+              <Stack spacing={2}>
+                <Skeleton variant="rounded" height={56} />
+                <Skeleton variant="rounded" height={56} />
+                <Skeleton variant="rounded" height={56} />
+                <Skeleton variant="rounded" height={48} />
+              </Stack>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <FormControl fullWidth required>
+                    <InputLabel>{t('lookup.selectEvent')}</InputLabel>
+                    <Select
+                      value={selectedEventId}
+                      onChange={(e) => setSelectedEventId(e.target.value as number | '')}
+                      label={t('lookup.selectEvent')}
+                      disabled={loading}
+                    >
+                      {events.length === 0 ? (
+                        <MenuItem disabled>{t('lookup.noEventsAvailable')}</MenuItem>
+                      ) : (
+                        events.map((ev) => (
+                          <MenuItem key={ev.id} value={ev.id}>
+                            {ev.name} ({ev.status})
+                          </MenuItem>
+                        ))
+                      )}
+                    </Select>
+                  </FormControl>
 
-              {result.sequentialNumber && (
+                  <TextField
+                    label={t('lookup.searchByName')}
+                    value={nameQuery}
+                    onChange={(e) => setNameQuery(e.target.value)}
+                    fullWidth
+                    disabled={!selectedEventId || loadingLeaderboard}
+                    helperText={
+                      loadingLeaderboard
+                        ? t('common.loading')
+                        : selectedEventId
+                          ? t('lookup.nameSearchHelper')
+                          : t('lookup.nameSearchHint')
+                    }
+                  />
+
+                  {nameMatches.length > 0 && (
+                    <Paper variant="outlined" sx={{ maxHeight: 220, overflow: 'auto' }}>
+                      <List dense disablePadding>
+                        {nameMatches.map((row, idx) => (
+                          <ListItemButton
+                            key={`${row.sequentialNumber}-${idx}`}
+                            onClick={() => {
+                              if (row.sequentialNumber != null) {
+                                setSequentialNumber(String(row.sequentialNumber));
+                              }
+                            }}
+                          >
+                            <ListItemText
+                              primary={`${row.competitor.firstName} ${row.competitor.lastName}`}
+                              secondary={
+                                row.sequentialNumber != null
+                                  ? `#${row.sequentialNumber} · ${row.category?.name ?? ''}`
+                                  : row.category?.name ?? ''
+                              }
+                            />
+                          </ListItemButton>
+                        ))}
+                      </List>
+                    </Paper>
+                  )}
+
+                  <TextField
+                    label={t('lookup.sequentialNumber')}
+                    type="number"
+                    value={sequentialNumber}
+                    onChange={(e) => setSequentialNumber(e.target.value)}
+                    required
+                    fullWidth
+                    disabled={loading}
+                    inputProps={{ min: 1 }}
+                    helperText={t('lookup.sequentialNumberHelper')}
+                  />
+
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    size="large"
+                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SearchIcon />}
+                    disabled={loading || loadingEvents || !selectedEventId || !sequentialNumber.trim()}
+                    fullWidth
+                  >
+                    {loading ? t('lookup.lookingUp') : t('lookup.lookupTime')}
+                  </Button>
+                </Box>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 3 }} onClose={() => setError('')}>
+            {error}
+          </Alert>
+        )}
+
+        {result && (
+          <Card sx={{ mt: 3 }}>
+            <CardContent>
+              <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 2 }}>
+                <Typography variant="h6">{t('lookup.yourResults')}</Typography>
+                <Button size="small" startIcon={<ShareIcon />} onClick={() => void shareResult()}>
+                  {t('lookup.shareResult')}
+                </Button>
+              </Stack>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    {t('lookup.sequentialNumber')}
+                    {t('lookup.competitor')}
                   </Typography>
-                  <Typography variant="body1">#{result.sequentialNumber}</Typography>
-                </Box>
-              )}
-
-              {result.category && (
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    {t('lookup.category')}
+                  <Typography variant="body1" fontWeight="medium">
+                    {result.competitor.firstName} {result.competitor.lastName}
                   </Typography>
-                  <Typography variant="body1">{result.category.name}</Typography>
                 </Box>
-              )}
 
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  {t('lookup.status')}
-                </Typography>
-                {getStatusChip()}
-              </Box>
-
-              {result.status === 'FINISHED' && result.rank && (
-                <>
+                {result.sequentialNumber && (
                   <Box>
                     <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                      {t('lookup.overallRank')}
+                      {t('lookup.sequentialNumber')}
                     </Typography>
-                    <Typography variant="h5" color="primary" fontWeight="bold">
-                      #{result.rank}
-                    </Typography>
+                    <Typography variant="body1">#{result.sequentialNumber}</Typography>
                   </Box>
-                  {result.category && result.categoryRank && (
+                )}
+
+                {result.category && (
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                      {t('lookup.category')}
+                    </Typography>
+                    <Typography variant="body1">{result.category.name}</Typography>
+                  </Box>
+                )}
+
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                    {t('lookup.status')}
+                  </Typography>
+                  {getStatusChip()}
+                </Box>
+
+                {result.status === 'FINISHED' && result.rank && (
+                  <>
                     <Box>
                       <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                        {t('lookup.categoryRank', { category: result.category.name })}
+                        {t('lookup.overallRank')}
                       </Typography>
-                      <Typography variant="h5" color="secondary" fontWeight="bold">
-                        #{result.categoryRank}
+                      <Typography variant="h5" color="primary" fontWeight="bold">
+                        #{result.rank}
                       </Typography>
                     </Box>
-                  )}
-                </>
-              )}
+                    {result.category && result.categoryRank && (
+                      <Box>
+                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                          {t('lookup.categoryRank', { category: result.category.name })}
+                        </Typography>
+                        <Typography variant="h5" color="secondary" fontWeight="bold">
+                          #{result.categoryRank}
+                        </Typography>
+                      </Box>
+                    )}
+                  </>
+                )}
 
-              {result.duration !== null && (
-                <>
-                  <Divider />
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                      {t('lookup.duration')}
-                    </Typography>
-                    <Typography variant="h6" color="primary" fontWeight="bold">
-                      {formatDuration(result.duration)}
-                    </Typography>
-                  </Box>
-                </>
-              )}
+                {result.duration !== null && (
+                  <>
+                    <Divider />
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        {t('lookup.duration')}
+                      </Typography>
+                      <Typography variant="h6" color="primary" fontWeight="bold">
+                        {formatDuration(result.duration)}
+                      </Typography>
+                    </Box>
+                  </>
+                )}
 
-              {result.status === 'NOT_STARTED' && (
-                <Alert severity="info">
-                  {t('lookup.notStartedMessage')}
-                </Alert>
-              )}
+                {result.status === 'NOT_STARTED' && <Alert severity="info">{t('lookup.notStartedMessage')}</Alert>}
 
-              {result.status === 'IN_PROGRESS' && (
-                <Alert severity="warning">
-                  {t('lookup.inProgressMessage')}
-                </Alert>
-              )}
+                {result.status === 'IN_PROGRESS' && <Alert severity="warning">{t('lookup.inProgressMessage')}</Alert>}
 
-              <Divider sx={{ my: 2 }} />
+                <Divider sx={{ my: 2 }} />
 
-              <Box>
                 <Button
                   variant="outlined"
                   fullWidth
@@ -358,12 +516,10 @@ export default function LookupPage() {
                   {t('lookup.viewCompleteLeaderboard')}
                 </Button>
               </Box>
-            </Box>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
       </Container>
     </>
   );
 }
-

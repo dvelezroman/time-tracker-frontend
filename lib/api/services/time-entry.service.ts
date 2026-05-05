@@ -288,6 +288,36 @@ export const timeEntryService = {
     return response.data;
   },
 
+  revertFinish: async (
+    eventId: number,
+    timeEntryId: number,
+    timezone?: string,
+  ): Promise<RecordFinishResponse> => {
+    const params: Record<string, string> = {};
+    if (timezone) params.timezone = timezone;
+    const response = await apiClient.post<RecordFinishResponse>(
+      '/time-entries/revert-finish',
+      { eventId, timeEntryId },
+      { params },
+    );
+    return response.data;
+  },
+
+  revertStage: async (
+    eventId: number,
+    stageTimeEntryId: number,
+    timezone?: string,
+  ): Promise<StageTimeEntry & { reverted?: boolean }> => {
+    const params: Record<string, string> = {};
+    if (timezone) params.timezone = timezone;
+    const response = await apiClient.post<StageTimeEntry & { reverted?: boolean }>(
+      '/time-entries/revert-stage',
+      { eventId, stageTimeEntryId },
+      { params },
+    );
+    return response.data;
+  },
+
   recordStageBySequentialNumber: async (
     eventId: number,
     sequentialNumber: number,

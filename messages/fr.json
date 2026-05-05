@@ -204,10 +204,23 @@
     "failedToLoadEvents": "Échec du chargement des événements. Veuillez réessayer.",
     "failedToLookup": "Échec de la recherche du temps. Veuillez réessayer.",
     "loadingEvents": "Chargement des événements...",
-    "noEventsAvailable": "Aucun événement disponible"
+    "noEventsAvailable": "Aucun événement disponible",
+    "searchByName": "Rechercher par nom",
+    "nameSearchHelper": "Tapez pour filtrer les concurrents du classement",
+    "nameSearchHint": "Sélectionnez un événement, puis cherchez par nom pour trouver votre dossard.",
+    "installApp": "Installer l'app",
+    "installAppBody": "Ajoutez Time Tracker à l'écran d'accueil pour un accès rapide aux résultats.",
+    "installDismiss": "Pas maintenant",
+    "installedThanks": "Vous pouvez installer depuis le menu du navigateur à tout moment.",
+    "shareResult": "Partager le résultat"
   },
   "leaderboard": {
     "title": "Classement",
+    "liveUpdating": "En direct · mise à jour toutes les 10s",
+    "podiumTitle": "Top 3",
+    "share": "Partager",
+    "shareCopied": "Copié dans le presse-papiers",
+    "shareFailed": "Impossible de partager ou copier",
     "backToLookup": "Retour à la recherche",
     "finishedCompetitors": "Concurrents terminés",
     "inProgress": "En cours",
@@ -283,7 +296,29 @@
       }
     },
     "developedBy": "Développé par",
-    "softwareFactory": "Usine de Logiciels"
+    "softwareFactory": "Usine de Logiciels",
+    "marketing": {
+      "card1Title": "Suivi en temps réel",
+      "card1Desc": "Chronométrez avec précision millimétrique. Suivez l'événement en direct.",
+      "card2Title": "Scan QR",
+      "card2Desc": "Enregistrement rapide et fiable par codes QR.",
+      "card3Title": "Classements en direct",
+      "card3Desc": "Classements automatiques avec catégories et mises à jour en temps réel.",
+      "card4Title": "Import en masse",
+      "card4Desc": "Importez des concurrents depuis Excel avec catégories et dossards.",
+      "card5Title": "Notifications multicanal",
+      "card5Desc": "Envoi des temps par e-mail et WhatsApp.",
+      "card6Title": "Analytique",
+      "card6Desc": "Statistiques, classements par catégorie et indicateurs d'événement.",
+      "benefit1": "Précision à la milliseconde",
+      "benefit2": "Génération automatique de QR",
+      "benefit3": "Organisation par catégories",
+      "benefit4": "Classement en direct",
+      "benefit5": "Import Excel",
+      "benefit6": "Notifications e-mail et WhatsApp",
+      "benefit7": "Chronomètre plein écran",
+      "benefit8": "Interface adaptée au mobile"
+    }
   },
   "login": {
     "title": "Bon Retour",

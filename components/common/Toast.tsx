@@ -45,6 +45,9 @@ export function Toast() {
       autoHideDuration={6000}
       onClose={handleClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
     >
       <Alert onClose={handleClose} severity={state.severity} sx={{ width: '100%' }}>
         {state.message}

@@ -48,45 +48,45 @@ export default function Home() {
   const features = [
     {
       icon: <TimerIcon sx={{ fontSize: 40 }} />,
-      title: 'Real-Time Tracking',
-      description: 'Track competitor times with millisecond precision. Monitor events in real-time with live updates.',
+      title: t('landing.marketing.card1Title'),
+      description: t('landing.marketing.card1Desc'),
     },
     {
       icon: <QrCodeIcon sx={{ fontSize: 40 }} />,
-      title: 'QR Code Scanning',
-      description: 'Quick and accurate finish time recording using QR codes. Scan and record in seconds.',
+      title: t('landing.marketing.card2Title'),
+      description: t('landing.marketing.card2Desc'),
     },
     {
       icon: <LeaderboardIcon sx={{ fontSize: 40 }} />,
-      title: 'Live Leaderboards',
-      description: 'Automatically generated leaderboards with category rankings and real-time updates.',
+      title: t('landing.marketing.card3Title'),
+      description: t('landing.marketing.card3Desc'),
     },
     {
       icon: <UploadIcon sx={{ fontSize: 40 }} />,
-      title: 'Bulk Import',
-      description: 'Import competitors from Excel files. Support for categories and custom competitor numbers.',
+      title: t('landing.marketing.card4Title'),
+      description: t('landing.marketing.card4Desc'),
     },
     {
       icon: <NotificationsIcon sx={{ fontSize: 40 }} />,
-      title: 'Multi-Channel Notifications',
-      description: 'Send finish times via Email and WhatsApp. Automated notifications for competitors.',
+      title: t('landing.marketing.card5Title'),
+      description: t('landing.marketing.card5Desc'),
     },
     {
       icon: <AnalyticsIcon sx={{ fontSize: 40 }} />,
-      title: 'Comprehensive Analytics',
-      description: 'Detailed statistics, category rankings, and performance metrics for all events.',
+      title: t('landing.marketing.card6Title'),
+      description: t('landing.marketing.card6Desc'),
     },
   ];
 
   const benefits = [
-    'Millisecond precision timing',
-    'Automatic QR code generation',
-    'Category-based organization',
-    'Real-time leaderboard updates',
-    'Excel bulk import support',
-    'Email & WhatsApp notifications',
-    'Full-screen timer display',
-    'Mobile-responsive design',
+    t('landing.marketing.benefit1'),
+    t('landing.marketing.benefit2'),
+    t('landing.marketing.benefit3'),
+    t('landing.marketing.benefit4'),
+    t('landing.marketing.benefit5'),
+    t('landing.marketing.benefit6'),
+    t('landing.marketing.benefit7'),
+    t('landing.marketing.benefit8'),
   ];
 
   const steps = [
@@ -162,12 +162,7 @@ export default function Home() {
             sx={{
               fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem', lg: '5.5rem' },
               fontWeight: 800,
-              background: theme.palette.mode === 'dark'
-                ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: theme.palette.mode === 'dark' ? '#e8eaf6' : '#312e81',
               mb: 3,
               lineHeight: 1.2,
             }}

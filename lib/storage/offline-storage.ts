@@ -268,6 +268,12 @@ export const offlineStorage = {
     return db.getAll('syncQueue');
   },
 
+  /** Count of operations waiting to sync (for operator UI). */
+  async getPendingSyncCount(): Promise<number> {
+    const pending = await this.getSyncQueue('pending');
+    return pending.length;
+  },
+
   async updateSyncQueueStatus(id: string, status: 'pending' | 'syncing' | 'synced' | 'failed'): Promise<void> {
     const db = await initOfflineStorage();
     const item = await db.get('syncQueue', id);
